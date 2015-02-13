@@ -14,20 +14,19 @@
 
         This is a sketch of the resulting directory structure:
 
-> boost_1_57_0/ .................The “boost root directory”
-> > index.htm .........A copy of www.boost.org starts here
-> > boost/ .........................All Boost Header files
->
-> > libs/ ............Tests, .cpps, docs, etc., by library
-> > > index.html ........Library documentation starts here
-> > > algorithm/
-> > > any/
-> > > array/
-> > > …more libraries…
-> > status/ .........................Boost-wide test suite
-> > tools/ ...........Utilities, e.g. Boost.Build, quickbook, bcp
-> > more/ ..........................Policy documents, etc.
-> > doc/ ...............A subset of all Boost library docs
+        boost_1_57_0/ .................The “boost root directory”
+                index.htm .........A copy of www.boost.org starts here
+                boost/ .........................All Boost Header files
+                libs/ ............Tests, .cpps, docs, etc., by library
+                        index.html ........Library documentation starts here
+                        algorithm/
+                        any/
+                        array/
+                        …more libraries…
+                status/ .........................Boost-wide test suite
+                tools/ ...........Utilities, e.g. Boost.Build, quickbook, bcp
+                more/ ..........................Policy documents, etc.
+                doc/ ...............A subset of all Boost library docs
 
 ### 2. build
    Most of codes in boost 
