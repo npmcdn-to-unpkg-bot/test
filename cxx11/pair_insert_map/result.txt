@@ -1,0 +1,6 @@
+
+std::unordered_map need to know how to hash the pair.
+ therefor pair is usually not suitable for as key.
+ TODO: so is our own class ? common::subscription_id seems have the same problem.
+
+std::map is ok to have pair as key.
