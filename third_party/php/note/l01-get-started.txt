@@ -1,0 +1,12 @@
+
+1. 	php >= 5.3
+	mysql >= 5.0
+	apache >= 2.2
+
+2. IDE
+	Hbuilder
+
+3. xampp  x + apache + mysql + php + python
+
+4. jquery (bootstrap as UI)
+
