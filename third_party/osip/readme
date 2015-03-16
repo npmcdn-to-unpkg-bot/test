@@ -1,0 +1,9 @@
+1. build osip.cpp
+    g++ -I/home/xren/dev/tmp/libosip2-4.1.0/bld-linux/staging/include \
+        -L/home/xren/dev/tmp/libosip2-4.1.0/bld-linux/staging/lib  \
+        /home/xren/dev/tmp/libosip2-4.1.0/bld-linux/staging/lib/libosipparser2.a \
+        /home/xren/dev/tmp/libosip2-4.1.0/bld-linux/staging/lib/libosip2.a \
+        osip.cpp 
+
+
+        // TODO find the macro.
