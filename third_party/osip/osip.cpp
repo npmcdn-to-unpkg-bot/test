@@ -1,4 +1,5 @@
 #define ENABLE_TRACE
+#include <sys/time.h> // Need before osip.h.
 #include "osip2/osip.h"
 #include <osip2/osip_mt.h>
 #include <iostream>
