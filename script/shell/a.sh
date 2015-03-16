@@ -1,0 +1,2 @@
+
+echo "dafei is:"$DAFEI

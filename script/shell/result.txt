@@ -1,0 +1,15 @@
+
+$ DAFEI="dafei" ./a.sh   // DAFEI pass into a.sh
+$ dafei is: dafei      
+$ echo $DAFEI 
+$              // DAFEI is null
+
+in this way, we can avoid messing up the envirement values.
+
+
+
+$ DAFEI="dafei"
+$ ./a.sh
+$ dafei is:      // DAFEI not passed into a.sh
+$ echo $DAFEI  
+$ dafei
