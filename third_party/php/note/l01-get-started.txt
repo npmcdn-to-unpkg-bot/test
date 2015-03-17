@@ -39,3 +39,11 @@
 
 	}
 	今后我们任何一个controller类都要集成他
+
+
+lesson 04
+
+所谓的拦截
+php现有的流行的mvc框架中是采用单一入口文件来完成这个功能的,因为入口只有一个,自然可以实现过滤拦截的概念(包括get和post)
+
+	http://localhost/index.php?controller=index&action=showindex
