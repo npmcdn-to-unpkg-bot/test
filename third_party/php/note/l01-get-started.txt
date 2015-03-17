@@ -13,3 +13,29 @@
 5. 安全设计
 	1) 只有根目录下的 index.php 和制定目录下的 *.php可以被外部直接访问
 	2) 其余指定目录(可以配置)中 静态资源可以被外部访问，例如js,图片
+
+6. index.php (主目录下的)应该干什么
+	1) 加载全框架配置文件(譬如路径,数据库密码等)
+		可以再apache设置.conf文件不能访问
+	2) 保证所有的请求(访问)都需要通过index.php来拦截(这里涉及到一些参数处理如 $_POST 和 $_GET)
+	3) 加载全局通用函数.供各个页面可以随时调用
+	4) 统一控制controller
+	5) 根据controller的程序来加载相应的view
+	6) 加载相应的插件
+
+7. 订制一个访问规则(重要)
+	http://xxxx/index.php?controller=XXX&action=XX
+	代表index.php会根据这两个参数去寻找相应的controller类,同时action代表在这个controller类中药执行
+	的方法,并且由index.php来 代为 执行.
+
+8. 简历一个全局函数库
+	在common下建立一个文件叫 functions.inc
+	在index.php里去include他
+
+9. 建立controller主控类
+	在mvc/controller中建立一个_Master.inc,并写上
+	abstract class _Master
+	{
+
+	}
+	今后我们任何一个controller类都要集成他
