@@ -1,0 +1,6 @@
+
+1. xampp default document root
+	open:   xampp\apache\conf\httpd.conf
+	search DocumentRoot
+	replace
+	restart apache
