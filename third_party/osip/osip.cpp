@@ -16,25 +16,38 @@
 #include <string.h>
 #include <time.h>
 
-int g_socket_fd = -1;
+static int g_socket_fd = -1;
+static int g_send_fd = -1;
 static const size_t BUFFSIZE = 1600;  // MTU usually doesn't exceed 1600
 
-void exit_if_faled(int ret, const std::string& info) {
-    std::cout << "exit_if_faled:" << ret << " ," << info << std::endl;
+void exit_if_failed(int ret, const std::string& info) {
     if (ret != 0) {
+        std::cout << "exit_if_failed:" << ret << " ," << info << std::endl;
         exit(-1);
+    }
+}
+
+void cleanup_socket() {
+    std::cout << "cleanup socket" << std::endl;
+    if (g_socket_fd > 0) {
+        close(g_socket_fd);
+        g_socket_fd = -1;
+    }
+    if (g_send_fd > 0) {
+        close(g_send_fd);
+        g_send_fd = -1;
     }
 }
 
 void* transport_fun(void* arg) {
     std::cout << "transport_fun running" << std::endl;
-    assert(g_socket_fd > 0);
+    assert(g_send_fd > 0);
 
     osip_t* osip = static_cast<osip_t*>(arg);
     char buf[BUFFSIZE];
     while(true)
     {
-        int len = read(g_socket_fd, buf, BUFFSIZE);
+        int len = read(g_send_fd, buf, BUFFSIZE);
         if (len == -1) {
             std::cout << "read error" << std::endl;
             exit(-1);
@@ -82,8 +95,8 @@ void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip);
 void usage(const char* process)
 {
     std::cout << process << " true/false\n" 
-            << "  true  socket server. listen on localhost:8888\n"
-            << "  false socket client. try to connect localhost:8888\n" << std::endl;
+            << "  true  socket server. listen on localhost:7890\n"
+            << "  false socket client. try to connect localhost:7890\n" << std::endl;
 }
 
 int init_net(bool as_server)
@@ -94,7 +107,7 @@ int init_net(bool as_server)
         std::cout << "This is client" << std::endl;
     }
 
-    unsigned short port = 8888;
+    unsigned short port = 7890;
     const char* ip = "127.0.0.1";
 
     int fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -104,6 +117,8 @@ int init_net(bool as_server)
     }
 
     if (as_server) {
+        g_socket_fd = fd;
+
         struct sockaddr_in s_add, c_add;
         bzero(&s_add,sizeof(struct sockaddr_in));
         s_add.sin_family = AF_INET;
@@ -112,11 +127,13 @@ int init_net(bool as_server)
 
         if(-1 == bind(fd, (struct sockaddr *)(&s_add), sizeof(struct sockaddr))) {
             printf("bind fail !\n");
+            cleanup_socket();
             return -1;
         }
 
         if(-1 == listen(fd, 5)) {
             printf("listen fail !\n");
+            cleanup_socket();
             return -1;
         }
         printf("listen ok\n");
@@ -126,6 +143,7 @@ int init_net(bool as_server)
         if(-1 == l_fd)
         {
             printf("accept fail !\n");
+            cleanup_socket();
             return -1;
         }
         printf("accept ok!\nServer start get connect from %s : %d\n", inet_ntoa(c_add.sin_addr), ntohs(c_add.sin_port));
@@ -135,13 +153,31 @@ int init_net(bool as_server)
 
     // as client
     struct sockaddr_in add;
+    bzero(&add,sizeof(struct sockaddr_in));
+    add.sin_family = AF_INET;
+    add.sin_addr.s_addr = inet_addr(ip);
+    add.sin_port = htons(port);
+
     if(-1 == connect(fd,(struct sockaddr *)(&add), sizeof(struct sockaddr))) {
         printf("connect fail! error:%s\n", strerror(errno));
+        cleanup_socket();
         return -1;
     }
     printf("connect ok !\n");
 
     return fd;
+}
+
+void* command_fun(void* arg)
+{
+    std::cout << "command thread is running" << std::endl;
+    std::string buf;
+    std::cout << ">";
+    while (std::getline(std::cin, buf)) {
+        std::cout << "command is:" << buf << std::endl;
+        std::cout << ">" << std::flush;
+    }
+    return NULL;
 }
 
 int main(int argc, char** argv){
@@ -151,19 +187,26 @@ int main(int argc, char** argv){
     }
 
     bool as_server = false;
-    if (argv[1] == "true") {
+    if ( 0 == strcmp(argv[1], "true")) {
         as_server = true;
-    } else if (argv[1] != "false") {
+    } else if (0 != strcmp(argv[1], "false")) {
         usage(argv[0]);
         return 0;
     }
 
-    g_socket_fd = init_net(as_server);
-    assert(g_socket_fd > 0);
+    // Init net
+    g_send_fd = init_net(as_server);
+    assert(g_send_fd > 0);
 
+    // Init command thread.
+    pthread_t th_command;
+    int ret = pthread_create(&th_command, NULL, command_fun, NULL);
+    exit_if_failed(ret, "Failed to create thread");
+
+    // Init osip
     osip_t* osip = NULL;
-    int ret = osip_init(&osip);
-    exit_if_faled(ret, "Failed to init osip");
+    ret = osip_init(&osip);
+    exit_if_failed(ret, "Failed to init osip");
 
     // set callbacks.
     // callback called when a SIP message must be sent.
@@ -220,8 +263,11 @@ int main(int argc, char** argv){
         osip_timers_nict_execute(osip);
         osip_timers_nist_execute(osip);
     }
-    return 0;
 
+    pthread_join(th_command, NULL);
+    
+    cleanup_socket();
+    return 0;
 }
 
 int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, int port, int out_socket)
@@ -237,7 +283,7 @@ int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, i
     std::stringstream ss;
     ss << "cb_send_message: " << tr->topvia->host << ':' << tr->topvia->port;
 
-    write(g_socket_fd, msg, msgLen);
+    write(g_send_fd, msg, msgLen);
     return OSIP_SUCCESS;
 }
 
