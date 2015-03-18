@@ -68,3 +68,19 @@ lesson 05
 
     Require all granted
 	</Directory>
+
+lesson 06
+	思考点
+	1.普通 controller不应该自己搭配模板路径来加载(太脏)
+	2. 目前在controller中定义的变量无法再模板(view)中引用到
+
+	本课时搞定第一点
+	1.在 _Master中
+		1) 新增一个变量 $_view
+		2) 新增一个方法 $setView()
+		3) 新增一个方法 $getView()
+ 	2. 修改index.php(根目录下的路由文件)
+ 		1) 增加判断control文件是否存在的程序
+ 		2) 增加判断control文件所属的类是否存在的程序
+ 		3) 对action参数进行判断
+ 		4) 在具体的index.inc中 尝试调用 $this->setView
