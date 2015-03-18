@@ -47,3 +47,24 @@ lesson 04
 php现有的流行的mvc框架中是采用单一入口文件来完成这个功能的,因为入口只有一个,自然可以实现过滤拦截的概念(包括get和post)
 
 	http://localhost/index.php?controller=index&action=showindex
+
+lesson 05
+	我们使用 .htaccess 文件来固化访问方式
+
+	http://xxx.com/index/showindex/
+
+	1) 在 apache 中增加支持
+	打开配置文件 httpd.conf 找到,
+	LoadModule rewrite_module modules/mod_rewrite.so
+	取消注释
+
+	并在对应的目录权限中设置
+
+	<Directory "D:\dev\repo\test\third_party\php\xphp\xphp">
+
+    Options Indexes FollowSymLinks Includes ExecCGI
+
+    AllowOverride All // 加上这句话
+
+    Require all granted
+	</Directory>
