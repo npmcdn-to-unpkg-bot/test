@@ -8,9 +8,10 @@ class index extends _Master
 	
 	function showindex()
 	{
-		include(XPHP_PATH."/mvc/view/".XPHP_VIEWPATH."/index.php");
+//		include(XPHP_PATH."/mvc/view/".XPHP_VIEWPATH."/index.php");
 		
-		echo "id:".$_GET["id"];
+//		echo "id:".$_GET["id"];
+		$this->setView("index");
 	}
 }
 ?>
