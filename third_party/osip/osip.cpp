@@ -16,6 +16,7 @@
 #include <errno.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 
 static int g_socket_fd = -1;
 static int g_send_fd = -1;
@@ -552,9 +553,17 @@ int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, i
         return -1;
     }
     
-    // std::stringstream ss;
-    // std::cout << "cb_send_message: " << tr->topvia->host << ':' << tr->topvia->port << std::endl;
-    std::cout << "time:" << time(NULL) << std::endl;
+    // check time.
+    static timeval store_time = {0, 0};
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    int msec = 0;
+    if (!(store_time.tv_sec == 0 && store_time.tv_usec == 0)) {
+        msec = (now.tv_sec - store_time.tv_sec)*1000 + (now.tv_usec - store_time.tv_usec)/1000;
+    }
+    memcpy(&store_time, &now, sizeof(struct timeval));
+    std::cout << "time msec:" << msec << std::endl;
+
     write(g_send_fd, msg, msgLen);
     return OSIP_SUCCESS;
 }
