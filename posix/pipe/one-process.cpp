@@ -17,6 +17,17 @@
 int main(int argc, char** argv) {
     int fds[2];
     char buf[256] = { 0 };
+    // 1) 头文件 #include<unistd.h>
+    // 2) 定义函数： int pipe(int filedes[2]);
+    // 3) 函数说明： pipe()会建立管道，并将文件描述词由参数filedes数组返回。
+    //               filedes[0]为管道里的读取端
+    //               filedes[1]则为管道的写入端。
+    // 4) 返回值：  若成功则返回零，否则返回-1，错误原因存于errno中。
+    //     错误代码: 
+    //          EMFILE 进程已用完文件描述词最大量
+    //          ENFILE 系统已无文件描述词可用。
+    //          EFAULT 参数 filedes 数组地址不合法。
+
     int ret = pipe(fds);
     if (ret != 0) {
         std::cout << "pipe failed\n";

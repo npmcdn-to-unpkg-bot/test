@@ -1,3 +1,4 @@
+#define ENABLE_TRACE
 #include <sys/time.h> // Need before osip.h.
 #include <osip2/osip.h>
 #include <osip2/osip_mt.h>
@@ -18,10 +19,15 @@
 
 static int g_socket_fd = -1;
 static int g_send_fd = -1;
+static int g_recv_fd = -1;
+static int g_wakeup_send_fd = -1;
+static int g_wakeup_recv_fd = -1;
 static osip_t* g_osip = NULL;
 static const size_t BUFFSIZE = 1600;  // MTU usually doesn't exceed 1600
 static const unsigned MESSAGE_ENTRY_MAX_LENGTH = 256;
 static const unsigned MAX_ADDR_STR = 128;
+
+static bool g_begin_log = false;
 
 void exit_if_failed(int ret, const std::string& info) {
     if (ret != 0) {
@@ -52,37 +58,37 @@ void process_new_request(osip_t* osip, osip_event_t* evt)
     osip_transaction_add_event(tran, evt);
 }
 
-void* transport_fun(void* arg) {
-    std::cout << "transport_fun running" << std::endl;
-    assert(g_send_fd > 0);
+// void* transport_fun(void* arg) {
+//     std::cout << "transport_fun running" << std::endl;
+//     assert(g_send_fd > 0);
 
-    osip_t* osip = static_cast<osip_t*>(arg);
-    char buf[BUFFSIZE];
-    while(true)
-    {
-        int len = read(g_send_fd, buf, BUFFSIZE);
-        if (len == -1) {
-            std::cout << "read error" << std::endl;
-            exit(-1);
-        }
-        buf[len] = 0;
-        std::cout << "message received:" << buf << std::endl;
+//     osip_t* osip = static_cast<osip_t*>(arg);
+//     char buf[BUFFSIZE];
+//     while(true)
+//     {
+//         int len = read(g_send_fd, buf, BUFFSIZE);
+//         if (len == -1) {
+//             std::cout << "read error" << std::endl;
+//             exit(-1);
+//         }
+//         buf[len] = 0;
+//         std::cout << "message received:" << buf << std::endl;
         
-        osip_event_t *evt = osip_parse(buf, len);
-        if (evt == NULL) {
-            std::cout << "osip_parse failed:" << buf << std::endl;
-            return NULL;
-        }
+//         osip_event_t *evt = osip_parse(buf, len);
+//         if (evt == NULL) {
+//             std::cout << "osip_parse failed:" << buf << std::endl;
+//             return NULL;
+//         }
 
-        int rc = osip_find_transaction_and_add_event(osip, evt);
-        if(0 != rc) {
-            std::cout << "this event has no transaction, create a new one.";
-            process_new_request(osip, evt);
-        }
-    }
+//         int rc = osip_find_transaction_and_add_event(osip, evt);
+//         if(0 != rc) {
+//             std::cout << "this event has no transaction, create a new one.";
+//             process_new_request(osip, evt);
+//         }
+//     }
 
-    return NULL;
-}
+//     return NULL;
+// }
 
 // All Callbacks
 // This function, which is implementation of transportation ourself, is used to send message.
@@ -100,7 +106,7 @@ void cb_rcv5xx(int type, osip_transaction_t * tr, osip_message_t * sip);
 void cb_rcv6xx(int type, osip_transaction_t * tr, osip_message_t * sip);
 
 void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip);
-
+std::string to_string(int type);
 // Usage
 void usage(const char* process)
 {
@@ -117,16 +123,25 @@ int init_net(bool as_server)
         std::cout << "This is client" << std::endl;
     }
 
+    // Init pipe for wakeup select.
+    int pipe_fds[2];
+    if (pipe(pipe_fds) != 0) {
+        std::cout << "pipe failed" << std::endl;
+        exit(-1);
+    }
+    g_wakeup_recv_fd = pipe_fds[0]; // 0 receive
+    g_wakeup_send_fd = pipe_fds[1]; // 1 send
+
+    // Init socket
     unsigned short port = 7890;
     const char* ip = "127.0.0.1";
 
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    if(-1 == fd) {
-        printf("socket fail ! \n");
-        return -1;
-    }
-
     if (as_server) {
+        int fd = socket(AF_INET, SOCK_STREAM, 0);
+        if(-1 == fd) {
+            printf("socket fail ! \n");
+            return -1;
+        }
         g_socket_fd = fd;
 
         struct sockaddr_in s_add, c_add;
@@ -137,11 +152,10 @@ int init_net(bool as_server)
 
         if(-1 == bind(fd, (struct sockaddr *)(&s_add), sizeof(struct sockaddr))) {
             printf("bind fail !\n");
-            cleanup_socket();
             return -1;
         }
 
-        if(-1 == listen(fd, 5)) {
+        if(-1 == listen(fd, 2)) {
             printf("listen fail !\n");
             cleanup_socket();
             return -1;
@@ -149,16 +163,21 @@ int init_net(bool as_server)
         printf("listen ok\n");
 
         socklen_t sin_size = sizeof(struct sockaddr);
-        int l_fd = accept(fd, (struct sockaddr *)(&c_add), &sin_size);
-        if(-1 == l_fd)
-        {
-            printf("accept fail !\n");
-            cleanup_socket();
-            return -1;
+        for (int i=0; i<2; i++) {
+            int l_fd = accept(fd, (struct sockaddr *)(&c_add), &sin_size);
+            if(-1 == l_fd) {
+                printf("accept fail !\n");
+                cleanup_socket();
+                return -1;
+            }
+            printf("accept ok! fd=%d, from %s:%d\n",l_fd, inet_ntoa(c_add.sin_addr), ntohs(c_add.sin_port));
+            if (i==0)
+                g_recv_fd = l_fd; // server use the first fd as receive fd, client use it as send fd.
+            else
+                g_send_fd = l_fd;
         }
-        printf("accept ok!\nServer start get connect from %s : %d\n", inet_ntoa(c_add.sin_addr), ntohs(c_add.sin_port));
 
-        return l_fd;
+        return 0;
     }
 
     // as client
@@ -168,14 +187,28 @@ int init_net(bool as_server)
     add.sin_addr.s_addr = inet_addr(ip);
     add.sin_port = htons(port);
 
-    if(-1 == connect(fd,(struct sockaddr *)(&add), sizeof(struct sockaddr))) {
-        printf("connect fail! error:%s\n", strerror(errno));
-        cleanup_socket();
-        return -1;
-    }
-    printf("connect ok !\n");
+    for (int i = 0; i < 2; i++) {
+        int fd = socket(AF_INET, SOCK_STREAM, 0);
+        if(-1 == fd) {
+            printf("socket fail ! \n");
+            return -1;
+        }
 
-    return fd;
+        if(-1 == connect(fd,(struct sockaddr *)(&add), sizeof(struct sockaddr))) {
+            printf("connect fail! error:%s\n", strerror(errno));
+            cleanup_socket();
+            return -1;
+        }
+        printf("connect ok !\n");
+
+        if (i==0) {
+            g_send_fd = fd;
+        } else {
+            g_recv_fd = fd;
+        }
+    }
+
+    return 0;
 }
 
 int send_invite()
@@ -282,6 +315,13 @@ int send_invite()
         return -1;
     }
 
+    std::cout << "wakeup select" << std::endl;
+    int ret = write(g_wakeup_send_fd, "a", 1); // wake up select
+    if (ret != 1) {
+        std::cout << "wakeup failed" << std::endl;
+        exit(-1);
+    }
+    g_begin_log = true;
     return 0;
 }
 
@@ -318,8 +358,7 @@ int main(int argc, char** argv){
     }
 
     // Init net
-    g_send_fd = init_net(as_server);
-    assert(g_send_fd > 0);
+    assert(init_net(as_server) == 0);
 
     // Init command thread.
     pthread_t th_command;
@@ -374,10 +413,61 @@ int main(int argc, char** argv){
     osip_set_message_callback(osip ,OSIP_NIST_UNKNOWN_REQUEST_RECEIVED, &cb_rcvreq);
 
     // setup transport layer.
-    osip_thread_create(0, transport_fun, osip);
+    // osip_thread_create(0, transport_fun, osip);
 
-    while(true)
-    {       
+    fd_set read_fds;
+    char buffer[BUFFSIZE] = { 0 };
+    while (true) {
+        // std::cout << "loop start ....." << std::endl;
+        FD_ZERO(&read_fds);
+        FD_SET(g_recv_fd, &read_fds);
+        FD_SET(g_wakeup_recv_fd, &read_fds);
+        int maxfd = g_recv_fd + 1;
+        struct timeval timeout = {0, 50};
+
+        switch(select(maxfd, &read_fds, NULL, NULL, &timeout)) {
+        case -1:
+            std::cout << "select error" << std::endl;
+            exit(-1);
+            break;
+        case 0:
+            break;
+        default:
+            {
+                if (FD_ISSET(g_recv_fd, &read_fds)) {
+                    int len = read(g_recv_fd, buffer, BUFFSIZE);
+                    if (len == -1) {
+                        std::cout << "read error" << std::endl;
+                        exit(-1);
+                    }
+                    buffer[len] = 0;
+                    std::cout << "message received:" << buffer << std::endl;
+
+                    osip_event_t *evt = osip_parse(buffer, len);
+                    if (evt == NULL) {
+                        std::cout << "osip_parse failed:" << std::endl;
+                    }
+
+                    int rc = osip_find_transaction_and_add_event(osip, evt);
+                    if(0 != rc) {
+                        std::cout << "this event has no transaction, create a new one.";
+                        process_new_request(osip, evt);
+                    }
+                } else if (FD_ISSET(g_wakeup_recv_fd, &read_fds)) {
+                    std::cout << "this is a wakeup" << std::endl;
+                    int len = read(g_wakeup_recv_fd, buffer, BUFFSIZE);
+                    buffer[len] = 0;
+                    assert(strcmp(buffer, "a") == 0);
+                    // Wake up select for our outgoing message handling.
+                } else {
+                    assert(false);
+                }
+
+            }
+            break;
+        }
+        // if (g_begin_log)
+        //     std::cout << ".";
         osip_ict_execute(osip);
         osip_ist_execute(osip);
         osip_nict_execute(osip);
@@ -386,13 +476,70 @@ int main(int argc, char** argv){
         osip_timers_ist_execute(osip);
         osip_timers_nict_execute(osip);
         osip_timers_nist_execute(osip);
-        // This is not block. We need to block it. Use select.
+
+
+          // osip_transaction_t *tr;
+          // osip_list_iterator_t iterator;
+          // // osip_mutex_lock (osip->ist_fastmutex);
+
+          // tr = (osip_transaction_t *) osip_list_get_first (&osip->osip_ict_transactions, &iterator);
+          // while (osip_list_iterator_has_elem (iterator)) {
+          //   osip_event_t *evt;
+
+          //   evt = (osip_event_t *) osip_fifo_tryget (tr->transactionff);
+          //   if (evt != NULL) {
+          //       std::cout << "event type:" << to_string(evt->type) <<std::endl;
+          //   } else {
+          //       std::cout << "no event" << std::endl;
+          //   }
+          //   tr = (osip_transaction_t *) osip_list_get_next (&iterator);
+          // }
+          // // osip_mutex_unlock (osip->ist_fastmutex);
     }
 
     pthread_join(th_command, NULL);
     
     cleanup_socket();
     return 0;
+}
+
+#define TO_EVENT_TYPE_D(type) \
+    case type:              \
+        t = #type;          \
+        break;              \
+
+std::string to_string(int type) {
+    std::string t;
+    switch(type) {
+    TO_EVENT_TYPE_D(TIMEOUT_A)
+    TO_EVENT_TYPE_D(TIMEOUT_B)
+    TO_EVENT_TYPE_D(TIMEOUT_D)               
+    TO_EVENT_TYPE_D(TIMEOUT_E)             
+    TO_EVENT_TYPE_D(TIMEOUT_F)             
+    TO_EVENT_TYPE_D(TIMEOUT_K)             
+    TO_EVENT_TYPE_D(TIMEOUT_G)           
+    TO_EVENT_TYPE_D(TIMEOUT_H)                
+    TO_EVENT_TYPE_D(TIMEOUT_I)                
+    TO_EVENT_TYPE_D(TIMEOUT_J)                
+    TO_EVENT_TYPE_D(RCV_REQINVITE)     
+    TO_EVENT_TYPE_D(RCV_REQACK)            
+    TO_EVENT_TYPE_D(RCV_REQUEST)      
+    TO_EVENT_TYPE_D(RCV_STATUS_1XX)      
+    TO_EVENT_TYPE_D(RCV_STATUS_2XX)      
+    TO_EVENT_TYPE_D(RCV_STATUS_3456XX)    
+    TO_EVENT_TYPE_D(SND_REQINVITE)      
+    TO_EVENT_TYPE_D(SND_REQACK)            
+    TO_EVENT_TYPE_D(SND_REQUEST)              
+    TO_EVENT_TYPE_D(SND_STATUS_1XX)  
+    TO_EVENT_TYPE_D(SND_STATUS_2XX)           
+    TO_EVENT_TYPE_D(SND_STATUS_3456XX)        
+    TO_EVENT_TYPE_D(KILL_TRANSACTION)        
+    TO_EVENT_TYPE_D(UNKNOWN_EVT)
+    default:
+        assert(false);
+        break;
+    }
+    return t;
 }
 
 int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, int port, int out_socket)
@@ -405,9 +552,9 @@ int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, i
         return -1;
     }
     
-    std::stringstream ss;
-    ss << "cb_send_message: " << tr->topvia->host << ':' << tr->topvia->port;
-
+    // std::stringstream ss;
+    // std::cout << "cb_send_message: " << tr->topvia->host << ':' << tr->topvia->port << std::endl;
+    std::cout << "time:" << time(NULL) << std::endl;
     write(g_send_fd, msg, msgLen);
     return OSIP_SUCCESS;
 }
