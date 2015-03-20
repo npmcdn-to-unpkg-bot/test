@@ -31,3 +31,6 @@ std::string transport_error_to_string(int type);
 std::string rcv_request_to_string(int type);
 std::string message_callback_type_to_string(int type);
 
+// MESSAGE HELP FUNCTIONS
+
+

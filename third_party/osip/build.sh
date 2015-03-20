@@ -8,7 +8,7 @@ LINK_O_FILE=""
 # simple build
 for file in $SOURCE_FILE
 do
-    g++ -I/usr/local/include -I$STAGING_DIR/include -c $file -o $file.o
+    g++ -I/usr/local/include -I$STAGING_DIR/include -g -c $file -o $file.o
     if [ $? -ne 0 ]; then
         echo "build failed"
         exit -1

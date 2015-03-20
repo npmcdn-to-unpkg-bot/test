@@ -137,13 +137,14 @@ int main(int argc, char** argv){
 
     fd_set read_fds;
     char buffer[BUFFSIZE] = { 0 };
+    struct timeval timeout = {0, 0};
+
     while (true) {
         // std::cout << "loop start ....." << std::endl;
         FD_ZERO(&read_fds);
         FD_SET(g_recv_fd, &read_fds);
         FD_SET(g_wakeup_recv_fd, &read_fds);
         int maxfd = g_recv_fd + 1;
-        struct timeval timeout = {0, 50};
 
         switch(select(maxfd, &read_fds, NULL, NULL, &timeout)) {
         case -1:
@@ -176,8 +177,7 @@ int main(int argc, char** argv){
             }
             break;
         }
-        // if (g_begin_log)
-        //     std::cout << ".";
+        
         osip_ict_execute(osip);
         osip_ist_execute(osip);
         osip_nict_execute(osip);
@@ -187,6 +187,10 @@ int main(int argc, char** argv){
         osip_timers_nict_execute(osip);
         osip_timers_nist_execute(osip);
 
+        // Get minimal timeout to wake up us. Put them behind execute is the best way.
+        // This is perfect to handle Real Time.
+        osip_timers_gettimeout(osip, &timeout);
+        LOG_DAFEI() << " secs:" << timeout.tv_sec << ", usecs:" << timeout.tv_usec << std::endl;
 
           // // Find all the evt and print their type. Only for test.
           // osip_transaction_t *tr;
@@ -332,7 +336,10 @@ void handle_incoming_message(const char* buffer, size_t len)
     if(0 != rc) {
         std::cout << "this event has no transaction, create a new one.";
         process_new_request(g_osip, evt);
-    }   
+    } else {
+        // TODO free evt ???
+        // osip_event_free(evt);
+    }
 }
 
 int send_invite()
