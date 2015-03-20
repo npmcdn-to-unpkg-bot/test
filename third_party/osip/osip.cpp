@@ -1,4 +1,5 @@
 #define ENABLE_TRACE
+#include "my_osip_utility.hpp"
 #include <sys/time.h> // Need before osip.h.
 #include <osip2/osip.h>
 #include <osip2/osip_mt.h>
@@ -30,12 +31,7 @@ static const unsigned MAX_ADDR_STR = 128;
 
 static bool g_begin_log = false;
 
-#define LOG_DAFEI() \
-        std::cout << __FUNCTION__ << ":"
-#define TO_STRING_ENTRY(x) \
-        case x:  \
-        s = #x;  \
-        break;
+
 
 void exit_if_failed(int ret, const std::string& info);
 void cleanup_socket();
@@ -57,14 +53,8 @@ void cb_rcv6xx(int type, osip_transaction_t * tr, osip_message_t * sip);
 
 void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip);
 
-// osip utility
-std::string to_string(int type);
-std::string kill_transaction_to_string(int type);
-std::string transport_error_to_string(int type);
-std::string rcv_request_to_string(int type);
-
 // handle incomming message
-void handle_incoming_message(char* buf, size_t len);
+void handle_incoming_message(const char* buf, size_t len);
 void process_new_request(osip_t* osip, osip_event_t* evt);
 int send_invite();
 
@@ -172,18 +162,7 @@ int main(int argc, char** argv){
                         exit(-1);
                     }
                     buffer[len] = 0;
-                    std::cout << "message received:\n---------------" << buffer << std::endl;
-
-                    osip_event_t *evt = osip_parse(buffer, len);
-                    if (evt == NULL) {
-                        std::cout << "osip_parse failed:" << std::endl;
-                    }
-
-                    int rc = osip_find_transaction_and_add_event(osip, evt);
-                    if(0 != rc) {
-                        std::cout << "this event has no transaction, create a new one.";
-                        process_new_request(osip, evt);
-                    }
+                    handle_incoming_message(buffer, len);
                 } else if (FD_ISSET(g_wakeup_recv_fd, &read_fds)) {
                     std::cout << "this is a wakeup" << std::endl;
                     int len = read(g_wakeup_recv_fd, buffer, BUFFSIZE);
@@ -339,6 +318,23 @@ int init_net(bool as_server)
     return 0;
 }
 
+void handle_incoming_message(const char* buffer, size_t len)
+{
+    std::string log_msg(buffer, len);
+    LOG_DAFEI() << "message received:\n---------------" << log_msg << "\n--------------" << std::endl;
+
+    osip_event_t *evt = osip_parse(buffer, len);
+    if (evt == NULL) {
+        std::cout << "osip_parse failed:" << std::endl;
+    }
+
+    int rc = osip_find_transaction_and_add_event(g_osip, evt);
+    if(0 != rc) {
+        std::cout << "this event has no transaction, create a new one.";
+        process_new_request(g_osip, evt);
+    }   
+}
+
 int send_invite()
 {
     static int g_seq_num = 1;
@@ -392,15 +388,15 @@ int send_invite()
         return -1;
     }
 
-    g_seq_num++;
     seq_num_str = (char*)osip_malloc(MAX_ADDR_STR);
-    sprintf(seq_num_str, "%i", g_seq_num);
+    sprintf(seq_num_str, "%i", g_seq_num++);
     osip_cseq_set_number(cseq_ptr, seq_num_str);
     osip_cseq_set_method(cseq_ptr, osip_strdup("INVITE"));
     invite_msg->cseq = cseq_ptr;
 
     osip_message_set_max_forwards(invite_msg, "70");
     // UDP will set time a, TCP won't. But they all have time-b.
+    // Use udp or tcp to represent reliable or unreliable transport layer that we use.
     sprintf(temp, "SIP/2.0/%s %s;branch=z9hG4bK%u", "UDP", "10.10.10.3", osip_build_random_number());
     osip_message_set_via(invite_msg, temp);
 
@@ -416,8 +412,6 @@ int send_invite()
     // osip_message_set_allow(msgPtr, "ACK");
     // osip_message_set_allow(msgPtr, "CANCEL");
     // osip_message_set_allow(msgPtr, "BYE");
-
-
 
     osip_transaction_t* transcation;
     osip_event_t* event;
@@ -507,147 +501,6 @@ void process_new_request(osip_t* osip, osip_event_t* evt)
     osip_transaction_add_event(tran, evt);
 }
 
-
-std::string to_string(int type) {
-    std::string s;
-    switch(type) {
-    TO_STRING_ENTRY(TIMEOUT_A)
-    TO_STRING_ENTRY(TIMEOUT_B)
-    TO_STRING_ENTRY(TIMEOUT_D)               
-    TO_STRING_ENTRY(TIMEOUT_E)             
-    TO_STRING_ENTRY(TIMEOUT_F)             
-    TO_STRING_ENTRY(TIMEOUT_K)             
-    TO_STRING_ENTRY(TIMEOUT_G)           
-    TO_STRING_ENTRY(TIMEOUT_H)                
-    TO_STRING_ENTRY(TIMEOUT_I)                
-    TO_STRING_ENTRY(TIMEOUT_J)                
-    TO_STRING_ENTRY(RCV_REQINVITE)     
-    TO_STRING_ENTRY(RCV_REQACK)            
-    TO_STRING_ENTRY(RCV_REQUEST)      
-    TO_STRING_ENTRY(RCV_STATUS_1XX)      
-    TO_STRING_ENTRY(RCV_STATUS_2XX)      
-    TO_STRING_ENTRY(RCV_STATUS_3456XX)    
-    TO_STRING_ENTRY(SND_REQINVITE)      
-    TO_STRING_ENTRY(SND_REQACK)            
-    TO_STRING_ENTRY(SND_REQUEST)              
-    TO_STRING_ENTRY(SND_STATUS_1XX)  
-    TO_STRING_ENTRY(SND_STATUS_2XX)           
-    TO_STRING_ENTRY(SND_STATUS_3456XX)        
-    TO_STRING_ENTRY(KILL_TRANSACTION)        
-    TO_STRING_ENTRY(UNKNOWN_EVT)
-    default:
-        assert(false);
-        break;
-    }
-    return s;
-}
-
-std::string kill_transaction_to_string(int type) {
-    std::string s;
-    switch (type) {
-    TO_STRING_ENTRY(OSIP_ICT_KILL_TRANSACTION)
-    TO_STRING_ENTRY(OSIP_IST_KILL_TRANSACTION)
-    TO_STRING_ENTRY(OSIP_NICT_KILL_TRANSACTION)
-    TO_STRING_ENTRY(OSIP_NIST_KILL_TRANSACTION)
-    default:
-        std::cout << "wrong type:" << type << std::endl;
-        break;
-    }
-
-    return s;
-}
-
-std::string message_callback_type_to_string(int type) {
-    std::string s;
-    switch (type) {
-    TO_STRING_ENTRY(OSIP_ICT_INVITE_SENT)       
-    TO_STRING_ENTRY(OSIP_ICT_INVITE_SENT_AGAIN)             
-    TO_STRING_ENTRY(OSIP_ICT_ACK_SENT)                      
-    TO_STRING_ENTRY(OSIP_ICT_ACK_SENT_AGAIN)                
-    TO_STRING_ENTRY(OSIP_ICT_STATUS_1XX_RECEIVED)           
-    TO_STRING_ENTRY(OSIP_ICT_STATUS_2XX_RECEIVED)           
-    TO_STRING_ENTRY(OSIP_ICT_STATUS_2XX_RECEIVED_AGAIN)     
-    TO_STRING_ENTRY(OSIP_ICT_STATUS_3XX_RECEIVED)           
-    TO_STRING_ENTRY(OSIP_ICT_STATUS_4XX_RECEIVED)           
-    TO_STRING_ENTRY(OSIP_ICT_STATUS_5XX_RECEIVED)           
-    TO_STRING_ENTRY(OSIP_ICT_STATUS_6XX_RECEIVED)           
-    TO_STRING_ENTRY(OSIP_ICT_STATUS_3456XX_RECEIVED_AGAIN)  
-
-    TO_STRING_ENTRY(OSIP_IST_INVITE_RECEIVED)               
-    TO_STRING_ENTRY(OSIP_IST_INVITE_RECEIVED_AGAIN)         
-    TO_STRING_ENTRY(OSIP_IST_ACK_RECEIVED)                  
-    TO_STRING_ENTRY(OSIP_IST_ACK_RECEIVED_AGAIN)            
-    TO_STRING_ENTRY(OSIP_IST_STATUS_1XX_SENT)               
-    TO_STRING_ENTRY(OSIP_IST_STATUS_2XX_SENT)               
-    TO_STRING_ENTRY(OSIP_IST_STATUS_2XX_SENT_AGAIN)         
-    TO_STRING_ENTRY(OSIP_IST_STATUS_3XX_SENT)               
-    TO_STRING_ENTRY(OSIP_IST_STATUS_4XX_SENT)               
-    TO_STRING_ENTRY(OSIP_IST_STATUS_5XX_SENT)               
-    TO_STRING_ENTRY(OSIP_IST_STATUS_6XX_SENT)               
-    TO_STRING_ENTRY(OSIP_IST_STATUS_3456XX_SENT_AGAIN)      
-
-    TO_STRING_ENTRY(OSIP_NICT_REGISTER_SENT)                
-    TO_STRING_ENTRY(OSIP_NICT_BYE_SENT)                     
-    TO_STRING_ENTRY(OSIP_NICT_OPTIONS_SENT)                 
-    TO_STRING_ENTRY(OSIP_NICT_INFO_SENT)                    
-    TO_STRING_ENTRY(OSIP_NICT_CANCEL_SENT)                  
-    TO_STRING_ENTRY(OSIP_NICT_NOTIFY_SENT)                  
-    TO_STRING_ENTRY(OSIP_NICT_SUBSCRIBE_SENT)               
-    TO_STRING_ENTRY(OSIP_NICT_UNKNOWN_REQUEST_SENT)         
-    TO_STRING_ENTRY(OSIP_NICT_REQUEST_SENT_AGAIN)           
-    TO_STRING_ENTRY(OSIP_NICT_STATUS_1XX_RECEIVED)          
-    TO_STRING_ENTRY(OSIP_NICT_STATUS_2XX_RECEIVED)          
-    TO_STRING_ENTRY(OSIP_NICT_STATUS_2XX_RECEIVED_AGAIN)    
-    TO_STRING_ENTRY(OSIP_NICT_STATUS_3XX_RECEIVED)          
-    TO_STRING_ENTRY(OSIP_NICT_STATUS_4XX_RECEIVED)          
-    TO_STRING_ENTRY(OSIP_NICT_STATUS_5XX_RECEIVED)          
-    TO_STRING_ENTRY(OSIP_NICT_STATUS_6XX_RECEIVED)          
-    TO_STRING_ENTRY(OSIP_NICT_STATUS_3456XX_RECEIVED_AGAIN) 
-
-    TO_STRING_ENTRY(OSIP_NIST_REGISTER_RECEIVED)            
-    TO_STRING_ENTRY(OSIP_NIST_BYE_RECEIVED)                 
-    TO_STRING_ENTRY(OSIP_NIST_OPTIONS_RECEIVED)             
-    TO_STRING_ENTRY(OSIP_NIST_INFO_RECEIVED)                
-    TO_STRING_ENTRY(OSIP_NIST_CANCEL_RECEIVED)              
-    TO_STRING_ENTRY(OSIP_NIST_NOTIFY_RECEIVED)              
-    TO_STRING_ENTRY(OSIP_NIST_SUBSCRIBE_RECEIVED)           
-
-    TO_STRING_ENTRY(OSIP_NIST_UNKNOWN_REQUEST_RECEIVED)     
-    TO_STRING_ENTRY(OSIP_NIST_REQUEST_RECEIVED_AGAIN)       
-    TO_STRING_ENTRY(OSIP_NIST_STATUS_1XX_SENT)              
-    TO_STRING_ENTRY(OSIP_NIST_STATUS_2XX_SENT)              
-    TO_STRING_ENTRY(OSIP_NIST_STATUS_2XX_SENT_AGAIN)        
-    TO_STRING_ENTRY(OSIP_NIST_STATUS_3XX_SENT)              
-    TO_STRING_ENTRY(OSIP_NIST_STATUS_4XX_SENT)              
-    TO_STRING_ENTRY(OSIP_NIST_STATUS_5XX_SENT)              
-    TO_STRING_ENTRY(OSIP_NIST_STATUS_6XX_SENT)              
-    TO_STRING_ENTRY(OSIP_NIST_STATUS_3456XX_SENT_AGAIN)     
-
-    TO_STRING_ENTRY(OSIP_ICT_STATUS_TIMEOUT)                
-    TO_STRING_ENTRY(OSIP_NICT_STATUS_TIMEOUT)               
-    default:
-        std::cout << "wrong type:" << type << std::endl;
-        break;
-    }
-
-    return s;
-}
-
-std::string transport_error_to_string(int type)
-{
-    std::string s;
-    switch (type) {
-    TO_STRING_ENTRY(OSIP_ICT_TRANSPORT_ERROR)
-    TO_STRING_ENTRY(OSIP_IST_TRANSPORT_ERROR)
-    TO_STRING_ENTRY(OSIP_NICT_TRANSPORT_ERROR)
-    TO_STRING_ENTRY(OSIP_NIST_TRANSPORT_ERROR)
-    default:
-        std::cout << "wrong type:" << type << std::endl;
-        break;
-    }
-
-    return s;
-}
 
 int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, int port, int out_socket)
 {
@@ -745,7 +598,7 @@ void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip)
 
     LOG_DAFEI() << message_callback_type_to_string(type) << "\n" 
             << "tr->transactionid=" << tr->transactionid
-            << "msg:\n" << msg <<  std::endl;
+            << "\nmsg:------------\n" << msg << "\n--------------" << std::endl;
 
     switch (type) {
     case OSIP_IST_INVITE_RECEIVED:

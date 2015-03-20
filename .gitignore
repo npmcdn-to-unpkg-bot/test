@@ -1,2 +1,3 @@
 staging
 a.out
+*.o
