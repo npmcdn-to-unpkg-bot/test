@@ -30,66 +30,15 @@ static const unsigned MAX_ADDR_STR = 128;
 
 static bool g_begin_log = false;
 
-void exit_if_failed(int ret, const std::string& info) {
-    if (ret != 0) {
-        std::cout << "exit_if_failed:" << ret << " ," << info << std::endl;
-        exit(-1);
-    }
-}
+#define LOG_DAFEI() \
+        std::cout << __FUNCTION__ << ":"
+#define TO_STRING_ENTRY(x) \
+        case x:  \
+        s = #x;  \
+        break;
 
-void cleanup_socket() {
-    std::cout << "cleanup socket" << std::endl;
-    if (g_socket_fd > 0) {
-        close(g_socket_fd);
-        g_socket_fd = -1;
-    }
-    if (g_send_fd > 0) {
-        close(g_send_fd);
-        g_send_fd = -1;
-    }
-}
-
-void process_new_request(osip_t* osip, osip_event_t* evt)
-{
-    osip_transaction_t *tran;
-    osip_transaction_init(&tran, IST, osip, evt->sip);
-    //osip_transaction_set_in_socket (tran, socket);
-    osip_transaction_set_out_socket (tran, g_send_fd);
-    osip_transaction_set_your_instance(tran, osip);// store osip in transaction for later usage.
-    osip_transaction_add_event(tran, evt);
-}
-
-// void* transport_fun(void* arg) {
-//     std::cout << "transport_fun running" << std::endl;
-//     assert(g_send_fd > 0);
-
-//     osip_t* osip = static_cast<osip_t*>(arg);
-//     char buf[BUFFSIZE];
-//     while(true)
-//     {
-//         int len = read(g_send_fd, buf, BUFFSIZE);
-//         if (len == -1) {
-//             std::cout << "read error" << std::endl;
-//             exit(-1);
-//         }
-//         buf[len] = 0;
-//         std::cout << "message received:" << buf << std::endl;
-        
-//         osip_event_t *evt = osip_parse(buf, len);
-//         if (evt == NULL) {
-//             std::cout << "osip_parse failed:" << buf << std::endl;
-//             return NULL;
-//         }
-
-//         int rc = osip_find_transaction_and_add_event(osip, evt);
-//         if(0 != rc) {
-//             std::cout << "this event has no transaction, create a new one.";
-//             process_new_request(osip, evt);
-//         }
-//     }
-
-//     return NULL;
-// }
+void exit_if_failed(int ret, const std::string& info);
+void cleanup_socket();
 
 // All Callbacks
 // This function, which is implementation of transportation ourself, is used to send message.
@@ -107,8 +56,186 @@ void cb_rcv5xx(int type, osip_transaction_t * tr, osip_message_t * sip);
 void cb_rcv6xx(int type, osip_transaction_t * tr, osip_message_t * sip);
 
 void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip);
+
+// osip utility
 std::string to_string(int type);
-// Usage
+std::string kill_transaction_to_string(int type);
+std::string transport_error_to_string(int type);
+std::string rcv_request_to_string(int type);
+
+// handle incomming message
+void handle_incoming_message(char* buf, size_t len);
+void process_new_request(osip_t* osip, osip_event_t* evt);
+int send_invite();
+
+// main usage and net, command thread.
+void usage(const char* process);
+int init_net(bool as_server);
+void* command_fun(void* arg);
+
+int main(int argc, char** argv){
+    if (argc != 2) {
+        usage(argv[0]);
+        return 0;
+    }
+
+    bool as_server = false;
+    if ( 0 == strcmp(argv[1], "true")) {
+        as_server = true;
+    } else if (0 != strcmp(argv[1], "false")) {
+        usage(argv[0]);
+        return 0;
+    }
+
+    // Init net
+    assert(init_net(as_server) == 0);
+
+    // Init command thread.
+    pthread_t th_command;
+    int ret = pthread_create(&th_command, NULL, command_fun, NULL);
+    exit_if_failed(ret, "Failed to create thread");
+
+    // Init osip
+    osip_t* osip = NULL;
+    ret = osip_init(&osip);
+    exit_if_failed(ret, "Failed to init osip");
+    g_osip = osip;
+
+    // set callbacks.
+    // callback called when a SIP message must be sent.
+    osip_set_cb_send_message(osip, &cb_send_message);
+    // callback called when a SIP transaction is TERMINATED.
+    osip_set_kill_transaction_callback(osip ,OSIP_ICT_KILL_TRANSACTION, &cb_xixt_kill_transaction);
+    osip_set_kill_transaction_callback(osip ,OSIP_IST_KILL_TRANSACTION, &cb_xixt_kill_transaction);
+    osip_set_kill_transaction_callback(osip ,OSIP_NICT_KILL_TRANSACTION, &cb_xixt_kill_transaction);
+    osip_set_kill_transaction_callback(osip ,OSIP_NIST_KILL_TRANSACTION, &cb_xixt_kill_transaction);
+    //callback called when the callback to send message have failed.
+    osip_set_transport_error_callback(osip ,OSIP_ICT_TRANSPORT_ERROR, &cb_transport_error);
+    osip_set_transport_error_callback(osip ,OSIP_IST_TRANSPORT_ERROR, &cb_transport_error);
+    osip_set_transport_error_callback(osip ,OSIP_NICT_TRANSPORT_ERROR, &cb_transport_error);
+    osip_set_transport_error_callback(osip ,OSIP_NIST_TRANSPORT_ERROR, &cb_transport_error);
+    // callback called when a received answer has been accepted by the transaction.
+    osip_set_message_callback(osip ,OSIP_ICT_STATUS_1XX_RECEIVED, &cb_rcv1xx);
+    osip_set_message_callback(osip ,OSIP_ICT_STATUS_2XX_RECEIVED, &cb_rcv2xx);
+    osip_set_message_callback(osip ,OSIP_ICT_STATUS_3XX_RECEIVED, &cb_rcv3xx);
+    osip_set_message_callback(osip ,OSIP_ICT_STATUS_4XX_RECEIVED, &cb_rcv4xx);
+    osip_set_message_callback(osip ,OSIP_ICT_STATUS_5XX_RECEIVED, &cb_rcv5xx);
+    osip_set_message_callback(osip ,OSIP_ICT_STATUS_6XX_RECEIVED, &cb_rcv6xx);
+    // callback called when a received answer has been accepted by the transaction.
+    osip_set_message_callback(osip ,OSIP_NICT_STATUS_1XX_RECEIVED, &cb_rcv1xx);
+    osip_set_message_callback(osip ,OSIP_NICT_STATUS_2XX_RECEIVED, &cb_rcv2xx);
+    osip_set_message_callback(osip ,OSIP_NICT_STATUS_3XX_RECEIVED, &cb_rcv3xx);
+    osip_set_message_callback(osip ,OSIP_NICT_STATUS_4XX_RECEIVED, &cb_rcv4xx);
+    osip_set_message_callback(osip ,OSIP_NICT_STATUS_5XX_RECEIVED, &cb_rcv5xx);
+    osip_set_message_callback(osip ,OSIP_NICT_STATUS_6XX_RECEIVED, &cb_rcv6xx);
+    // callback called when a received request has been accepted by the transaction.
+    osip_set_message_callback(osip ,OSIP_IST_INVITE_RECEIVED,       &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_IST_INVITE_RECEIVED_AGAIN, &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_IST_ACK_RECEIVED,          &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_IST_ACK_RECEIVED_AGAIN,    &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_NIST_REGISTER_RECEIVED,    &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_NIST_BYE_RECEIVED,         &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_NIST_CANCEL_RECEIVED,      &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_NIST_INFO_RECEIVED,        &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_NIST_OPTIONS_RECEIVED,     &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_NIST_SUBSCRIBE_RECEIVED,   &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_NIST_NOTIFY_RECEIVED,      &cb_rcvreq);
+    osip_set_message_callback(osip ,OSIP_NIST_UNKNOWN_REQUEST_RECEIVED, &cb_rcvreq);
+
+    // setup transport layer.
+    // osip_thread_create(0, transport_fun, osip);
+
+    fd_set read_fds;
+    char buffer[BUFFSIZE] = { 0 };
+    while (true) {
+        // std::cout << "loop start ....." << std::endl;
+        FD_ZERO(&read_fds);
+        FD_SET(g_recv_fd, &read_fds);
+        FD_SET(g_wakeup_recv_fd, &read_fds);
+        int maxfd = g_recv_fd + 1;
+        struct timeval timeout = {0, 50};
+
+        switch(select(maxfd, &read_fds, NULL, NULL, &timeout)) {
+        case -1:
+            std::cout << "select error" << std::endl;
+            exit(-1);
+            break;
+        case 0:
+            break;
+        default:
+            {
+                // This is where we receive sip messages when fd is ready to read.
+                if (FD_ISSET(g_recv_fd, &read_fds)) {
+                    int len = read(g_recv_fd, buffer, BUFFSIZE);
+                    if (len == -1) {
+                        std::cout << "read error" << std::endl;
+                        exit(-1);
+                    }
+                    buffer[len] = 0;
+                    std::cout << "message received:\n---------------" << buffer << std::endl;
+
+                    osip_event_t *evt = osip_parse(buffer, len);
+                    if (evt == NULL) {
+                        std::cout << "osip_parse failed:" << std::endl;
+                    }
+
+                    int rc = osip_find_transaction_and_add_event(osip, evt);
+                    if(0 != rc) {
+                        std::cout << "this event has no transaction, create a new one.";
+                        process_new_request(osip, evt);
+                    }
+                } else if (FD_ISSET(g_wakeup_recv_fd, &read_fds)) {
+                    std::cout << "this is a wakeup" << std::endl;
+                    int len = read(g_wakeup_recv_fd, buffer, BUFFSIZE);
+                    buffer[len] = 0;
+                    assert(strcmp(buffer, "a") == 0);
+                    // Wake up select for our outgoing message handling.
+                } else {
+                    assert(false);
+                }
+
+            }
+            break;
+        }
+        // if (g_begin_log)
+        //     std::cout << ".";
+        osip_ict_execute(osip);
+        osip_ist_execute(osip);
+        osip_nict_execute(osip);
+        osip_nist_execute(osip);
+        osip_timers_ict_execute(osip);
+        osip_timers_ist_execute(osip);
+        osip_timers_nict_execute(osip);
+        osip_timers_nist_execute(osip);
+
+
+          // // Find all the evt and print their type. Only for test.
+          // osip_transaction_t *tr;
+          // osip_list_iterator_t iterator;
+          // // osip_mutex_lock (osip->ist_fastmutex);
+
+          // tr = (osip_transaction_t *) osip_list_get_first (&osip->osip_ict_transactions, &iterator);
+          // while (osip_list_iterator_has_elem (iterator)) {
+          //   osip_event_t *evt;
+
+          //   evt = (osip_event_t *) osip_fifo_tryget (tr->transactionff);
+          //   if (evt != NULL) {
+          //       std::cout << "event type:" << to_string(evt->type) <<std::endl;
+          //   } else {
+          //       std::cout << "no event" << std::endl;
+          //   }
+          //   tr = (osip_transaction_t *) osip_list_get_next (&iterator);
+          // }
+          // // osip_mutex_unlock (osip->ist_fastmutex);
+    }
+
+    pthread_join(th_command, NULL);
+    
+    cleanup_socket();
+    return 0;
+} // main
+
+
 void usage(const char* process)
 {
     std::cout << process << " true/false\n" 
@@ -273,6 +400,7 @@ int send_invite()
     invite_msg->cseq = cseq_ptr;
 
     osip_message_set_max_forwards(invite_msg, "70");
+    // UDP will set time a, TCP won't. But they all have time-b.
     sprintf(temp, "SIP/2.0/%s %s;branch=z9hG4bK%u", "UDP", "10.10.10.3", osip_build_random_number());
     osip_message_set_via(invite_msg, temp);
 
@@ -289,12 +417,16 @@ int send_invite()
     // osip_message_set_allow(msgPtr, "CANCEL");
     // osip_message_set_allow(msgPtr, "BYE");
 
+
+
     osip_transaction_t* transcation;
     osip_event_t* event;
     if ((status = osip_transaction_init(&transcation, ICT, g_osip, invite_msg)) != 0) {
         std::cout << "Failed to init transportation :" << status << std::endl;
         return -1; 
     }
+    osip_transaction_set_your_instance(transcation, g_osip);// store osip in transaction for later usage.
+
 
     if ((event = osip_new_outgoing_sipmessage(invite_msg)) == NULL) {
         std::cout << "Can't allocate message" << std::endl;
@@ -344,203 +476,177 @@ void* command_fun(void* arg)
     return NULL;
 }
 
-int main(int argc, char** argv){
-    if (argc != 2) {
-        usage(argv[0]);
-        return 0;
+
+void exit_if_failed(int ret, const std::string& info) {
+    if (ret != 0) {
+        std::cout << "exit_if_failed:" << ret << " ," << info << std::endl;
+        exit(-1);
     }
-
-    bool as_server = false;
-    if ( 0 == strcmp(argv[1], "true")) {
-        as_server = true;
-    } else if (0 != strcmp(argv[1], "false")) {
-        usage(argv[0]);
-        return 0;
-    }
-
-    // Init net
-    assert(init_net(as_server) == 0);
-
-    // Init command thread.
-    pthread_t th_command;
-    int ret = pthread_create(&th_command, NULL, command_fun, NULL);
-    exit_if_failed(ret, "Failed to create thread");
-
-    // Init osip
-    osip_t* osip = NULL;
-    ret = osip_init(&osip);
-    exit_if_failed(ret, "Failed to init osip");
-    g_osip = osip;
-
-    // set callbacks.
-    // callback called when a SIP message must be sent.
-    osip_set_cb_send_message(osip, &cb_send_message);
-    // callback called when a SIP transaction is TERMINATED.
-    osip_set_kill_transaction_callback(osip ,OSIP_ICT_KILL_TRANSACTION, &cb_xixt_kill_transaction);
-    osip_set_kill_transaction_callback(osip ,OSIP_IST_KILL_TRANSACTION, &cb_xixt_kill_transaction);
-    osip_set_kill_transaction_callback(osip ,OSIP_NICT_KILL_TRANSACTION, &cb_xixt_kill_transaction);
-    osip_set_kill_transaction_callback(osip ,OSIP_NIST_KILL_TRANSACTION, &cb_xixt_kill_transaction);
-    //callback called when the callback to send message have failed.
-    osip_set_transport_error_callback(osip ,OSIP_ICT_TRANSPORT_ERROR, &cb_transport_error);
-    osip_set_transport_error_callback(osip ,OSIP_IST_TRANSPORT_ERROR, &cb_transport_error);
-    osip_set_transport_error_callback(osip ,OSIP_NICT_TRANSPORT_ERROR, &cb_transport_error);
-    osip_set_transport_error_callback(osip ,OSIP_NIST_TRANSPORT_ERROR, &cb_transport_error);
-    // callback called when a received answer has been accepted by the transaction.
-    osip_set_message_callback(osip ,OSIP_ICT_STATUS_1XX_RECEIVED, &cb_rcv1xx);
-    osip_set_message_callback(osip ,OSIP_ICT_STATUS_2XX_RECEIVED, &cb_rcv2xx);
-    osip_set_message_callback(osip ,OSIP_ICT_STATUS_3XX_RECEIVED, &cb_rcv3xx);
-    osip_set_message_callback(osip ,OSIP_ICT_STATUS_4XX_RECEIVED, &cb_rcv4xx);
-    osip_set_message_callback(osip ,OSIP_ICT_STATUS_5XX_RECEIVED, &cb_rcv5xx);
-    osip_set_message_callback(osip ,OSIP_ICT_STATUS_6XX_RECEIVED, &cb_rcv6xx);
-    // callback called when a received answer has been accepted by the transaction.
-    osip_set_message_callback(osip ,OSIP_NICT_STATUS_1XX_RECEIVED, &cb_rcv1xx);
-    osip_set_message_callback(osip ,OSIP_NICT_STATUS_2XX_RECEIVED, &cb_rcv2xx);
-    osip_set_message_callback(osip ,OSIP_NICT_STATUS_3XX_RECEIVED, &cb_rcv3xx);
-    osip_set_message_callback(osip ,OSIP_NICT_STATUS_4XX_RECEIVED, &cb_rcv4xx);
-    osip_set_message_callback(osip ,OSIP_NICT_STATUS_5XX_RECEIVED, &cb_rcv5xx);
-    osip_set_message_callback(osip ,OSIP_NICT_STATUS_6XX_RECEIVED, &cb_rcv6xx);
-    // callback called when a received request has been accepted by the transaction.
-    osip_set_message_callback(osip ,OSIP_IST_INVITE_RECEIVED,       &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_IST_INVITE_RECEIVED_AGAIN, &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_IST_ACK_RECEIVED,          &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_IST_ACK_RECEIVED_AGAIN,    &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_NIST_REGISTER_RECEIVED,    &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_NIST_BYE_RECEIVED,         &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_NIST_CANCEL_RECEIVED,      &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_NIST_INFO_RECEIVED,        &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_NIST_OPTIONS_RECEIVED,     &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_NIST_SUBSCRIBE_RECEIVED,   &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_NIST_NOTIFY_RECEIVED,      &cb_rcvreq);
-    osip_set_message_callback(osip ,OSIP_NIST_UNKNOWN_REQUEST_RECEIVED, &cb_rcvreq);
-
-    // setup transport layer.
-    // osip_thread_create(0, transport_fun, osip);
-
-    fd_set read_fds;
-    char buffer[BUFFSIZE] = { 0 };
-    while (true) {
-        // std::cout << "loop start ....." << std::endl;
-        FD_ZERO(&read_fds);
-        FD_SET(g_recv_fd, &read_fds);
-        FD_SET(g_wakeup_recv_fd, &read_fds);
-        int maxfd = g_recv_fd + 1;
-        struct timeval timeout = {0, 50};
-
-        switch(select(maxfd, &read_fds, NULL, NULL, &timeout)) {
-        case -1:
-            std::cout << "select error" << std::endl;
-            exit(-1);
-            break;
-        case 0:
-            break;
-        default:
-            {
-                if (FD_ISSET(g_recv_fd, &read_fds)) {
-                    int len = read(g_recv_fd, buffer, BUFFSIZE);
-                    if (len == -1) {
-                        std::cout << "read error" << std::endl;
-                        exit(-1);
-                    }
-                    buffer[len] = 0;
-                    std::cout << "message received:" << buffer << std::endl;
-
-                    osip_event_t *evt = osip_parse(buffer, len);
-                    if (evt == NULL) {
-                        std::cout << "osip_parse failed:" << std::endl;
-                    }
-
-                    int rc = osip_find_transaction_and_add_event(osip, evt);
-                    if(0 != rc) {
-                        std::cout << "this event has no transaction, create a new one.";
-                        process_new_request(osip, evt);
-                    }
-                } else if (FD_ISSET(g_wakeup_recv_fd, &read_fds)) {
-                    std::cout << "this is a wakeup" << std::endl;
-                    int len = read(g_wakeup_recv_fd, buffer, BUFFSIZE);
-                    buffer[len] = 0;
-                    assert(strcmp(buffer, "a") == 0);
-                    // Wake up select for our outgoing message handling.
-                } else {
-                    assert(false);
-                }
-
-            }
-            break;
-        }
-        // if (g_begin_log)
-        //     std::cout << ".";
-        osip_ict_execute(osip);
-        osip_ist_execute(osip);
-        osip_nict_execute(osip);
-        osip_nist_execute(osip);
-        osip_timers_ict_execute(osip);
-        osip_timers_ist_execute(osip);
-        osip_timers_nict_execute(osip);
-        osip_timers_nist_execute(osip);
-
-
-          // osip_transaction_t *tr;
-          // osip_list_iterator_t iterator;
-          // // osip_mutex_lock (osip->ist_fastmutex);
-
-          // tr = (osip_transaction_t *) osip_list_get_first (&osip->osip_ict_transactions, &iterator);
-          // while (osip_list_iterator_has_elem (iterator)) {
-          //   osip_event_t *evt;
-
-          //   evt = (osip_event_t *) osip_fifo_tryget (tr->transactionff);
-          //   if (evt != NULL) {
-          //       std::cout << "event type:" << to_string(evt->type) <<std::endl;
-          //   } else {
-          //       std::cout << "no event" << std::endl;
-          //   }
-          //   tr = (osip_transaction_t *) osip_list_get_next (&iterator);
-          // }
-          // // osip_mutex_unlock (osip->ist_fastmutex);
-    }
-
-    pthread_join(th_command, NULL);
-    
-    cleanup_socket();
-    return 0;
 }
 
-#define TO_EVENT_TYPE_D(type) \
-    case type:              \
-        t = #type;          \
-        break;              \
+void cleanup_socket() {
+    std::cout << "cleanup socket" << std::endl;
+    if (g_socket_fd > 0) {
+        close(g_socket_fd);
+        g_socket_fd = -1;
+    }
+    if (g_send_fd > 0) {
+        close(g_send_fd);
+        g_send_fd = -1;
+    }
+}
+
+void process_new_request(osip_t* osip, osip_event_t* evt)
+{
+    // see how exosip process new request in  _eXosip_process_newrequest () 
+    osip_transaction_t *tran;
+    osip_transaction_init(&tran, IST, osip, evt->sip);
+    // osip_transaction_set_in_socket (tran, socket);
+    // osip_transaction_set_out_socket (tran, g_send_fd);
+    osip_transaction_set_your_instance(tran, osip);// store osip in transaction for later usage.
+    osip_transaction_add_event(tran, evt);
+}
+
 
 std::string to_string(int type) {
-    std::string t;
+    std::string s;
     switch(type) {
-    TO_EVENT_TYPE_D(TIMEOUT_A)
-    TO_EVENT_TYPE_D(TIMEOUT_B)
-    TO_EVENT_TYPE_D(TIMEOUT_D)               
-    TO_EVENT_TYPE_D(TIMEOUT_E)             
-    TO_EVENT_TYPE_D(TIMEOUT_F)             
-    TO_EVENT_TYPE_D(TIMEOUT_K)             
-    TO_EVENT_TYPE_D(TIMEOUT_G)           
-    TO_EVENT_TYPE_D(TIMEOUT_H)                
-    TO_EVENT_TYPE_D(TIMEOUT_I)                
-    TO_EVENT_TYPE_D(TIMEOUT_J)                
-    TO_EVENT_TYPE_D(RCV_REQINVITE)     
-    TO_EVENT_TYPE_D(RCV_REQACK)            
-    TO_EVENT_TYPE_D(RCV_REQUEST)      
-    TO_EVENT_TYPE_D(RCV_STATUS_1XX)      
-    TO_EVENT_TYPE_D(RCV_STATUS_2XX)      
-    TO_EVENT_TYPE_D(RCV_STATUS_3456XX)    
-    TO_EVENT_TYPE_D(SND_REQINVITE)      
-    TO_EVENT_TYPE_D(SND_REQACK)            
-    TO_EVENT_TYPE_D(SND_REQUEST)              
-    TO_EVENT_TYPE_D(SND_STATUS_1XX)  
-    TO_EVENT_TYPE_D(SND_STATUS_2XX)           
-    TO_EVENT_TYPE_D(SND_STATUS_3456XX)        
-    TO_EVENT_TYPE_D(KILL_TRANSACTION)        
-    TO_EVENT_TYPE_D(UNKNOWN_EVT)
+    TO_STRING_ENTRY(TIMEOUT_A)
+    TO_STRING_ENTRY(TIMEOUT_B)
+    TO_STRING_ENTRY(TIMEOUT_D)               
+    TO_STRING_ENTRY(TIMEOUT_E)             
+    TO_STRING_ENTRY(TIMEOUT_F)             
+    TO_STRING_ENTRY(TIMEOUT_K)             
+    TO_STRING_ENTRY(TIMEOUT_G)           
+    TO_STRING_ENTRY(TIMEOUT_H)                
+    TO_STRING_ENTRY(TIMEOUT_I)                
+    TO_STRING_ENTRY(TIMEOUT_J)                
+    TO_STRING_ENTRY(RCV_REQINVITE)     
+    TO_STRING_ENTRY(RCV_REQACK)            
+    TO_STRING_ENTRY(RCV_REQUEST)      
+    TO_STRING_ENTRY(RCV_STATUS_1XX)      
+    TO_STRING_ENTRY(RCV_STATUS_2XX)      
+    TO_STRING_ENTRY(RCV_STATUS_3456XX)    
+    TO_STRING_ENTRY(SND_REQINVITE)      
+    TO_STRING_ENTRY(SND_REQACK)            
+    TO_STRING_ENTRY(SND_REQUEST)              
+    TO_STRING_ENTRY(SND_STATUS_1XX)  
+    TO_STRING_ENTRY(SND_STATUS_2XX)           
+    TO_STRING_ENTRY(SND_STATUS_3456XX)        
+    TO_STRING_ENTRY(KILL_TRANSACTION)        
+    TO_STRING_ENTRY(UNKNOWN_EVT)
     default:
         assert(false);
         break;
     }
-    return t;
+    return s;
+}
+
+std::string kill_transaction_to_string(int type) {
+    std::string s;
+    switch (type) {
+    TO_STRING_ENTRY(OSIP_ICT_KILL_TRANSACTION)
+    TO_STRING_ENTRY(OSIP_IST_KILL_TRANSACTION)
+    TO_STRING_ENTRY(OSIP_NICT_KILL_TRANSACTION)
+    TO_STRING_ENTRY(OSIP_NIST_KILL_TRANSACTION)
+    default:
+        std::cout << "wrong type:" << type << std::endl;
+        break;
+    }
+
+    return s;
+}
+
+std::string message_callback_type_to_string(int type) {
+    std::string s;
+    switch (type) {
+    TO_STRING_ENTRY(OSIP_ICT_INVITE_SENT)       
+    TO_STRING_ENTRY(OSIP_ICT_INVITE_SENT_AGAIN)             
+    TO_STRING_ENTRY(OSIP_ICT_ACK_SENT)                      
+    TO_STRING_ENTRY(OSIP_ICT_ACK_SENT_AGAIN)                
+    TO_STRING_ENTRY(OSIP_ICT_STATUS_1XX_RECEIVED)           
+    TO_STRING_ENTRY(OSIP_ICT_STATUS_2XX_RECEIVED)           
+    TO_STRING_ENTRY(OSIP_ICT_STATUS_2XX_RECEIVED_AGAIN)     
+    TO_STRING_ENTRY(OSIP_ICT_STATUS_3XX_RECEIVED)           
+    TO_STRING_ENTRY(OSIP_ICT_STATUS_4XX_RECEIVED)           
+    TO_STRING_ENTRY(OSIP_ICT_STATUS_5XX_RECEIVED)           
+    TO_STRING_ENTRY(OSIP_ICT_STATUS_6XX_RECEIVED)           
+    TO_STRING_ENTRY(OSIP_ICT_STATUS_3456XX_RECEIVED_AGAIN)  
+
+    TO_STRING_ENTRY(OSIP_IST_INVITE_RECEIVED)               
+    TO_STRING_ENTRY(OSIP_IST_INVITE_RECEIVED_AGAIN)         
+    TO_STRING_ENTRY(OSIP_IST_ACK_RECEIVED)                  
+    TO_STRING_ENTRY(OSIP_IST_ACK_RECEIVED_AGAIN)            
+    TO_STRING_ENTRY(OSIP_IST_STATUS_1XX_SENT)               
+    TO_STRING_ENTRY(OSIP_IST_STATUS_2XX_SENT)               
+    TO_STRING_ENTRY(OSIP_IST_STATUS_2XX_SENT_AGAIN)         
+    TO_STRING_ENTRY(OSIP_IST_STATUS_3XX_SENT)               
+    TO_STRING_ENTRY(OSIP_IST_STATUS_4XX_SENT)               
+    TO_STRING_ENTRY(OSIP_IST_STATUS_5XX_SENT)               
+    TO_STRING_ENTRY(OSIP_IST_STATUS_6XX_SENT)               
+    TO_STRING_ENTRY(OSIP_IST_STATUS_3456XX_SENT_AGAIN)      
+
+    TO_STRING_ENTRY(OSIP_NICT_REGISTER_SENT)                
+    TO_STRING_ENTRY(OSIP_NICT_BYE_SENT)                     
+    TO_STRING_ENTRY(OSIP_NICT_OPTIONS_SENT)                 
+    TO_STRING_ENTRY(OSIP_NICT_INFO_SENT)                    
+    TO_STRING_ENTRY(OSIP_NICT_CANCEL_SENT)                  
+    TO_STRING_ENTRY(OSIP_NICT_NOTIFY_SENT)                  
+    TO_STRING_ENTRY(OSIP_NICT_SUBSCRIBE_SENT)               
+    TO_STRING_ENTRY(OSIP_NICT_UNKNOWN_REQUEST_SENT)         
+    TO_STRING_ENTRY(OSIP_NICT_REQUEST_SENT_AGAIN)           
+    TO_STRING_ENTRY(OSIP_NICT_STATUS_1XX_RECEIVED)          
+    TO_STRING_ENTRY(OSIP_NICT_STATUS_2XX_RECEIVED)          
+    TO_STRING_ENTRY(OSIP_NICT_STATUS_2XX_RECEIVED_AGAIN)    
+    TO_STRING_ENTRY(OSIP_NICT_STATUS_3XX_RECEIVED)          
+    TO_STRING_ENTRY(OSIP_NICT_STATUS_4XX_RECEIVED)          
+    TO_STRING_ENTRY(OSIP_NICT_STATUS_5XX_RECEIVED)          
+    TO_STRING_ENTRY(OSIP_NICT_STATUS_6XX_RECEIVED)          
+    TO_STRING_ENTRY(OSIP_NICT_STATUS_3456XX_RECEIVED_AGAIN) 
+
+    TO_STRING_ENTRY(OSIP_NIST_REGISTER_RECEIVED)            
+    TO_STRING_ENTRY(OSIP_NIST_BYE_RECEIVED)                 
+    TO_STRING_ENTRY(OSIP_NIST_OPTIONS_RECEIVED)             
+    TO_STRING_ENTRY(OSIP_NIST_INFO_RECEIVED)                
+    TO_STRING_ENTRY(OSIP_NIST_CANCEL_RECEIVED)              
+    TO_STRING_ENTRY(OSIP_NIST_NOTIFY_RECEIVED)              
+    TO_STRING_ENTRY(OSIP_NIST_SUBSCRIBE_RECEIVED)           
+
+    TO_STRING_ENTRY(OSIP_NIST_UNKNOWN_REQUEST_RECEIVED)     
+    TO_STRING_ENTRY(OSIP_NIST_REQUEST_RECEIVED_AGAIN)       
+    TO_STRING_ENTRY(OSIP_NIST_STATUS_1XX_SENT)              
+    TO_STRING_ENTRY(OSIP_NIST_STATUS_2XX_SENT)              
+    TO_STRING_ENTRY(OSIP_NIST_STATUS_2XX_SENT_AGAIN)        
+    TO_STRING_ENTRY(OSIP_NIST_STATUS_3XX_SENT)              
+    TO_STRING_ENTRY(OSIP_NIST_STATUS_4XX_SENT)              
+    TO_STRING_ENTRY(OSIP_NIST_STATUS_5XX_SENT)              
+    TO_STRING_ENTRY(OSIP_NIST_STATUS_6XX_SENT)              
+    TO_STRING_ENTRY(OSIP_NIST_STATUS_3456XX_SENT_AGAIN)     
+
+    TO_STRING_ENTRY(OSIP_ICT_STATUS_TIMEOUT)                
+    TO_STRING_ENTRY(OSIP_NICT_STATUS_TIMEOUT)               
+    default:
+        std::cout << "wrong type:" << type << std::endl;
+        break;
+    }
+
+    return s;
+}
+
+std::string transport_error_to_string(int type)
+{
+    std::string s;
+    switch (type) {
+    TO_STRING_ENTRY(OSIP_ICT_TRANSPORT_ERROR)
+    TO_STRING_ENTRY(OSIP_IST_TRANSPORT_ERROR)
+    TO_STRING_ENTRY(OSIP_NICT_TRANSPORT_ERROR)
+    TO_STRING_ENTRY(OSIP_NIST_TRANSPORT_ERROR)
+    default:
+        std::cout << "wrong type:" << type << std::endl;
+        break;
+    }
+
+    return s;
 }
 
 int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, int port, int out_socket)
@@ -553,43 +659,29 @@ int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, i
         return -1;
     }
     
-    // check time.
-    static timeval store_time = {0, 0};
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    int msec = 0;
-    if (!(store_time.tv_sec == 0 && store_time.tv_usec == 0)) {
-        msec = (now.tv_sec - store_time.tv_sec)*1000 + (now.tv_usec - store_time.tv_usec)/1000;
-    }
-    memcpy(&store_time, &now, sizeof(struct timeval));
-    std::cout << "time msec:" << msec << std::endl;
+    // // check time.
+    // static timeval store_time = {0, 0};
+    // struct timeval now;
+    // gettimeofday(&now, NULL);
+    // int msec = 0;
+    // if (!(store_time.tv_sec == 0 && store_time.tv_usec == 0)) {
+    //     msec = (now.tv_sec - store_time.tv_sec)*1000 + (now.tv_usec - store_time.tv_usec)/1000;
+    // }
+    // memcpy(&store_time, &now, sizeof(struct timeval));
+    // std::cout << "time msec:" << msec << std::endl;
 
-    write(g_send_fd, msg, msgLen);
+    int r = write(g_send_fd, msg, msgLen);
+    if (r == -1) {
+        return -1;
+    }
+    // return non OSIP_SUCCESS( 0 ) will lead to callback cb_transport_error();
+    // return value is the int error in cb_transport_error( ..., int error);
     return OSIP_SUCCESS;
 }
 
 void cb_xixt_kill_transaction(int type, osip_transaction_t * tr)
 {
-    std::cout << __FUNCTION__ << " ";
-    switch (type) {
-    case OSIP_ICT_KILL_TRANSACTION:
-        std::cout << "OSIP_ICT_KILL_TRANSACTION ";
-        break;
-    case OSIP_IST_KILL_TRANSACTION:
-        std::cout << "OSIP_IST_KILL_TRANSACTION ";
-        break;
-    case OSIP_NICT_KILL_TRANSACTION:
-        std::cout << "OSIP_NICT_KILL_TRANSACTION ";
-        break;
-    case OSIP_NIST_KILL_TRANSACTION:
-        std::cout << "OSIP_NIST_KILL_TRANSACTION ";
-        break;
-    default:
-        assert(false); // not reachable.
-        break;
-    }
-
-    std::cout << ", transactionid=" << tr->transactionid << std::endl;
+    LOG_DAFEI() << kill_transaction_to_string(type) << ", transactionid=" << tr->transactionid << std::endl;
 
     // First, remove transacation.
     osip_t *osip = (osip_t*) osip_transaction_get_reserved1 (tr);
@@ -604,40 +696,62 @@ void cb_xixt_kill_transaction(int type, osip_transaction_t * tr)
 
 void cb_transport_error(int type, osip_transaction_t * tr, int error)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    LOG_DAFEI() << transport_error_to_string(type) << ": tr->transactionid:" << tr->transactionid
+            << ", error:" << error << std::endl;
+    // error is what we return in cb_send_message.
+    // When transport encouter error,
+    // first, cb_transport_error is called.
+    // second, cb_xixt_kill_transaction is called.
 }
 
 void cb_rcv1xx(int type, osip_transaction_t * tr, osip_message_t * sip)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    LOG_DAFEI() << std::endl;
 }
 
 void cb_rcv2xx(int type, osip_transaction_t * tr, osip_message_t * sip)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    LOG_DAFEI() << std::endl;
 }
 
 void cb_rcv3xx(int type, osip_transaction_t * tr, osip_message_t * sip)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    LOG_DAFEI() << std::endl;
 }
 
 void cb_rcv4xx(int type, osip_transaction_t * tr, osip_message_t * sip)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    LOG_DAFEI() << std::endl;
 }
 
 void cb_rcv5xx(int type, osip_transaction_t * tr, osip_message_t * sip)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    LOG_DAFEI() << std::endl;
 }
 
 void cb_rcv6xx(int type, osip_transaction_t * tr, osip_message_t * sip)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    LOG_DAFEI() << std::endl;
 }
 
 void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip)
 {
-    std::cout << __FUNCTION__ << std::endl;
+    char *msg;
+    size_t msgLen;
+    int ret = osip_message_to_str(sip, &msg, &msgLen);
+    if (ret != 0) {
+        std::cout << "Cannot get printable msg:";
+    }
+
+    LOG_DAFEI() << message_callback_type_to_string(type) << "\n" 
+            << "tr->transactionid=" << tr->transactionid
+            << "msg:\n" << msg <<  std::endl;
+
+    switch (type) {
+    case OSIP_IST_INVITE_RECEIVED:
+
+        break;
+    default:
+        break;
+    }
 }
