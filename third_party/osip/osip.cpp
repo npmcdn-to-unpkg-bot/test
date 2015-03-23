@@ -195,26 +195,7 @@ int main(int argc, char** argv){
         // Get minimal timeout to wake up us. Put them behind execute is the best way.
         // This is perfect to handle Real Time.
         osip_timers_gettimeout(osip, &timeout);
-        LOG_DAFEI() << " secs:" << timeout.tv_sec << ", usecs:" << timeout.tv_usec << std::endl;
-
-          // // Find all the evt and print their type. Only for test.
-          // osip_transaction_t *tr;
-          // osip_list_iterator_t iterator;
-          // // osip_mutex_lock (osip->ist_fastmutex);
-
-          // tr = (osip_transaction_t *) osip_list_get_first (&osip->osip_ict_transactions, &iterator);
-          // while (osip_list_iterator_has_elem (iterator)) {
-          //   osip_event_t *evt;
-
-          //   evt = (osip_event_t *) osip_fifo_tryget (tr->transactionff);
-          //   if (evt != NULL) {
-          //       std::cout << "event type:" << to_string(evt->type) <<std::endl;
-          //   } else {
-          //       std::cout << "no event" << std::endl;
-          //   }
-          //   tr = (osip_transaction_t *) osip_list_get_next (&iterator);
-          // }
-          // // osip_mutex_unlock (osip->ist_fastmutex);
+        // LOG_DAFEI() << " secs:" << timeout.tv_sec << ", usecs:" << timeout.tv_usec << std::endl;
     }
 
     pthread_join(th_command, NULL);
@@ -338,19 +319,19 @@ int handle_incoming_message(const char* buffer, size_t len)
         return -1;
     }
 
-    char *msg;
-    size_t msgLen;
-    int ret = osip_message_to_str(evt->sip, &msg, &msgLen);
-    if (ret != 0) {
-        std::cout << "Cannot get printable msg:";
-        return -1;
-    }
+    // char *msg;
+    // size_t msgLen;
+    // int ret = osip_message_to_str(evt->sip, &msg, &msgLen);
+    // if (ret != 0) {
+    //     std::cout << "Cannot get printable msg:";
+    //     return -1;
+    // }
 
-    LOG_DAFEI() << "new event created\n"
-            << "type:" << event_type_to_string(evt->type) << "\n"
-            // << "transactionid:" << evt->transactionid << "\n" // Here must be 0. Because we havn't find transaction for this event.
-            << "sip:" << msg << std::endl;;
-    osip_free(msg);
+    // LOG_DAFEI() << "new event created\n"
+    //         << "type:" << event_type_to_string(evt->type) << "\n"
+    //         // << "transactionid:" << evt->transactionid << "\n" // Here must be 0. Because we havn't find transaction for this event.
+    //         << "sip:" << msg << std::endl;;
+    // osip_free(msg);
 
     // use "branch" to identity transaction for this event.
     int rc = osip_find_transaction_and_add_event(g_osip, evt);
@@ -667,16 +648,16 @@ void cb_rcv6xx(int type, osip_transaction_t * tr, osip_message_t * sip)
 
 void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip)
 {
-    char *msg;
-    size_t msgLen;
-    int ret = osip_message_to_str(sip, &msg, &msgLen);
-    if (ret != 0) {
-        std::cout << "Cannot get printable msg:";
-    }
+    // char *msg;
+    // size_t msgLen;
+    // int ret = osip_message_to_str(sip, &msg, &msgLen);
+    // if (ret != 0) {
+    //     std::cout << "Cannot get printable msg:";
+    // }
 
-    LOG_DAFEI() << message_callback_type_to_string(type) << "\n" 
-            << "tr->transactionid=" << tr->transactionid
-            << "\nmsg:------------\n" << msg << "\n--------------" << std::endl;
+    // LOG_DAFEI() << message_callback_type_to_string(type) << "\n" 
+    //         << "tr->transactionid=" << tr->transactionid
+    //         << "\nmsg:------------\n" << msg << "\n--------------" << std::endl;
 
     switch (type) {
     case OSIP_IST_INVITE_RECEIVED:
