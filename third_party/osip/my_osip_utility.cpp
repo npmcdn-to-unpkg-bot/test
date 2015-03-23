@@ -1,6 +1,6 @@
 #include "my_osip_utility.hpp"
 
-std::string to_string(int type) {
+std::string event_type_to_string(int type) {
     std::string s;
     switch(type) {
     TO_STRING_ENTRY(TIMEOUT_A)
@@ -139,4 +139,102 @@ std::string transport_error_to_string(int type)
     }
 
     return s;
+}
+
+char* build_random_number()
+{
+  char *tmp = (char *)osip_malloc(33);
+  unsigned number = osip_build_random_number();
+
+  if (tmp == NULL)
+    return NULL;
+
+  sprintf (tmp, "%u", number);
+  return tmp;
+}
+
+int build_response_default (osip_message_t** dest, osip_dialog_t* dialog, int status, osip_message_t* request)
+{
+  osip_generic_param_t *tag;
+  osip_message_t *response;
+  int pos;
+  int i;
+
+  *dest = NULL;
+  if (request == NULL)
+    return OSIP_BADPARAMETER;
+
+  i = osip_message_init (&response);
+  if (i != 0)
+    return i;
+  /* initialise osip_message_t structure */
+  /* yet done... */
+
+  response->sip_version = (char *) osip_malloc (8 * sizeof (char));
+  if (response->sip_version == NULL) {
+    osip_message_free (response);
+    return OSIP_NOMEM;
+  }
+  sprintf (response->sip_version, "SIP/2.0");
+  osip_message_set_status_code (response, status);
+
+  // We don't use our own status.
+  response->reason_phrase = osip_strdup(osip_message_get_reason(status));
+  response->req_uri = NULL;
+  response->sip_method = NULL;
+
+    i = osip_to_clone (request->to, &(response->to));
+    if (i != 0) {
+        osip_message_free (response);
+        return i;
+    }
+
+    i = osip_to_get_tag (response->to, &tag);
+    if (i != 0) {                 /* we only add a tag if it does not already contains one! */
+        if ((dialog != NULL) && (dialog->local_tag != NULL)) {
+            /* it should contain the local TAG we created */
+            osip_to_set_tag (response->to, osip_strdup (dialog->local_tag));
+        } else {
+            // dafei 100 need no tag ???
+            if (status != 100)
+                osip_to_set_tag (response->to, build_random_number());
+        }
+    }
+
+  i = osip_from_clone (request->from, &(response->from));
+  if (i != 0) {
+    osip_message_free (response);
+    return i;
+  }
+
+  pos = 0;
+  while (!osip_list_eol (&request->vias, pos)) {
+    osip_via_t *via;
+    osip_via_t *via2;
+
+    via = (osip_via_t *) osip_list_get (&request->vias, pos);
+    i = osip_via_clone (via, &via2);
+    if (i != 0) {
+      osip_message_free (response);
+      return i;
+    }
+    osip_list_add (&response->vias, via2, -1);
+    pos++;
+  }
+
+  i = osip_call_id_clone (request->call_id, &(response->call_id));
+  if (i != 0) {
+    osip_message_free (response);
+    return i;
+  }
+  i = osip_cseq_clone (request->cseq, &(response->cseq));
+  if (i != 0) {
+    osip_message_free (response);
+    return i;
+  }
+
+  osip_message_set_user_agent (response, "xiaoming");
+
+  *dest = response;
+  return OSIP_SUCCESS;
 }
