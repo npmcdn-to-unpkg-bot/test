@@ -29,6 +29,9 @@ static int g_wakeup_send_fd = -1;
 static int g_wakeup_recv_fd = -1;
 static osip_t* g_osip = NULL;
 static std::vector<osip_dialog_t*> g_dialogs;
+osip_transaction_t* g_out_transaction = NULL;
+osip_transaction_t* g_inc_transaction = NULL;
+
 static const size_t BUFFSIZE = 1600;  // MTU usually doesn't exceed 1600
 static const unsigned MESSAGE_ENTRY_MAX_LENGTH = 256;
 static const unsigned MAX_ADDR_STR = 128;
@@ -67,6 +70,7 @@ int send_invite();
 void usage(const char* process);
 int init_net(bool as_server);
 void* command_fun(void* arg);
+void wakeup_select();
 
 int main(int argc, char** argv){
     if (argc != 2) {
@@ -195,7 +199,7 @@ int main(int argc, char** argv){
         // Get minimal timeout to wake up us. Put them behind execute is the best way.
         // This is perfect to handle Real Time.
         osip_timers_gettimeout(osip, &timeout);
-        // LOG_DAFEI() << " secs:" << timeout.tv_sec << ", usecs:" << timeout.tv_usec << std::endl;
+        LOG_DAFEI() << " secs:" << timeout.tv_sec << ", usecs:" << timeout.tv_usec << std::endl;
     }
 
     pthread_join(th_command, NULL);
@@ -311,7 +315,7 @@ int init_net(bool as_server)
 int handle_incoming_message(const char* buffer, size_t len)
 {
     std::string log_msg(buffer, len);
-    // LOG_DAFEI() << "message received:\n---------------" << log_msg << "\n--------------" << std::endl;
+    LOG_DAFEI() << "message received:\n---------------" << log_msg << "\n--------------" << std::endl;
 
     osip_event_t *evt = osip_parse(buffer, len);
     if (evt == NULL) {
@@ -339,7 +343,7 @@ int handle_incoming_message(const char* buffer, size_t len)
         // should free event.
         LOG_DAFEI() << "this event has no transaction, create a new one." << std::endl;
         if (MSG_IS_REQUEST(evt->sip)) {
-            LOG_DAFEI() << "process_new_request" << std::endl;
+            LOG_DAFEI() << "process_new_request, event type:" << event_type_to_string(evt->type) << std::endl;
             process_new_request(g_osip, evt);
         } else if (MSG_IS_RESPONSE(evt->sip)) {
             LOG_DAFEI() << "process_response_out_of_transacation" << std::endl;
@@ -347,6 +351,8 @@ int handle_incoming_message(const char* buffer, size_t len)
         }
     } else {
         LOG_DAFEI() << "Find transaction for this event" << std::endl;
+        // Already add event, wakeup select.
+        wakeup_select();
     }
 
     return 0;
@@ -425,13 +431,13 @@ int send_invite()
     osip_message_set_content_length(invite_msg, "0");
     osip_message_set_user_agent(invite_msg, "TotalView 1.0");
 
-    osip_transaction_t* transcation;
+    osip_transaction_t* transaction;
     osip_event_t* event;
-    if ((status = osip_transaction_init(&transcation, ICT, g_osip, invite_msg)) != 0) {
+    if ((status = osip_transaction_init(&transaction, ICT, g_osip, invite_msg)) != 0) {
         std::cout << "Failed to init transportation :" << status << std::endl;
         return -1; 
     }
-    osip_transaction_set_your_instance(transcation, g_osip);// store osip in transaction for later usage.
+    osip_transaction_set_your_instance(transaction, g_osip);// store osip in transaction for later usage.
 
 
     if ((event = osip_new_outgoing_sipmessage(invite_msg)) == NULL) {
@@ -440,7 +446,7 @@ int send_invite()
         return -1;
     }
 
-    event->transactionid = transcation->transactionid;
+    event->transactionid = transaction->transactionid;
 
     if((status = osip_message_force_update(invite_msg)) != 0){
         std::cout << "Failed force update:" << status << std::endl;
@@ -448,25 +454,168 @@ int send_invite()
         return -1;
     }
 
-    if((status = osip_transaction_add_event(transcation, event)) != 0){
+    if((status = osip_transaction_add_event(transaction, event)) != 0){
         std::cout << "Can't add event" << std::endl;
         osip_message_free(invite_msg);
         return -1;
     }
 
-    std::cout << "wakeup select" << std::endl;
+    wakeup_select();
+
+    g_out_transaction = transaction;
+    return 0;
+}
+
+void wakeup_select()
+{
     int ret = write(g_wakeup_send_fd, "a", 1); // wake up select
     if (ret != 1) {
         std::cout << "wakeup failed" << std::endl;
         exit(-1);
     }
-    g_begin_log = true;
-    return 0;
 }
 
-void send_cancel()
+int send_cancel()
 {
+    if (!g_out_transaction) {
+        LOG_DAFEI() << "No out transaction at all" << std::endl;
+        return -1;
+    }
 
+    if (!MSG_IS_STATUS_1XX(g_out_transaction->last_response)) {
+        LOG_DAFEI() << "transaction last_response is not 1xx" << std::endl;
+        return -1;
+    }
+
+    int i;
+    osip_message_t *request;
+    osip_message_t* request_cancelled = g_out_transaction->orig_request;
+    
+    i = osip_message_init (&request);
+    if (i != 0) {
+        LOG_DAFEI() << "failed to init message" << std::endl;
+        return i;
+    }
+    
+    /* prepare the request-line */
+    osip_message_set_method (request, osip_strdup ("CANCEL"));
+    osip_message_set_version (request, osip_strdup ("SIP/2.0"));
+    osip_message_set_status_code (request, 0);
+    osip_message_set_reason_phrase (request, NULL);
+    
+    i = osip_uri_clone (request_cancelled->req_uri, &(request->req_uri));
+    if (i != 0) {
+      osip_message_free (request);
+      request = NULL;
+      LOG_DAFEI() << "failed to clone message uri" << std::endl;
+      return i;
+    }
+    
+    i = osip_to_clone (request_cancelled->to, &(request->to));
+    if (i != 0) {
+      osip_message_free (request);
+      request = NULL;
+      LOG_DAFEI() << "failed to clone message to" << std::endl;
+      return i;
+    }
+    i = osip_from_clone (request_cancelled->from, &(request->from));
+    if (i != 0) {
+      osip_message_free (request);
+      request = NULL;
+      LOG_DAFEI() << "failed to clone message from" << std::endl;
+      return i;
+    }
+    
+    /* set the cseq and call_id header */
+    i = osip_call_id_clone (request_cancelled->call_id, &(request->call_id));
+    if (i != 0) {
+      osip_message_free (request);
+      request = NULL;
+      LOG_DAFEI() << "failed to clone message call_id" << std::endl;
+      return i;
+    }
+    i = osip_cseq_clone (request_cancelled->cseq, &(request->cseq));
+    if (i != 0) {
+      osip_message_free (request);
+      request = NULL;
+      LOG_DAFEI() << "failed to clone message cseq" << std::endl;
+      return i;
+    }
+    osip_free (request->cseq->method);
+    request->cseq->method = osip_strdup ("CANCEL");
+    if (request->cseq->method == NULL) {
+      osip_message_free (request);
+      request = NULL;
+      LOG_DAFEI() << "failed set cancel method" << std::endl;
+      return OSIP_NOMEM;
+    }
+    
+    /* copy ONLY the top most Via Field (this method is also used by proxy) */
+    {
+      osip_via_t *via;
+      osip_via_t *via2;
+    
+      i = osip_message_get_via (request_cancelled, 0, &via);
+      if (i < 0) {
+        osip_message_free (request);
+        request = NULL;
+        LOG_DAFEI() << "failed to get via" << std::endl;
+        return i;
+      }
+      i = osip_via_clone (via, &via2);
+      if (i != 0) {
+        osip_message_free (request);
+        request = NULL;
+        LOG_DAFEI() << "failed to clone via" << std::endl;
+        return i;
+      }
+      osip_list_add (&request->vias, via2, -1);
+    }
+    
+    /* add the same route-set than in the previous request */
+    {
+      int pos = 0;
+      osip_route_t *route;
+      osip_route_t *route2;
+    
+      while (!osip_list_eol (&request_cancelled->routes, pos)) {
+        route = (osip_route_t *) osip_list_get (&request_cancelled->routes, pos);
+        i = osip_route_clone (route, &route2);
+        if (i != 0) {
+          osip_message_free (request);
+          request = NULL;
+          LOG_DAFEI() << "failed to clone route" << std::endl;
+          return i;
+        }
+        osip_list_add (&request->routes, route2, -1);
+        pos++;
+      }
+    }
+    
+    osip_message_set_max_forwards (request, "70");        /* a UA should start a request with 70 */
+    osip_message_set_user_agent (request, osip_strdup("Webview 0.1"));
+
+    // Send it.
+    osip_transaction_t* transaction = NULL;
+    int r = osip_transaction_init(&transaction, NICT, g_osip, request);
+    if (r != 0) {
+        LOG_DAFEI() << "transacation init failed" << std::endl;
+        return -1;
+    }
+
+    osip_event_t* sipevent = osip_new_outgoing_sipmessage (request);
+    sipevent->transactionid = transaction->transactionid;
+
+    r = osip_transaction_add_event (transaction, sipevent);
+    if (r !=0) {
+        LOG_DAFEI()  << "Failed to add event" << std::endl;
+        return r;
+    }
+    LOG_DAFEI() << "success to add cancel event" << std::endl;
+
+    wakeup_select();
+
+  return 0;
 }
 
 void send_bye()
@@ -545,7 +694,12 @@ void process_new_request(osip_t* osip, osip_event_t* evt)
         }
         evt->transactionid = transaction->transactionid;
         osip_transaction_set_your_instance(transaction, osip); // store osip in transaction for later usage.
-        osip_transaction_add_event(transaction, evt);
+        r = osip_transaction_add_event(transaction, evt);
+        if (r !=0) {
+            LOG_DAFEI()  << "Failed to add event" << std::endl;
+            return;
+        }
+        g_inc_transaction = transaction;
     }
 
     if (ctx_type == IST) {
@@ -560,7 +714,11 @@ void process_new_request(osip_t* osip, osip_event_t* evt)
         osip_event_t* evt_answer = osip_new_outgoing_sipmessage (answer);
         evt_answer->transactionid = transaction->transactionid;
 
-        osip_transaction_add_event(transaction, evt_answer);
+        r = osip_transaction_add_event(transaction, evt_answer);
+        if (r !=0) {
+            LOG_DAFEI()  << "Failed to add event" << std::endl;
+            return;
+        }
     }
 }
 
@@ -568,6 +726,7 @@ void process_cancel(osip_t* osip, osip_transaction_t* tran, osip_event_t* evt)
 {
 
 }
+
 
 int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, int port, int out_socket)
 {
@@ -604,12 +763,12 @@ void cb_xixt_kill_transaction(int type, osip_transaction_t * tr)
     LOG_DAFEI() << kill_transaction_to_string(type) << ", transactionid=" << tr->transactionid << std::endl;
 
     // First, remove transacation.
-    osip_t *osip = (osip_t*) osip_transaction_get_reserved1 (tr);
-    assert(osip == g_osip);
-    int i = osip_remove_transaction(osip, tr);
+    // osip_t *osip = (osip_t*) osip_transaction_get_reserved1 (tr);
+    // assert(osip == g_osip);
+    int i = osip_remove_transaction(g_osip, tr);
     if (i != 0) {
         std::cout << "osip_remove_transacation failed:" << i
-                << ", transcationid=" << tr->transactionid << std::endl;
+                << ", transactionid=" << tr->transactionid << std::endl;
     }
 
 }
@@ -667,22 +826,51 @@ void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip)
     //         << "tr->transactionid=" << tr->transactionid
     //         << "\nmsg:------------\n" << msg << "\n--------------" << std::endl;
 
+    LOG_DAFEI() << message_callback_type_to_string(type)  << ", tr->transactionid=" << tr->transactionid << std::endl;
     switch (type) {
     case OSIP_IST_INVITE_RECEIVED:
-    {
-        osip_message_t *answer;
-        int r = build_response_default(&answer, NULL, 200, sip);
-        if (r != 0) {
-            osip_transaction_free(tr);
-            return;
+    // {
+    //     osip_message_t *answer;
+    //     int r = build_response_default(&answer, NULL, 200, sip);
+    //     if (r != 0) {
+    //         osip_transaction_free(tr);
+    //         return;
+    //     }
+    //     osip_message_set_content_length(answer, "0");
+
+    //     osip_event_t* evt_answer = osip_new_outgoing_sipmessage(answer);
+    //     evt_answer->transactionid = tr->transactionid;
+
+    //     osip_transaction_add_event(tr, evt_answer);
+    //      wakeup_select();
+    // }
+        break;
+    case OSIP_NIST_CANCEL_RECEIVED:
+        {
+            osip_message_t *answer;
+            int r = build_response_default(&answer, NULL, 200, sip);
+            if (r != 0) {
+                LOG_DAFEI()  << "Failed to build_response_default" << std::endl;
+                osip_transaction_free(tr);
+                return;
+            }
+            osip_message_set_content_length(answer, "0");
+
+            osip_event_t* evt_answer = osip_new_outgoing_sipmessage(answer);
+            if (!evt_answer) {
+                LOG_DAFEI()  << "Failed to osip_new_outgoing_sipmessage" << std::endl;
+                break;
+            }
+            evt_answer->transactionid = tr->transactionid;
+
+            r = osip_transaction_add_event(tr, evt_answer);
+            if (r !=0) {
+                LOG_DAFEI()  << "Failed to add event" << std::endl;
+                break;
+            }
+
+            wakeup_select();
         }
-        osip_message_set_content_length(answer, "0");
-
-        osip_event_t* evt_answer = osip_new_outgoing_sipmessage(answer);
-        evt_answer->transactionid = tr->transactionid;
-
-        osip_transaction_add_event(tr, evt_answer);
-    }
         break;
     default:
         break;
