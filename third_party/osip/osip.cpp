@@ -425,12 +425,6 @@ int send_invite()
     osip_message_set_content_length(invite_msg, "0");
     osip_message_set_user_agent(invite_msg, "TotalView 1.0");
 
-    // osip_message_set_allow(msgPtr, "INVITE");
-    // osip_message_set_allow(msgPtr, "INFO");
-    // osip_message_set_allow(msgPtr, "ACK");
-    // osip_message_set_allow(msgPtr, "CANCEL");
-    // osip_message_set_allow(msgPtr, "BYE");
-
     osip_transaction_t* transcation;
     osip_event_t* event;
     if ((status = osip_transaction_init(&transcation, ICT, g_osip, invite_msg)) != 0) {
@@ -470,6 +464,16 @@ int send_invite()
     return 0;
 }
 
+void send_cancel()
+{
+
+}
+
+void send_bye()
+{
+
+}
+
 void* command_fun(void* arg)
 {
     std::cout << "command thread is running" << std::endl;
@@ -479,6 +483,10 @@ void* command_fun(void* arg)
         if (command == "invite") {
             assert(g_osip);
             send_invite();
+        } else if (command == "cancel") {
+            send_cancel();
+        } else if (command == "bye") {
+            send_bye();
         } else {
             std::cout << "unknown command:" << command << std::endl;
         }
