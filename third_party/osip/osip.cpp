@@ -623,6 +623,29 @@ void send_bye()
 
 }
 
+void send_ok()
+{
+    if (!g_inc_transaction) {
+        LOG_DAFEI() << "no out transaction" << std::endl;
+        return;
+    }
+
+    osip_message_t *answer;
+    int r = build_response_default(&answer, NULL, 200, g_inc_transaction->orig_request);
+    if (r != 0) {
+        LOG_DAFEI() << "Failed to build_response_default" << std::endl;
+        return;
+    }
+    osip_message_set_content_length(answer, "0");
+
+    osip_event_t* evt_answer = osip_new_outgoing_sipmessage(answer);
+    evt_answer->transactionid = g_inc_transaction->transactionid;
+
+    osip_transaction_add_event(g_inc_transaction, evt_answer);
+
+    wakeup_select();
+}
+
 void* command_fun(void* arg)
 {
     std::cout << "command thread is running" << std::endl;
@@ -636,6 +659,8 @@ void* command_fun(void* arg)
             send_cancel();
         } else if (command == "bye") {
             send_bye();
+        } else if (command == "ok") {
+            send_ok();
         } else {
             std::cout << "unknown command:" << command << std::endl;
         }
