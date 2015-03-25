@@ -4,3 +4,7 @@
 	search DocumentRoot
 	replace
 	restart apache
+2. 多站点 多虚拟主机
+	打开httpd.conf文件，搜索<IfModule alias_module> 节点
+
+	

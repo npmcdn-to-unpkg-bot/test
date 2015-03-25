@@ -1,0 +1,6 @@
+
+1.变量
+   $a = "aaaa";
+   $b = 3;
+   echo $a.$b     aaaa3
+ 

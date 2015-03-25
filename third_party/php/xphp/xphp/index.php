@@ -6,6 +6,7 @@
 	$_action = isset($_GET["action"]) ? $_GET["action"] : "";	// 获取action参数,这个参数可以没有,没有的话会执行controller的构造函数
 	if ($_controller == "" || in_array($_controller, explode(",", XPHP_FORBIDDEN_TYPE))) exit();
 
+	echo "dafei";
 	// 加载全局函数库
 	require(XPHP_PATH."/common/functions.inc");	
 	// 加载controller父类 _Master
