@@ -45,25 +45,27 @@ void cleanup_socket();
 
 // All Callbacks
 // This function, which is implementation of transportation ourself, is used to send message.
-int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, int port, int out_socket);
+int cb_send_message(osip_transaction_t* tr, osip_message_t* sip, char *host, int port, int out_socket);
 
-void cb_xixt_kill_transaction(int type, osip_transaction_t * tr);
+void cb_xixt_kill_transaction(int type, osip_transaction_t* tr);
 
-void cb_transport_error(int type, osip_transaction_t * tr, int error);
+void cb_transport_error(int type, osip_transaction_t* tr, int error);
 
-void cb_rcv1xx(int type, osip_transaction_t * tr, osip_message_t * sip);
-void cb_rcv2xx(int type, osip_transaction_t * tr, osip_message_t * sip);
-void cb_rcv3xx(int type, osip_transaction_t * tr, osip_message_t * sip);
-void cb_rcv4xx(int type, osip_transaction_t * tr, osip_message_t * sip);
-void cb_rcv5xx(int type, osip_transaction_t * tr, osip_message_t * sip);
-void cb_rcv6xx(int type, osip_transaction_t * tr, osip_message_t * sip);
+void cb_rcv1xx(int type, osip_transaction_t* tr, osip_message_t* sip);
+void cb_rcv2xx(int type, osip_transaction_t* tr, osip_message_t* sip);
+void cb_rcv3xx(int type, osip_transaction_t* tr, osip_message_t* sip);
+void cb_rcv4xx(int type, osip_transaction_t* tr, osip_message_t* sip);
+void cb_rcv5xx(int type, osip_transaction_t* tr, osip_message_t* sip);
+void cb_rcv6xx(int type, osip_transaction_t* tr, osip_message_t* sip);
 
-void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip);
+void cb_rcvreq(int type, osip_transaction_t* tr, osip_message_t* sip);
 
 // handle incomming message
 int handle_incoming_message(const char* buf, size_t len);
 void process_new_request(osip_t* osip, osip_event_t* evt);
-void process_cancel(osip_t* osip, osip_transaction_t* tran, osip_event_t* evt);
+void process_rcv_cancel(osip_transaction_t* tran, osip_message_t* sip);
+void process_rcv_2xx(osip_transaction_t* tr, osip_message_t* sip);
+
 int send_invite();
 
 // main usage and net, command thread.
@@ -177,7 +179,7 @@ int main(int argc, char** argv){
                     std::cout << "this is a wakeup" << std::endl;
                     int len = read(g_wakeup_recv_fd, buffer, BUFFSIZE);
                     buffer[len] = 0;
-                    assert(strcmp(buffer, "a") == 0);
+                    // assert(strcmp(buffer, "a") == 0);
                     // Wake up select for our outgoing message handling.
                 } else {
                     assert(false);
@@ -626,9 +628,12 @@ void send_bye()
 void send_ok()
 {
     if (!g_inc_transaction) {
-        LOG_DAFEI() << "no out transaction" << std::endl;
+        LOG_DAFEI() << "no in transaction" << std::endl;
         return;
     }
+
+    // Send ok will kill this IST.
+    // re-send 200 is TU's responsibilty, not transport. Unlike others.
 
     osip_message_t *answer;
     int r = build_response_default(&answer, NULL, 200, g_inc_transaction->orig_request);
@@ -724,7 +729,11 @@ void process_new_request(osip_t* osip, osip_event_t* evt)
             LOG_DAFEI()  << "Failed to add event" << std::endl;
             return;
         }
-        g_inc_transaction = transaction;
+        // STORE IST transaction only.
+        if (transaction->ctx_type == IST) {
+            LOG_DAFEI() << "This is an IST (INVITE) incoming transaction, store it" << std::endl;
+            g_inc_transaction = transaction;
+        }
     }
 
     if (ctx_type == IST) {
@@ -747,13 +756,131 @@ void process_new_request(osip_t* osip, osip_event_t* evt)
     }
 }
 
-void process_cancel(osip_t* osip, osip_transaction_t* tran, osip_event_t* evt)
+#define MATCH_CHECK(x);  \
+    if (!x) { \
+        LOG_DAFEI() << #x << " is null";   \
+        return -1;  \
+    }
+
+int match_invite(osip_transaction_t* invite, osip_message_t* cancel)
+{
+    osip_generic_param_t *br = NULL;
+    osip_generic_param_t *br2 = NULL;
+    osip_via_t *via;
+    osip_via_param_get_byname (invite->topvia, "branch", &br);
+    MATCH_CHECK(br);
+    via = (osip_via_t*)osip_list_get (&cancel->vias, 0);
+    MATCH_CHECK(via);
+    osip_via_param_get_byname (via, "branch", &br2);
+    MATCH_CHECK(br2);
+
+    MATCH_CHECK(br->gvalue);
+    MATCH_CHECK(br2->gvalue);
+    if (0 != strcmp(br->gvalue, br2->gvalue)) {
+        std::string v1(br->gvalue, strlen(br->gvalue));
+        std::string v2(br2->gvalue, strlen(br2->gvalue));
+        LOG_DAFEI() << "v1:[" << v1 << "], v2:[" << v2 << "]not match" << std::endl;
+        return -1;
+    }
+
+    // if ((0 != osip_call_id_match (invite->callid, cancel->call_id)) ||
+    //         (0 != osip_to_tag_match (invite->to, cancel->to)) &||
+    //         (0 != osip_from_tag_match (invite->from, cancel->from)) ||
+    //         (0 != osip_via_match (invite->topvia, via))) {
+    //  // From may have no tag right now.
+    //     return -1;
+    // }
+
+    // Match OK.
+    return 0;
+}
+
+void process_rcv_cancel(osip_transaction_t* tr, osip_message_t* sip)
+{
+    // First, we need to handle cancel transaction and response with a 200 ok or 481
+    // find no match invite.
+    // Then, we need to find the INVITE transaction and answer with 487.(canceled)
+
+    int cancel_status = 200; // default 200 ok for cancel.
+    // Find the INVITE in incoming transacton
+    if (!g_inc_transaction) {
+        LOG_DAFEI() << "Have no incoming transaction at all?" << std::endl;
+    } else {
+        // match the invite
+        if (0 == match_invite(tr, sip)) {
+            if (g_inc_transaction->state == IST_TERMINATED ||
+                    g_inc_transaction->state == IST_CONFIRMED ||
+                    g_inc_transaction->state == IST_COMPLETED) {
+                LOG_DAFEI() << "match INVITE in wrong state." << std::endl;
+                cancel_status = 481;
+            }  else {
+                // We should answer with 487. We answer after answer CANCEL.
+            }
+        } else {
+            LOG_DAFEI() << "NO matach invite for this CANCEL" << std::endl;
+            cancel_status = 481; // Not found for this cancel.
+        }
+    }
+
+    // For CANCEL trasaction, reponse with 200 ok.
+    LOG_DAFEI() << "Response CANCEL with " << cancel_status << std::endl;
+    osip_message_t *answer;
+    int r = build_response_default(&answer, NULL, cancel_status, sip);
+    if (r != 0) {
+        LOG_DAFEI()  << "Failed to build_response_default" << std::endl;
+        osip_transaction_free(tr); // dafei Is this right????
+        return;
+    }
+    osip_message_set_content_length(answer, "0");
+
+    osip_event_t* evt_answer = osip_new_outgoing_sipmessage(answer);
+    if (!evt_answer) {
+        LOG_DAFEI()  << "Failed to osip_new_outgoing_sipmessage" << std::endl;
+        return;
+    }
+    evt_answer->transactionid = tr->transactionid;
+
+    r = osip_transaction_add_event(tr, evt_answer);
+    if (r !=0) {
+        LOG_DAFEI()  << "Failed to add event" << std::endl;
+        return;
+    }
+
+    // ANSWER INVITE with 487
+    while (cancel_status == 200) {
+        LOG_DAFEI() << "Response INVITE with " << 487 << std::endl;
+        osip_message_t *invite_answer;
+        int r = build_response_default(&invite_answer, NULL, 487, g_inc_transaction->orig_request);
+        if (r != 0) {
+            LOG_DAFEI()  << "Failed to build_response_default" << std::endl;
+            break;
+        }
+        osip_message_set_content_length(invite_answer, "0");
+
+        osip_event_t* evt_invite_answer = osip_new_outgoing_sipmessage(invite_answer);
+        if (!evt_invite_answer) {
+            LOG_DAFEI()  << "Failed to osip_new_outgoing_sipmessage" << std::endl;
+            break;
+        }
+        evt_invite_answer->transactionid = g_inc_transaction->transactionid;
+
+        r = osip_transaction_add_event(g_inc_transaction, evt_invite_answer);
+        if (r !=0) {
+            LOG_DAFEI()  << "Failed to add event" << std::endl;
+            break;
+        }
+        break;
+    }
+    
+    wakeup_select();
+}
+
+void process_rcv_2xx(osip_transaction_t* tr, osip_message_t* sip)
 {
 
 }
 
-
-int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, int port, int out_socket)
+int cb_send_message(osip_transaction_t* tr, osip_message_t* sip, char *host, int port, int out_socket)
 {
     char *msg;
     size_t msgLen;
@@ -774,6 +901,11 @@ int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, i
     // memcpy(&store_time, &now, sizeof(struct timeval));
     // std::cout << "time msec:" << msec << std::endl;
 
+    if (tr->ctx_type == IST && MSG_IS_RESPONSE_FOR(sip, "INVITE")
+        && MSG_TEST_CODE(sip, 200)) {
+        LOG_DAFEI() << "This is a 200 for INVITE, should re-send until we get ACK" << std::endl;
+    }
+
     int r = write(g_send_fd, msg, msgLen);
     if (r == -1) {
         return -1;
@@ -783,13 +915,21 @@ int cb_send_message(osip_transaction_t * tr, osip_message_t * sip, char *host, i
     return OSIP_SUCCESS;
 }
 
-void cb_xixt_kill_transaction(int type, osip_transaction_t * tr)
+void cb_xixt_kill_transaction(int type, osip_transaction_t* tr)
 {
     LOG_DAFEI() << kill_transaction_to_string(type) << ", transactionid=" << tr->transactionid << std::endl;
 
-    // First, remove transacation.
-    // osip_t *osip = (osip_t*) osip_transaction_get_reserved1 (tr);
-    // assert(osip == g_osip);
+    if (g_out_transaction == tr) {
+        g_out_transaction = NULL;
+    }
+    if (g_inc_transaction == tr) {
+        g_inc_transaction = NULL;
+    }
+
+    // TODO maybe we should check the INT transaction if it's killed properly.
+
+    // Need to remove transacation here.
+    // This will free the transaction.
     int i = osip_remove_transaction(g_osip, tr);
     if (i != 0) {
         std::cout << "osip_remove_transacation failed:" << i
@@ -798,7 +938,7 @@ void cb_xixt_kill_transaction(int type, osip_transaction_t * tr)
 
 }
 
-void cb_transport_error(int type, osip_transaction_t * tr, int error)
+void cb_transport_error(int type, osip_transaction_t* tr, int error)
 {
     LOG_DAFEI() << transport_error_to_string(type) << ": tr->transactionid:" << tr->transactionid
             << ", error:" << error << std::endl;
@@ -808,37 +948,53 @@ void cb_transport_error(int type, osip_transaction_t * tr, int error)
     // second, cb_xixt_kill_transaction is called.
 }
 
-void cb_rcv1xx(int type, osip_transaction_t * tr, osip_message_t * sip)
+void cb_rcv1xx(int type, osip_transaction_t* tr, osip_message_t* sip)
 {
     LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
 }
 
-void cb_rcv2xx(int type, osip_transaction_t * tr, osip_message_t * sip)
+void cb_rcv2xx(int type, osip_transaction_t* tr, osip_message_t* sip)
+{
+    LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code
+            << ", " << message_callback_type_to_string(type) << std::endl;
+    if (MSG_IS_RESPONSE_FOR(sip, "INVITE")) {
+        LOG_DAFEI() << "msg is response for INVITE" << std::endl;
+        process_rcv_2xx(tr, sip);
+        return;
+    }
+
+    if (MSG_IS_RESPONSE_FOR(sip, "BYE")) {
+        LOG_DAFEI() << "msg is response for BYE" << std::endl;
+    } else if (MSG_IS_RESPONSE_FOR(sip, "CANCEL")) {
+        LOG_DAFEI() << "msg is response for CANCEL" << std::endl;
+    } else {
+        std::string method(sip->cseq->method);
+        LOG_DAFEI() << "msg is response for " << method << "We didn't handle this" << std::endl;
+    }
+
+}
+
+void cb_rcv3xx(int type, osip_transaction_t* tr, osip_message_t* sip)
 {
     LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
 }
 
-void cb_rcv3xx(int type, osip_transaction_t * tr, osip_message_t * sip)
+void cb_rcv4xx(int type, osip_transaction_t* tr, osip_message_t* sip)
 {
     LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
 }
 
-void cb_rcv4xx(int type, osip_transaction_t * tr, osip_message_t * sip)
+void cb_rcv5xx(int type, osip_transaction_t* tr, osip_message_t* sip)
 {
     LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
 }
 
-void cb_rcv5xx(int type, osip_transaction_t * tr, osip_message_t * sip)
+void cb_rcv6xx(int type, osip_transaction_t* tr, osip_message_t* sip)
 {
     LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
 }
 
-void cb_rcv6xx(int type, osip_transaction_t * tr, osip_message_t * sip)
-{
-    LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
-}
-
-void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip)
+void cb_rcvreq(int type, osip_transaction_t* tr, osip_message_t* sip)
 {
     // char *msg;
     // size_t msgLen;
@@ -854,6 +1010,7 @@ void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip)
     LOG_DAFEI() << message_callback_type_to_string(type)  << ", tr->transactionid=" << tr->transactionid << std::endl;
     switch (type) {
     case OSIP_IST_INVITE_RECEIVED:
+    //TODO should return 100 here. Let user to send 200 OK.
     // {
     //     osip_message_t *answer;
     //     int r = build_response_default(&answer, NULL, 200, sip);
@@ -871,31 +1028,7 @@ void cb_rcvreq(int type, osip_transaction_t * tr, osip_message_t * sip)
     // }
         break;
     case OSIP_NIST_CANCEL_RECEIVED:
-        {
-            osip_message_t *answer;
-            int r = build_response_default(&answer, NULL, 200, sip);
-            if (r != 0) {
-                LOG_DAFEI()  << "Failed to build_response_default" << std::endl;
-                osip_transaction_free(tr);
-                return;
-            }
-            osip_message_set_content_length(answer, "0");
-
-            osip_event_t* evt_answer = osip_new_outgoing_sipmessage(answer);
-            if (!evt_answer) {
-                LOG_DAFEI()  << "Failed to osip_new_outgoing_sipmessage" << std::endl;
-                break;
-            }
-            evt_answer->transactionid = tr->transactionid;
-
-            r = osip_transaction_add_event(tr, evt_answer);
-            if (r !=0) {
-                LOG_DAFEI()  << "Failed to add event" << std::endl;
-                break;
-            }
-
-            wakeup_select();
-        }
+        process_rcv_cancel(tr, sip);
         break;
     default:
         break;
