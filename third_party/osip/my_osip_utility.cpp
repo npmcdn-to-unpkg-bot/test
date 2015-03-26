@@ -270,3 +270,169 @@ int build_response_default (osip_message_t** dest, osip_dialog_t* dialog, int st
   *dest = response;
   return OSIP_SUCCESS;
 }
+
+int build_request_within_dialog (osip_message_t ** dest, const char *method, osip_dialog_t * dialog)
+{
+  int i;
+  osip_message_t *request;
+  char locip[65];
+
+  *dest = NULL;
+
+  if (dialog == NULL) {
+    LOG_DAFEI() << "dafei return" << std::endl;
+    return OSIP_BADPARAMETER;
+    }
+
+  i = osip_message_init (&request);
+  if (i != 0) {
+    LOG_DAFEI() << "dafei return" << std::endl;
+    return i;
+  }
+
+  // TODO dafei FIX it.
+
+  // if (dialog->remote_contact_uri == NULL) {
+  //    // this dialog is probably not established! or the remote UA
+  //    //   is not compliant with the latest RFC
+     
+  //   osip_message_free (request);
+  //   LOG_DAFEI() << "dafei return" << std::endl;
+  //   return OSIP_SYNTAXERROR;
+  // }
+
+  /* prepare the request-line */
+  request->sip_method = osip_strdup (method);
+  if (request->sip_method == NULL) {
+    osip_message_free (request);
+    LOG_DAFEI() << "dafei return" << std::endl;
+    return OSIP_NOMEM;
+  }
+  request->sip_version = osip_strdup ("SIP/2.0");
+  if (request->sip_version == NULL) {
+    osip_message_free (request);
+    LOG_DAFEI() << "dafei return" << std::endl;
+    return OSIP_NOMEM;
+  }
+  request->status_code = 0;
+  request->reason_phrase = NULL;
+
+
+  // TODO dafei this is for req_uri FIX IT
+    osip_uri_init(&(request->req_uri));
+    if ((i = osip_uri_parse(request->req_uri, "sip:10.10.10.1")) != 0) {
+        std::cout << "osip uri parse failed" << std::endl;
+        osip_message_free(request);
+        return -1;
+    }
+
+  // TODO dafei we use no contact and route.
+  /* and the request uri???? */
+  // if (osip_list_eol (&dialog->route_set, 0)) {
+  //   /* The UAC must put the remote target URI (to field) in the req_uri */
+  //   i = osip_uri_clone (dialog->remote_contact_uri->url, &(request->req_uri));
+  //   if (i != 0) {
+  //     osip_message_free (request);
+  //     return i;
+  //   }
+  // } else {
+  //   /* fill the request-uri, and the route headers. */
+  //   i = dialog_fill_route_set (dialog, request);
+  //   if (i != 0) {
+  //     osip_message_free (request);
+  //     return i;
+  //   }
+  // }
+
+  /* To and From already contains the proper tag! */
+  i = osip_to_clone (dialog->remote_uri, &(request->to));
+  if (i != 0) {
+    osip_message_free (request);
+    LOG_DAFEI() << "dafei return" << std::endl;
+    return i;
+  }
+  i = osip_from_clone (dialog->local_uri, &(request->from));
+  if (i != 0) {
+    osip_message_free (request);
+    LOG_DAFEI() << "dafei return" << std::endl;
+    return i;
+  }
+
+  /* set the cseq and call_id header */
+  osip_message_set_call_id (request, dialog->call_id);
+
+  if (0 == strcmp ("ACK", method)) {
+    osip_cseq_t *cseq;
+    char *tmp;
+
+    i = osip_cseq_init (&cseq);
+    if (i != 0) {
+      osip_message_free (request);
+      LOG_DAFEI() << "dafei return" << std::endl;
+      return i;
+    }
+    tmp = (char*)osip_malloc (20);
+    if (tmp == NULL) {
+      osip_message_free (request);
+      LOG_DAFEI() << "dafei return" << std::endl;
+      return OSIP_NOMEM;
+    }
+    sprintf (tmp, "%i", dialog->local_cseq);
+    osip_cseq_set_number (cseq, tmp);
+    osip_cseq_set_method (cseq, osip_strdup (method));
+    request->cseq = cseq;
+  } else {
+    osip_cseq_t *cseq;
+    char *tmp;
+
+    i = osip_cseq_init (&cseq);
+    if (i != 0) {
+      osip_message_free (request);
+      LOG_DAFEI() << "dafei return" << std::endl;
+      return i;
+    }
+    dialog->local_cseq++;       /* we should we do that?? */
+    tmp = (char*)osip_malloc (20);
+    if (tmp == NULL) {
+      osip_message_free (request);
+      LOG_DAFEI() << "dafei return" << std::endl;
+      return OSIP_NOMEM;
+    }
+    snprintf (tmp, 20, "%i", dialog->local_cseq);
+    osip_cseq_set_number (cseq, tmp);
+    osip_cseq_set_method (cseq, osip_strdup (method));
+    request->cseq = cseq;
+  }
+
+  /* always add the Max-Forward header */
+  osip_message_set_max_forwards (request, "70");        /* a UA should start a request with 70 */
+
+  // TODO dafei add via
+  // i = _eXosip_request_add_via (excontext, request, transport, locip);
+  // if (i != 0) {
+  //   osip_message_free (request);
+  //   return i;
+  // }
+
+  /* add specific headers for each kind of request... */
+  if ((0 != strcmp ("BYE", method)) && (0 != strcmp ("CANCEL", method)))
+  {
+    // TODO dafei why we need contact for bye???
+    // _eXosip_dialog_add_contact (excontext, request);
+  }
+
+  if (0 == strcmp ("NOTIFY", method)) {
+  } else if (0 == strcmp ("INFO", method)) {
+
+  } else if (0 == strcmp ("OPTIONS", method)) {
+    osip_message_set_accept (request, "application/sdp");
+  } else if (0 == strcmp ("ACK", method)) {
+    /* The ACK MUST contains the same credential than the INVITE!! */
+    /* TODO... */
+  }
+
+  osip_message_set_user_agent (request, osip_strdup("xiaoming"));
+  /*  else if ... */
+  *dest = request;
+  return OSIP_SUCCESS;
+}

@@ -61,9 +61,12 @@ void cb_rcvreq(int type, osip_transaction_t* tr, osip_message_t* sip);
 int handle_incoming_message(const char* buf, size_t len);
 void process_new_request(osip_t* osip, osip_event_t* evt);
 void process_rcv_cancel(osip_transaction_t* tran, osip_message_t* sip);
-void process_rcv_2xx(osip_transaction_t* tr, osip_message_t* sip);
+void process_ict_rcv_2xx(osip_transaction_t* tr, osip_message_t* sip);
 
 int send_invite();
+osip_dialog_t* search_existing_dialog(osip_message_t* sip);
+void add_existing_dialog(osip_dialog_t* dialog);
+
 
 // main usage and net, command thread.
 void usage(const char* process);
@@ -629,6 +632,32 @@ int send_cancel()
 
 void send_bye()
 {
+    // TODO we only have one dialog right now
+    if (g_dialogs.size() ==0) {
+        LOG_DAFEI() << "This is no dialog" << std::endl;
+        return;
+    }
+
+    osip_dialog_t* dialog = g_dialogs[0];
+
+    osip_message_t* bye;
+    int i = build_request_within_dialog(&bye, "BYE", dialog);
+    if (i !=0) {
+        LOG_DAFEI() << "Failed to create bye" << std::endl;
+        return;
+    }
+
+    char *msg;
+    size_t msgLen;
+    i = osip_message_to_str(bye, &msg, &msgLen);
+    if (i != 0 ) {
+        LOG_DAFEI() << "Failed to to str" << std::endl;
+    } else {
+        LOG_DAFEI() << "bye message is :\n"
+            << std::string(msg, msgLen) << std::endl;
+        free(msg);
+    }
+
 
 }
 
@@ -760,6 +789,11 @@ void process_new_request(osip_t* osip, osip_event_t* evt)
             LOG_DAFEI()  << "Failed to add event" << std::endl;
             return;
         }
+        
+        sleep(1);
+        // TODO dafei in order to received the message one bye one.
+        // or 100 and 180 will received the same time in TCP.
+        // TODO maybe change it to UDP.    
     }
 }
 
@@ -882,9 +916,13 @@ void process_rcv_cancel(osip_transaction_t* tr, osip_message_t* sip)
     wakeup_select();
 }
 
-void process_rcv_2xx(osip_transaction_t* tr, osip_message_t* sip)
+void process_ict_rcv_2xx(osip_transaction_t* tr, osip_message_t* sip)
 {
-
+    // This handles ICT receiving 2xx
+    if (MSG_TEST_CODE(sip, 200)) {
+        // This is 200. We need to send ACK.
+        // TODO dafei
+    }
 }
 
 int cb_send_message(osip_transaction_t* tr, osip_message_t* sip, char *host, int port, int out_socket)
@@ -955,9 +993,45 @@ void cb_transport_error(int type, osip_transaction_t* tr, int error)
     // second, cb_xixt_kill_transaction is called.
 }
 
+osip_dialog_t* search_existing_dialog(osip_message_t* sip)
+{
+    for (int i=0; i< g_dialogs.size(); i++) {
+        if (osip_dialog_match_as_uac(g_dialogs[i], sip)) {
+            return g_dialogs[i];
+        }
+        if (osip_dialog_match_as_uas(g_dialogs[i], sip)) {
+            return g_dialogs[i];
+        }
+    }
+
+    LOG_DAFEI() << "match no dialog" << std::endl;
+    return NULL;
+}
+
+void add_existing_dialog(osip_dialog_t* dialog)
+{
+    g_dialogs.push_back(dialog);
+}
+
 void cb_rcv1xx(int type, osip_transaction_t* tr, osip_message_t* sip)
 {
     LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
+    osip_dialog_t* dialog;
+    if (MSG_IS_RESPONSE_FOR(sip, "INVITE") && !MSG_TEST_CODE(sip, 100)) { // osip said between 101 and 199 to setup a dialog
+        dialog = search_existing_dialog(sip);
+        if (!dialog) {
+            int i = osip_dialog_init_as_uac(&dialog, sip);
+            if (i != 0) {
+                LOG_DAFEI() << "Failed to create a dialog" << std::endl;
+            } else {
+                add_existing_dialog(dialog);
+            }
+        } else {
+            // we match a dialog, then what ?
+            LOG_DAFEI() << "match the dialog" << std::endl;
+        }
+    }
+    // other request doesn't establish dialog.
 }
 
 void cb_rcv2xx(int type, osip_transaction_t* tr, osip_message_t* sip)
@@ -966,7 +1040,7 @@ void cb_rcv2xx(int type, osip_transaction_t* tr, osip_message_t* sip)
             << ", " << message_callback_type_to_string(type) << std::endl;
     if (MSG_IS_RESPONSE_FOR(sip, "INVITE")) {
         LOG_DAFEI() << "msg is response for INVITE" << std::endl;
-        process_rcv_2xx(tr, sip);
+        process_ict_rcv_2xx(tr, sip);
         return;
     }
 
@@ -987,7 +1061,7 @@ void cb_rcv3456xx(int type, osip_transaction_t* tr, osip_message_t* sip)
 }
 
 
-void cb_rcvreq(int type, osip_transaction_t* tr, osip_message_t* sip)
+void cb_rcvreq(int type, osip_transaction_t* transaction, osip_message_t* sip)
 {
     // char *msg;
     // size_t msgLen;
@@ -1000,28 +1074,43 @@ void cb_rcvreq(int type, osip_transaction_t* tr, osip_message_t* sip)
     //         << "tr->transactionid=" << tr->transactionid
     //         << "\nmsg:------------\n" << msg << "\n--------------" << std::endl;
 
-    LOG_DAFEI() << message_callback_type_to_string(type)  << ", tr->transactionid=" << tr->transactionid << std::endl;
+    LOG_DAFEI() << message_callback_type_to_string(type)  << ", tr->transactionid=" << transaction->transactionid << std::endl;
     switch (type) {
     case OSIP_IST_INVITE_RECEIVED:
-    //TODO should return 100 here. Let user to send 200 OK.
-    // {
-    //     osip_message_t *answer;
-    //     int r = build_response_default(&answer, NULL, 200, sip);
-    //     if (r != 0) {
-    //         osip_transaction_free(tr);
-    //         return;
-    //     }
-    //     osip_message_set_content_length(answer, "0");
+        {
+            // Let's return 180 ring here. IST will create dialog with this response
+            // ICT will create dialog when receive 180.
+            osip_message_t *answer;
+            int r = build_response_default(&answer, NULL, 180, sip);
+            if (r != 0) {
+                osip_transaction_free(transaction);
+                break;
+            }
+            osip_message_set_content_length (answer, "0");
 
-    //     osip_event_t* evt_answer = osip_new_outgoing_sipmessage(answer);
-    //     evt_answer->transactionid = tr->transactionid;
 
-    //     osip_transaction_add_event(tr, evt_answer);
-    //      wakeup_select();
-    // }
+            // create dialog here.
+            osip_dialog_t* dialog = NULL;
+            r = osip_dialog_init_as_uas(&dialog, sip, answer);
+            if (r != 0) {
+                LOG_DAFEI() << "Failed to create dialog" << std::endl;
+            } else {
+                add_existing_dialog(dialog);
+            }
+
+            // Send back.
+            osip_event_t* evt_answer = osip_new_outgoing_sipmessage (answer);
+            evt_answer->transactionid = transaction->transactionid;
+
+            r = osip_transaction_add_event(transaction, evt_answer);
+            if (r !=0) {
+                LOG_DAFEI()  << "Failed to add event" << std::endl;
+                break;
+            }
+        }
         break;
     case OSIP_NIST_CANCEL_RECEIVED:
-        process_rcv_cancel(tr, sip);
+        process_rcv_cancel(transaction, sip);
         break;
     default:
         break;

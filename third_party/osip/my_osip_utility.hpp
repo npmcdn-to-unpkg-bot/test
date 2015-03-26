@@ -36,3 +36,4 @@ std::string transaction_state_to_string(int type);
 // MESSAGE HELP FUNCTIONS
 int build_response_default (osip_message_t** dest, osip_dialog_t* dialog, int status, osip_message_t* request);
 char* build_random_number();
+int build_request_within_dialog (osip_message_t ** dest, const char *method, osip_dialog_t * dialog);
