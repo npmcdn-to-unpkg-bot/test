@@ -141,6 +141,38 @@ std::string transport_error_to_string(int type)
     return s;
 }
 
+std::string transaction_state_to_string(int type)
+{
+    std::string s;
+    switch (type) {
+    TO_STRING_ENTRY(ICT_PRE_CALLING)
+    TO_STRING_ENTRY(ICT_CALLING)
+    TO_STRING_ENTRY(ICT_PROCEEDING)
+    TO_STRING_ENTRY(ICT_COMPLETED)
+    TO_STRING_ENTRY(ICT_TERMINATED)
+    TO_STRING_ENTRY(IST_PRE_PROCEEDING)
+    TO_STRING_ENTRY(IST_PROCEEDING)
+    TO_STRING_ENTRY(IST_COMPLETED)
+    TO_STRING_ENTRY(IST_CONFIRMED)
+    TO_STRING_ENTRY(IST_TERMINATED)
+    TO_STRING_ENTRY(NICT_PRE_TRYING)
+    TO_STRING_ENTRY(NICT_TRYING)
+    TO_STRING_ENTRY(NICT_PROCEEDING)
+    TO_STRING_ENTRY(NICT_COMPLETED)
+    TO_STRING_ENTRY(NICT_TERMINATED)
+    TO_STRING_ENTRY(NIST_PRE_TRYING)
+    TO_STRING_ENTRY(NIST_TRYING)
+    TO_STRING_ENTRY(NIST_PROCEEDING)
+    TO_STRING_ENTRY(NIST_COMPLETED)
+    TO_STRING_ENTRY(NIST_TERMINATED)
+    default:
+        std::cout << "wrong type:" << type << std::endl;
+        break;
+    }
+
+    return s;
+}
+
 char* build_random_number()
 {
   char *tmp = (char *)osip_malloc(33);

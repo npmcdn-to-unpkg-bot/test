@@ -53,10 +53,7 @@ void cb_transport_error(int type, osip_transaction_t* tr, int error);
 
 void cb_rcv1xx(int type, osip_transaction_t* tr, osip_message_t* sip);
 void cb_rcv2xx(int type, osip_transaction_t* tr, osip_message_t* sip);
-void cb_rcv3xx(int type, osip_transaction_t* tr, osip_message_t* sip);
-void cb_rcv4xx(int type, osip_transaction_t* tr, osip_message_t* sip);
-void cb_rcv5xx(int type, osip_transaction_t* tr, osip_message_t* sip);
-void cb_rcv6xx(int type, osip_transaction_t* tr, osip_message_t* sip);
+void cb_rcv3456xx(int type, osip_transaction_t* tr, osip_message_t* sip);
 
 void cb_rcvreq(int type, osip_transaction_t* tr, osip_message_t* sip);
 
@@ -118,17 +115,17 @@ int main(int argc, char** argv){
     // callback called when a received answer has been accepted by the transaction.
     osip_set_message_callback(osip ,OSIP_ICT_STATUS_1XX_RECEIVED, &cb_rcv1xx);
     osip_set_message_callback(osip ,OSIP_ICT_STATUS_2XX_RECEIVED, &cb_rcv2xx);
-    osip_set_message_callback(osip ,OSIP_ICT_STATUS_3XX_RECEIVED, &cb_rcv3xx);
-    osip_set_message_callback(osip ,OSIP_ICT_STATUS_4XX_RECEIVED, &cb_rcv4xx);
-    osip_set_message_callback(osip ,OSIP_ICT_STATUS_5XX_RECEIVED, &cb_rcv5xx);
-    osip_set_message_callback(osip ,OSIP_ICT_STATUS_6XX_RECEIVED, &cb_rcv6xx);
+    osip_set_message_callback(osip ,OSIP_ICT_STATUS_3XX_RECEIVED, &cb_rcv3456xx);
+    osip_set_message_callback(osip ,OSIP_ICT_STATUS_4XX_RECEIVED, &cb_rcv3456xx);
+    osip_set_message_callback(osip ,OSIP_ICT_STATUS_5XX_RECEIVED, &cb_rcv3456xx);
+    osip_set_message_callback(osip ,OSIP_ICT_STATUS_6XX_RECEIVED, &cb_rcv3456xx);
     // callback called when a received answer has been accepted by the transaction.
     osip_set_message_callback(osip ,OSIP_NICT_STATUS_1XX_RECEIVED, &cb_rcv1xx);
     osip_set_message_callback(osip ,OSIP_NICT_STATUS_2XX_RECEIVED, &cb_rcv2xx);
-    osip_set_message_callback(osip ,OSIP_NICT_STATUS_3XX_RECEIVED, &cb_rcv3xx);
-    osip_set_message_callback(osip ,OSIP_NICT_STATUS_4XX_RECEIVED, &cb_rcv4xx);
-    osip_set_message_callback(osip ,OSIP_NICT_STATUS_5XX_RECEIVED, &cb_rcv5xx);
-    osip_set_message_callback(osip ,OSIP_NICT_STATUS_6XX_RECEIVED, &cb_rcv6xx);
+    osip_set_message_callback(osip ,OSIP_NICT_STATUS_3XX_RECEIVED, &cb_rcv3456xx);
+    osip_set_message_callback(osip ,OSIP_NICT_STATUS_4XX_RECEIVED, &cb_rcv3456xx);
+    osip_set_message_callback(osip ,OSIP_NICT_STATUS_5XX_RECEIVED, &cb_rcv3456xx);
+    osip_set_message_callback(osip ,OSIP_NICT_STATUS_6XX_RECEIVED, &cb_rcv3456xx);
     // callback called when a received request has been accepted by the transaction.
     osip_set_message_callback(osip ,OSIP_IST_INVITE_RECEIVED,       &cb_rcvreq);
     osip_set_message_callback(osip ,OSIP_IST_INVITE_RECEIVED_AGAIN, &cb_rcvreq);
@@ -188,6 +185,11 @@ int main(int argc, char** argv){
             }
             break;
         }
+
+        if (g_inc_transaction) {
+            LOG_DAFEI() << "execute Before report IST status" << std::endl
+                    << "         state:" << transaction_state_to_string(g_inc_transaction->state) << std::endl;
+        }
         
         osip_ict_execute(osip);
         osip_ist_execute(osip);
@@ -197,6 +199,11 @@ int main(int argc, char** argv){
         osip_timers_ist_execute(osip);
         osip_timers_nict_execute(osip);
         osip_timers_nist_execute(osip);
+
+        if (g_inc_transaction) {
+            LOG_DAFEI() << "execute After report IST status" << std::endl
+                    << "state:" << transaction_state_to_string(g_inc_transaction->state) << std::endl;
+        }
 
         // Get minimal timeout to wake up us. Put them behind execute is the best way.
         // This is perfect to handle Real Time.
@@ -974,25 +981,11 @@ void cb_rcv2xx(int type, osip_transaction_t* tr, osip_message_t* sip)
 
 }
 
-void cb_rcv3xx(int type, osip_transaction_t* tr, osip_message_t* sip)
+void cb_rcv3456xx(int type, osip_transaction_t* tr, osip_message_t* sip)
 {
     LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
 }
 
-void cb_rcv4xx(int type, osip_transaction_t* tr, osip_message_t* sip)
-{
-    LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
-}
-
-void cb_rcv5xx(int type, osip_transaction_t* tr, osip_message_t* sip)
-{
-    LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
-}
-
-void cb_rcv6xx(int type, osip_transaction_t* tr, osip_message_t* sip)
-{
-    LOG_DAFEI() << "receive " << std::setfill('0') << std::setw(3) << sip->status_code << std::endl;
-}
 
 void cb_rcvreq(int type, osip_transaction_t* tr, osip_message_t* sip)
 {

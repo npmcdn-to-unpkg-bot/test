@@ -31,6 +31,7 @@ std::string kill_transaction_to_string(int type);
 std::string transport_error_to_string(int type);
 std::string rcv_request_to_string(int type);
 std::string message_callback_type_to_string(int type);
+std::string transaction_state_to_string(int type);
 
 // MESSAGE HELP FUNCTIONS
 int build_response_default (osip_message_t** dest, osip_dialog_t* dialog, int status, osip_message_t* request);
