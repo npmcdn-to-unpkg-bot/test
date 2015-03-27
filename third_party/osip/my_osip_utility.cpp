@@ -1,5 +1,7 @@
 #include "my_osip_utility.hpp"
 
+static int dialog_fill_route_set (osip_dialog_t * dialog, osip_message_t * request);
+
 std::string event_type_to_string(int type) {
     std::string s;
     switch(type) {
@@ -319,6 +321,7 @@ int build_request_within_dialog (osip_message_t ** dest, const char *method, osi
 
 
   // TODO dafei this is for req_uri FIX IT
+  // This is just a workaround.
     osip_uri_init(&(request->req_uri));
     if ((i = osip_uri_parse(request->req_uri, "sip:10.10.10.1")) != 0) {
         std::cout << "osip uri parse failed" << std::endl;
@@ -327,7 +330,7 @@ int build_request_within_dialog (osip_message_t ** dest, const char *method, osi
     }
 
   // TODO dafei we use no contact and route.
-  /* and the request uri???? */
+  // /* and the request uri???? */
   // if (osip_list_eol (&dialog->route_set, 0)) {
   //   /* The UAC must put the remote target URI (to field) in the req_uri */
   //   i = osip_uri_clone (dialog->remote_contact_uri->url, &(request->req_uri));
@@ -414,11 +417,17 @@ int build_request_within_dialog (osip_message_t ** dest, const char *method, osi
   //   return i;
   // }
 
+  char tmp[200] = { 0 };
+  snprintf (tmp, 200, "SIP/2.0/%s %s:%s;branch=z9hG4bK%u", "UDP", "10.10.10.3", "5060", osip_build_random_number());
+  osip_message_set_via(request, tmp);
+
   /* add specific headers for each kind of request... */
   if ((0 != strcmp ("BYE", method)) && (0 != strcmp ("CANCEL", method)))
   {
     // TODO dafei why we need contact for bye???
+    // Because it will crash when init transaction.
     // _eXosip_dialog_add_contact (excontext, request);
+    osip_message_set_contact(request, "<sip:bob@192.0.2.4>");
   }
 
   if (0 == strcmp ("NOTIFY", method)) {
@@ -434,5 +443,84 @@ int build_request_within_dialog (osip_message_t ** dest, const char *method, osi
   osip_message_set_user_agent (request, osip_strdup("xiaoming"));
   /*  else if ... */
   *dest = request;
+  return OSIP_SUCCESS;
+}
+
+
+int dialog_fill_route_set (osip_dialog_t * dialog, osip_message_t * request)
+{
+  /* if the pre-existing route set contains a "lr" (compliance
+     with bis-08) then the req_uri should contains the remote target
+     URI */
+  int i;
+  int pos = 0;
+  osip_uri_param_t *lr_param;
+  osip_route_t *route;
+  char *last_route;
+
+  /* AMD bug: fixed 17/06/2002 */
+
+  route = (osip_route_t *) osip_list_get (&dialog->route_set, 0);
+
+  osip_uri_uparam_get_byname (route->url, "lr", &lr_param);
+  if (lr_param != NULL) {       /* the remote target URI is the req_uri! */
+    i = osip_uri_clone (dialog->remote_contact_uri->url, &(request->req_uri));
+    if (i != 0)
+      return i;
+    /* "[request] MUST includes a Route header field containing
+       the route set values in order." */
+    /* AMD bug: fixed 17/06/2002 */
+    pos = 0;                    /* first element is at index 0 */
+    while (!osip_list_eol (&dialog->route_set, pos)) {
+      osip_route_t *route2;
+
+      route = (osip_route_t*)osip_list_get (&dialog->route_set, pos);
+      i = osip_route_clone (route, &route2);
+      if (i != 0)
+        return i;
+      osip_list_add (&request->routes, route2, -1);
+      pos++;
+    }
+    return OSIP_SUCCESS;
+  }
+
+  /* if the first URI of route set does not contain "lr", the req_uri
+     is set to the first uri of route set */
+
+
+  i = osip_uri_clone (route->url, &(request->req_uri));
+  if (i != 0)
+    return i;
+  /* add the route set */
+  /* "The UAC MUST add a route header field containing
+     the remainder of the route set values in order. */
+  pos = 0;                      /* yes it is */
+
+  while (!osip_list_eol (&dialog->route_set, pos)) {    /* not the first one in the list */
+    osip_route_t *route2;
+
+    route = (osip_route_t*)osip_list_get (&dialog->route_set, pos);
+    i = osip_route_clone (route, &route2);
+    if (i != 0)
+      return i;
+    if (!osip_list_eol (&dialog->route_set, pos + 1))
+      osip_list_add (&request->routes, route2, -1);
+    else
+      osip_route_free (route2);
+    pos++;
+  }
+
+  /* The UAC MUST then place the remote target URI into
+     the route header field as the last value */
+  i = osip_uri_to_str (dialog->remote_contact_uri->url, &last_route);
+  if (i != 0)
+    return i;
+  i = osip_message_set_route (request, last_route);
+  osip_free (last_route);
+  if (i != 0) {
+    return i;
+  }
+
+  /* route header and req_uri set */
   return OSIP_SUCCESS;
 }

@@ -62,6 +62,7 @@ int handle_incoming_message(const char* buf, size_t len);
 void process_new_request(osip_t* osip, osip_event_t* evt);
 void process_rcv_cancel(osip_transaction_t* tran, osip_message_t* sip);
 void process_ict_rcv_2xx(osip_transaction_t* tr, osip_message_t* sip);
+void process_bye(osip_transaction_t* tran, osip_message_t* sip);
 
 int send_invite();
 osip_dialog_t* search_existing_dialog(osip_message_t* sip);
@@ -658,6 +659,24 @@ void send_bye()
         free(msg);
     }
 
+    // Create transation
+    osip_transaction_t* transaction = NULL;
+    int r = osip_transaction_init(&transaction, NICT, g_osip, bye);
+    if (r != 0) {
+        LOG_DAFEI() << "transacation init failed" << std::endl;
+        return;
+    }
+
+    osip_event_t* sipevent = osip_new_outgoing_sipmessage (bye);
+    sipevent->transactionid = transaction->transactionid;
+
+    r = osip_transaction_add_event (transaction, sipevent);
+    if (r !=0) {
+        LOG_DAFEI()  << "Failed to add event" << std::endl;
+        return;
+    }
+
+    wakeup_select();
 
 }
 
@@ -672,7 +691,10 @@ void send_ok()
     // re-send 200 is TU's responsibilty, not transport. Unlike others.
 
     osip_message_t *answer;
-    int r = build_response_default(&answer, NULL, 200, g_inc_transaction->orig_request);
+    // We build 200 use dialog's to_tag which is created when we send 180.
+    osip_dialog_t* dialog = g_dialogs[0];
+    assert(dialog);
+    int r = build_response_default(&answer, dialog, 200, g_inc_transaction->orig_request);
     if (r != 0) {
         LOG_DAFEI() << "Failed to build_response_default" << std::endl;
         return;
@@ -683,6 +705,53 @@ void send_ok()
     evt_answer->transactionid = g_inc_transaction->transactionid;
 
     osip_transaction_add_event(g_inc_transaction, evt_answer);
+
+    wakeup_select();
+}
+
+void send_ack(osip_transaction_t* transaction, osip_message_t* sip)
+{
+    osip_dialog_t* dialog = NULL;
+    int index = 0;
+    for (; index < g_dialogs.size(); index++) {
+        if (0 == osip_dialog_match_as_uac(g_dialogs[index], sip)) {
+            dialog = g_dialogs[index];
+            break;
+        }
+    }
+
+    if (!dialog) {
+        LOG_DAFEI() << "didn't find the dialog" << std::endl;
+        // Should return 48? to tell remote that we didn't find one.
+        return;
+    }
+
+    osip_message_t* answer;
+    int i = build_request_within_dialog(&answer, "ACK", dialog);
+    if (i !=0) {
+        LOG_DAFEI() << "Failed to create ACK" << std::endl;
+        return;
+    }
+
+    char *msg;
+    size_t msgLen;
+    i = osip_message_to_str(answer, &msg, &msgLen);
+    if (i != 0 ) {
+        LOG_DAFEI() << "Failed to to str" << std::endl;
+    } else {
+        LOG_DAFEI() << "answer message is :\n"
+            << std::string(msg, msgLen) << std::endl;
+        free(msg);
+    }
+
+    osip_event_t* sipevent = osip_new_outgoing_sipmessage (answer);
+    sipevent->transactionid = transaction->transactionid;
+
+    i = osip_transaction_add_event (transaction, sipevent);
+    if (i !=0) {
+        LOG_DAFEI()  << "Failed to add event" << std::endl;
+        return;
+    }
 
     wakeup_select();
 }
@@ -789,7 +858,7 @@ void process_new_request(osip_t* osip, osip_event_t* evt)
             LOG_DAFEI()  << "Failed to add event" << std::endl;
             return;
         }
-        
+
         sleep(1);
         // TODO dafei in order to received the message one bye one.
         // or 100 and 180 will received the same time in TCP.
@@ -916,12 +985,60 @@ void process_rcv_cancel(osip_transaction_t* tr, osip_message_t* sip)
     wakeup_select();
 }
 
+void process_bye(osip_transaction_t* transaction, osip_message_t* sip)
+{
+    // First to match the dialog
+    osip_dialog_t* dialog = NULL;
+    int index = 0;
+    for (; index < g_dialogs.size(); index++) {
+        if (0 == osip_dialog_match_as_uas(g_dialogs[index], sip)) {
+            dialog = g_dialogs[index];
+            break;
+        }
+    }
+
+    if (!dialog) {
+        LOG_DAFEI() << "No match dialog for this bye" << std::endl;
+        // Should build a 48? to tell we didn't found.
+        return;
+    }
+
+    // Check if we have an old BYE transaction if have, return
+
+    // 
+    osip_message_t* answer;
+    int r = build_response_default(&answer, dialog, 200, sip);
+    if (r != 0 ) {
+        LOG_DAFEI() << "build answer failed" << std::endl;
+        return;
+    }
+
+    osip_message_set_content_length(answer, "0");
+
+    osip_event_t* evt_answer = osip_new_outgoing_sipmessage (answer);
+    evt_answer->transactionid = transaction->transactionid;
+
+    r = osip_transaction_add_event (transaction, evt_answer);
+    if (r != 0) {
+        LOG_DAFEI() << "Failed to add event" << std::endl;
+        osip_message_free(answer);
+        return;
+    }
+
+    // Release the dialog now.
+    osip_dialog_free(dialog);
+    g_dialogs.erase(g_dialogs.begin() + index);
+
+    wakeup_select();
+}
+
 void process_ict_rcv_2xx(osip_transaction_t* tr, osip_message_t* sip)
 {
     // This handles ICT receiving 2xx
     if (MSG_TEST_CODE(sip, 200)) {
         // This is 200. We need to send ACK.
         // TODO dafei
+        send_ack(tr, sip);
     }
 }
 
@@ -1112,6 +1229,8 @@ void cb_rcvreq(int type, osip_transaction_t* transaction, osip_message_t* sip)
     case OSIP_NIST_CANCEL_RECEIVED:
         process_rcv_cancel(transaction, sip);
         break;
+    case OSIP_NIST_BYE_RECEIVED:
+        process_bye(transaction, sip);
     default:
         break;
     }
