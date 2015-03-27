@@ -1069,6 +1069,7 @@ int cb_send_message(osip_transaction_t* tr, osip_message_t* sip, char *host, int
     }
 
     int r = write(g_send_fd, msg, msgLen);
+    free(msg);
     if (r == -1) {
         return -1;
     }
