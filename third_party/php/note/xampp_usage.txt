@@ -7,4 +7,17 @@
 2. 多站点 多虚拟主机
 	打开httpd.conf文件，搜索<IfModule alias_module> 节点
 
+3. 开启伪静态
+	去掉注释
+	LoadModule rewrite_module .....
+	然后,配置文件里
+	<Directory "D:\dev\repo\test\third_party\php\elephant\web-elephant">
+	...
+    AllowOverride All  // 设置为All
+    ...
+	</Directory>
+
+
+	设置 .htaccess 文件的规则
+
 	
