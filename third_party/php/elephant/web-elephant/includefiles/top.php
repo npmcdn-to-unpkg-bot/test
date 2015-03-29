@@ -1,5 +1,5 @@
 <?php
- include 'config.php';//加载全站配置文件
+ include "conf.php"; //加载全站配置文件
 ?>
 <html>
  <head>

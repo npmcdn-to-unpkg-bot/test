@@ -4,3 +4,8 @@
    $b = 3;
    echo $a.$b     aaaa3
  
+ 2. 网页参数
+    $_GET
+    $_POST
+    Isset的用法
+ 
