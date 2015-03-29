@@ -9,10 +9,26 @@
 	localhost/index.php?id=3
  	获取自己的路径 /index.php ,注意带着/ ,而且忽略id什么的 
 
- 	
+
  2. 网页参数
     #) $_GET
     	$get_id = $_GET["id"]
 
     #) $_POST
     #) Isset的用法
+
+3. class 类名 {
+		private $变量
+		function 类名(); // 构造函数 或者__contruct()
+	}
+
+	内部: $this->变量名
+	外部: $u = new user(); echo $u->username;
+
+
+ 	了解php很强大的魔力函数
+ 	__get
+ 	__set
+ 	__cal
+ 4. debug
+ 	var_export($user->userinfo); 输出变量所有的值,对数组很有效

@@ -16,6 +16,22 @@
  <div>
   <a href="/">首页</a>  |  <a href="/news">新闻</a> |  <a href="/reg">用户注册</a>
  
+ <span style="color: green;">
+ <?php include "module/webusers.php"; 
+ 
+	echo webuser::getCurrentUser();
+	
+// 	$user = new webuser();
+//	$user->userName = "大飞";
+//	$user->userAge = 18;
+//	$user->userDisplayName = "Mrdafei";
+//	$user->userPwd = "123";
+//	
+//	var_export($user->userinfo);
+//	$user->add();
+ ?>
+ </span>
+ <a href="#">安全退出</a>
  </div>
  
  <?php func_loadTpl(); //加载模板 ?>
