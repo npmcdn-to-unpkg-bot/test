@@ -3,9 +3,16 @@
    $a = "aaaa";
    $b = 3;
    echo $a.$b     aaaa3
- 
+
+1.1 
+	_SERVER["PHP_SELF"]
+	localhost/index.php?id=3
+ 	获取自己的路径 /index.php ,注意带着/ ,而且忽略id什么的 
+
+ 	
  2. 网页参数
-    $_GET
-    $_POST
-    Isset的用法
- 
+    #) $_GET
+    	$get_id = $_GET["id"]
+
+    #) $_POST
+    #) Isset的用法
