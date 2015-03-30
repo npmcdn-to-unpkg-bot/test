@@ -34,3 +34,5 @@
  4. debug
  	var_export($user->userinfo); 输出变量所有的值,对数组很有效
 
+ 5. 第7讲是讲的CSS,非常好
+

@@ -1,5 +1,5 @@
 <form method="post"> <!--默认是get 所有method=post一定要写 -->
-<table class="mytable">
+<table class="mytable regtable">
  <tr>
   <th colspan="2">用户注册</th>
  </tr>

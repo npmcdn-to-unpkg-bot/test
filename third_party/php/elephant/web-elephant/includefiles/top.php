@@ -6,7 +6,7 @@
  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?php echo $config_defaulttitle ?></title>  
   <style>
- *{margin:0 auto;text-align:center; font-size: 14px;}
+ *{margin:0 auto;text-align:center; font-size: 14px; font-family: "微软雅黑";}
  body {background: url(../images/bg.jpg);}
  .container {background-color: #474747; height: 130px; margin: 0 auto; color: #fff;}
  .container a{color: #fff; text-decoration: none;}
