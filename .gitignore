@@ -2,3 +2,6 @@ staging
 a.out
 *.o
 *.log
+*.png
+*.jpg
+*.gif
