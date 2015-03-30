@@ -24,7 +24,7 @@
  
  .mytable{margin:30px auto;}
  input{text-align:left;text-indent: 3px;}
- .text{width:150px;height: 22px;border:0;border-bottom:solid 1px #000}
+ .1text{width:150px;height: 22px;border:0;border-bottom:solid 1px #000}
 </style>
  </head>
  <body>
