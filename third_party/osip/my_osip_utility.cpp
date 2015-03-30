@@ -323,10 +323,12 @@ int build_request_within_dialog (osip_message_t ** dest, const char *method, osi
   // TODO dafei this is for req_uri FIX IT
   // This is just a workaround.
     osip_uri_init(&(request->req_uri));
-    if ((i = osip_uri_parse(request->req_uri, "sip:10.10.10.1")) != 0) {
-        std::cout << "osip uri parse failed" << std::endl;
+    if ((i = osip_uri_parse(request->req_uri, "<sip:thisi@fake.requri>")) != 0) {
+        std::cout << "dafei osip uri parse failed" << std::endl;
         osip_message_free(request);
         return -1;
+    } else {
+        LOG_DAFEI() << "dafei req_uri parse OK" << std::endl;
     }
 
   // TODO dafei we use no contact and route.
