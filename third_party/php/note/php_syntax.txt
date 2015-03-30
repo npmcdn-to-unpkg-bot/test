@@ -30,5 +30,7 @@
  	__get
  	__set
  	__cal
+
  4. debug
  	var_export($user->userinfo); 输出变量所有的值,对数组很有效
+
