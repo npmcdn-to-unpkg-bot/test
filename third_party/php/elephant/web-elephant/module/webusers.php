@@ -7,6 +7,7 @@ class webuser // 用户处理类
 //	public $userDisplayName;
 	
 	public $userinfo = array(); // 用户属性数组,初始化
+	public $error_code = "000";
 	function webuser()
 	{
 		echo "用户类已经初始化";	
@@ -33,12 +34,16 @@ class webuser // 用户处理类
 	
 	function __call($method, $args) // 默认执行函数,如果没找到对应名字的函数,对调用这个
 	{
-		if ($method == "add") {
+		if ($method == "add") { // 用户注册
 			if ($this->userName == "") {
 				echo "用户名不能为空";
 			} else {
 				echo "用户新增陈工";
 			}
+		} else if ($method == "login") {
+			
+		} else if ($method == "logout") {
+			
 		}
 	}
 	
@@ -50,6 +55,29 @@ class webuser // 用户处理类
 	function login($uname, $upwd)
 	{
 		
+	}
+	
+	private function addUser($userName, $userEmail, $userPwd1, $userPwd2)
+	{
+		if ($userPwd1 != $userPwd2) {
+			$this->error_code = "001";
+			return false;
+		}
+		
+		if ($userName == "" || $userEmail == "") {
+			$this->error_code = "002";
+			return false;
+		}
+		
+		if(isRepeat($userName, $userEmail)) {
+			$this->error_code = "003";
+			return false;
+		}
+	}
+	
+	private function isRepeat($userName, $userEmail)
+	{
+		return true;	
 	}
 	
 	// 传统方法
