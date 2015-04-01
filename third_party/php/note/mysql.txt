@@ -21,7 +21,7 @@ LongText 		<4294967295
 ------------------------------------------------------
 简单的qsl语句
 
-select from
-insert into
+select username, userpwd, useremail, addtime from users
+insert into users() values()
 delete from
 update set

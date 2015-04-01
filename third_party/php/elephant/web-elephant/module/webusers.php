@@ -46,6 +46,7 @@ class webuser // 用户处理类
 	{
 		if ($method == "add") { // 用户注册
 			if ($this->validateArgs($args, 4)) {
+				$this->addUser($args[0], $args[1], $args[2], $args[3]);
 			}
 		} else if ($method == "logout") {
 			
