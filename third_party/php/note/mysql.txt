@@ -1,0 +1,27 @@
+
+1. 类型
+int 		(-2147483648 ~  2147483647) 常用
+bigint		(特别大)	淘宝级别的用
+smallint	(-32768 ~ 32767)
+tinyint		(0, 255)	年龄,班级可以
+
+2. 日期
+Datatime:  YYYY-MM-DD HH:MM:SS
+timestamp  和datatime类似,但是在于 (1970 ~2037年之间) 而且受时区影响
+
+char  	固定长度
+Varchar	可变长度
+
+文本
+tinytext		<255
+text 			<65535
+MediumText 		<16777215
+LongText 		<4294967295
+
+------------------------------------------------------
+简单的qsl语句
+
+select from
+insert into
+delete from
+update set

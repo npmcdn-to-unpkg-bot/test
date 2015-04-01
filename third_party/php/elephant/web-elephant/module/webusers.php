@@ -32,16 +32,21 @@ class webuser // 用户处理类
 		return "";
 	}
 	
+	function validateArgs($args, $num)
+	{
+		if ($args && is_array($args) && count($args) == $num) {
+			return true;
+		} else {
+			$this->error_code = "008";
+			return false;
+		}
+	}
+	
 	function __call($method, $args) // 默认执行函数,如果没找到对应名字的函数,对调用这个
 	{
 		if ($method == "add") { // 用户注册
-			if ($this->userName == "") {
-				echo "用户名不能为空";
-			} else {
-				echo "用户新增陈工";
+			if ($this->validateArgs($args, 4)) {
 			}
-		} else if ($method == "login") {
-			
 		} else if ($method == "logout") {
 			
 		}
@@ -73,6 +78,14 @@ class webuser // 用户处理类
 			$this->error_code = "003";
 			return false;
 		}
+		
+		$ret = DataBase::addData($userName, $userEmail, $userPwd1, $userPwd2);
+		if ($ret && intval($ret) > 0) {
+			return true;
+		}
+		
+		$this->error_code = "009";
+		return false;
 	}
 	
 	private function isRepeat($userName, $userEmail)
