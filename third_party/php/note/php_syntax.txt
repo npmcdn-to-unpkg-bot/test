@@ -4,6 +4,21 @@
    $b = 3;
    echo $a.$b     aaaa3
 
+1.2 Array
+    array('k1'=>'v1', 'k2' => 'v2' ....)
+    array('a', 'b', 'c') == array(0=>'a', 1=>'b', 2=>'c')
+
+    var_export() // to see an array when debug
+
+    foreach($array as $entry)
+      $entry['username']
+    foreach($array as $key => $value)
+
+
+    array[] = object; // == push back
+    array_push()  // push back
+    array_unshift() // push font
+
 1.1 
 	_SERVER["PHP_SELF"]
 	localhost/index.php?id=3
