@@ -25,3 +25,43 @@ select username, userpwd, useremail, addtime from users
 insert into users() values()
 delete from
 update set
+
+--------------------------------------
+外键
+　　  RESTICT 必须子表要删干净才行
+    CASCADE 关联删除，删除主表的数据会把字表的数据也删掉
+    SET_NULL 删除主表时候，对应字表的外键的值会设置为NULL
+    
+------------------------------------------------------
+
+存储过程
+很常用
+对于多表增删改　事务处理上常用
+努力使用IN参数
+调用方法　　call name(arg1, arg2 ..)
+
+-----------------------------------------------------
+
+性能:
+1. count(*)  count(colname)
+   在有where条件下count(*)更快
+2. where条件的字段要建立索引 Hash 和 Btree
+   Hash 字段重复率低情况下使用
+　　　Btree 数据量大，重复度高的情况下
+
+---------------------------------------------------
+IN _uname char(30), IN pwd char(20)
+BEGIN
+    select count(*) into @getcount from users where username = _uname and userpwd = pwd;
+    
+    if @getcount = 0 then
+        select -1;
+    elseif @getcount = 1
+        select 1;
+    else
+        select -2;
+    end if;
+END
+
+----
+call userLogin('shenyi', 123);
