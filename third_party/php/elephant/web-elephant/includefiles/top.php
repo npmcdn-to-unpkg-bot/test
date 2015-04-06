@@ -52,9 +52,9 @@
    
    <div class="userinfo"> <span>
   <?php
-    include "module/webuser.php"; 
+    require_once("module/webuser.php"); 
     echo webuser::getCurrentUser(); //获取当前登录用户名
-    
+//  
   /*  $user=new webuser(); //实例化类
     
     //用户注册信息 作为属性值传入到 用户类
@@ -65,7 +65,13 @@
  
     // $user->add();//新增用户*/
   
-  ?></span> <a href="#">安全退出</a></div>
+  ?></span> 
+  <?php if(webuser::userIsLogged()): ?>
+  <a href="/logout">安全退出</a>
+  <?php else: ?>
+  <a href="/login">立即登录</a>
+<?php endif; ?>  
+  </div>
   
   
    <div class="menu"><a href="/">首页</a>  |  <a href="/news">新闻</a> |  <a href="/reg">用户注册</a> 

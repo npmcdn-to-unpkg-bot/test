@@ -77,16 +77,44 @@ class webuser //用户处理类
         else if($methodName=="login") //用户登录
         {
             //使用用户名和邮箱均可登录
+            if ($this->validateArgs($args, 2)) {
+            	$this->userLogin($args[0], $args[1]);
+            }
         }
         else if($methodName=="logout") //注销
         {
-            
+            $this->userLogout();
         }
     }
+	
+	private function userLogin($username, $userpwd)
+	{
+		if (trim($username) == "")
+			return;
+		setcookie("mywebuser_shenyi", $username, time()+200, "/"); // path很重要,不填写只会在当前文件夹生效
+	}
+	
+	static public function userIsLogged()
+	{
+		if (isset($_COOKIE["mywebuser_shenyi"]) && $_COOKIE["mywebuser_shenyi"] != "") { // cookie 是否存在
+			return true;
+		}
+		return false;
+	}
+	
     static public function getCurrentUser() //获取当前登录用户
     {
-        echo "欢迎回来：沈逸";
+        if (self::userIsLogged()) {
+        	return $_COOKIE["mywebuser_shenyi"];
+        } else {
+        	return "guest";
+        }
+		
     }
+	
+	private function userLogout() {
+		setcookie("mywebuser_shenyi", "", time() - 3600, "/"); // path很重要,不填写只会在当前文件夹生效
+	}
     
     private function addUser($userName,$userEmail,$userPwd1,$userPwd2) //往数据库插入用户
     {
