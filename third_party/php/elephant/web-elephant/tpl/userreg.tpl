@@ -8,6 +8,7 @@
  .regtable .righttd{text-align: left;width:75%}
  .regtable .text{width:58%;border: solid 1px #ddd;height:34px;line-height:34px;background:#f5f5f5;border-radius:5px;}
  
+ #cmdReg {width:200px;height:40px;text-align:center;color:#fff;border:0;background:#e96481;border-radius:5px;}
  #cmdLogin{width:200px;height:40px;text-align:center;color:#fff;border:0;background:#e96481;border-radius:5px;}
 </style>
 <table class="mytable regtable">
