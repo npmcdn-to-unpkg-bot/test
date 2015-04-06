@@ -1,6 +1,6 @@
 <?php
-  include "functions.php";//加载通用函数库
-  include "lib/database.php";
+  require "functions.php";//加载通用函数库
+  require "lib/database.php";
   
   $config_defaulttitle='_程序员在囧途';//网站的默认标题(title)
   $get_pagepath=$_SERVER["PHP_SELF"];//获取当前访问页 *即将废止
