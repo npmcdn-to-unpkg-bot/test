@@ -4,6 +4,19 @@
    $b = 3;
    echo $a.$b     aaaa3
 
+1.1 全局变量
+  谨慎使用,但要巧用,全局变量到这里就行了,不要再多用了
+
+  $a = "aaa";
+  function getMe() {
+    global $a;
+    echo $a; // 这里会输出全局变量的值
+  }
+
+1.1 include , require
+    include 出错了也会继续执行下去
+    require 出错了就断开了. 适合通用方法必须要加载执行成功的代码 
+
 1.2 Array
     array('k1'=>'v1', 'k2' => 'v2' ....)
     array('a', 'b', 'c') == array(0=>'a', 1=>'b', 2=>'c')
@@ -18,6 +31,13 @@
     array[] = object; // == push back
     array_push()  // push back
     array_unshift() // push font
+
+
+1.3 For循环
+   for ($i=0; $i<=xx; $i++)
+   foreach ($array as $entry)
+   foreach ($array as $key => $value)
+   while (一个表达式)
 
 1.1 
 	_SERVER["PHP_SELF"]
@@ -45,6 +65,45 @@
  	__get
  	__set
  	__cal
+
+3. 接口 interface
+
+  interface Boss {
+    public function getMoney();
+    public function working();
+    public function fuckOut();
+  }
+
+
+ 抽象类 abstract
+  abstract class Manager implements Boss {
+    public function getMoney()
+    {
+
+    }
+
+    absctract function working();
+
+    public function fuckOut()
+    {
+
+    }
+  }
+
+  普通类
+  class Coder extends Manager {
+    public function getMoney() {
+
+    }
+
+    public function working() {
+
+    }
+
+    public function fuckOUt() {
+
+    }
+  }
 
  4. debug
  	var_export($user->userinfo); 输出变量所有的值,对数组很有效
