@@ -1,6 +1,5 @@
 <?php
   //建立一些通用函数，来给各个页面调用
-  
    function func_loadTpl()
    {
     $tpl_root="tpl/";
@@ -45,5 +44,14 @@
      
    }
 
+?>
 
+<?php
+//新闻函数
+ function the_news($params="")
+ {
+    $getNews=new webnews();
+    $result=$getNews->loadNews("","",1,20);
+    return $result;
+ }
 ?>

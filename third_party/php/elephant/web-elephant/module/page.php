@@ -1,8 +1,17 @@
 <?php
-    function get_friendLinks()
+    function get_frindLinks()
     {
-    	global $myDB;
-        return $myDB->execForArray("select * from friendlinks");
+        //获取友情链接
+        
+        //第一种写法
+        //$db=new myDataBase();
+        //return $db->execForArray("select * from frindlinks");
+        
+        //第二种写法
+         global $myDB;
+         return $myDB->execForArray("select * from frindlinks");
+        
+      
     }
 
 ?>
