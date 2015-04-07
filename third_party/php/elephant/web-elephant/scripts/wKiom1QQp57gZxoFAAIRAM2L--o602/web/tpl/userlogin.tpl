@@ -1,21 +1,24 @@
-<script>
-	$(document).ready(function(){
-		$("#cmdLogin").css("display", "inline-block");
-		
-		$("#cmdLogin").click(function(){
-		if (isBlank("txtUserName", "red")) {
-			alert("用户名不能为空");
-			return false; // 阻止了submit行为
-		}
-		
-		if (isBlank("txtUserPwd", "blue")) {
-			alert("密码不能为空");
-			return false;
-		}
-	})
-	})
-</script>
-
+ <script>
+  $(document).ready(function(){
+    //页面加载完成后 执行以下代码
+    //alert($(".text").length);
+    $("#cmdLogin").css("display","inline-block");
+    $("#cmdLogin").click(function(){
+    if(isBlank("txtUserName","red"))
+    {
+        alert("用户名不能为空");
+        return false;//阻止了 submit行为
+    }
+   
+   if(isBlank("txtUserPwd","blue"))
+    {
+        alert("密码不能为空");
+        return false;//阻止了 submit行为
+    }   
+  })
+  })
+ 
+ </script>
 <form method="post"> <!--默认是get 所有method=post一定要写 -->
 <style>
  .regtable{width:600px;background:#fff;border-radius:5px;padding-top:30px;padding-bottom:100px}
@@ -31,26 +34,30 @@
 <table class="mytable regtable">
  <tr>
  <th></th>
-  <th class="righttd">用户注册</th>
+  <th class="righttd">用户登录</th>
  </tr>
  <tr>
    <td  class="lefttd">用户名:</td>
-   <td class="righttd"><input type="text" name="userName" id="txtUserName" class="text"/></td> 
+   <td class="righttd"><input type="text" name="userName" id="txtUserName"  class="text"/></td> 
  </tr>
- 
+  
  <tr>
    <td  class="lefttd">密码:</td>
    <td  class="righttd"><input type="password" name="userPwd" id="txtUserPwd" class="text"/></td> 
  </tr>
-
+ 
+ 
  <tr>
   <td></td>
   <td class="righttd" >
-    <input type="submit" value="登陆" name="cmdLogin"  id="cmdLogin" display="none" />
+    <input type="submit" value="登录" name="cmdLogin"  id="cmdLogin" style="display: none;"   />
   </td>
  
  </tr>
 </table>
+<script>
 
+
+</script>
  </form>
  

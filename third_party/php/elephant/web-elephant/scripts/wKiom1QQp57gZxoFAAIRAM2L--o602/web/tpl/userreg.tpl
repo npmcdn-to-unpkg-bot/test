@@ -1,21 +1,3 @@
-<script>
-	$(document).ready(function(){
-		$("#cmdLogin").css("display", "inline-block");
-		
-		$("#cmdLogin").click(function(){
-		if (isBlank("txtUserName", "red")) {
-			alert("用户名不能为空");
-			return false; // 阻止了submit行为
-		}
-		
-		if (isBlank("txtUserPwd", "blue")) {
-			alert("密码不能为空");
-			return false;
-		}
-	})
-	})
-</script>
-
 <form method="post"> <!--默认是get 所有method=post一定要写 -->
 <style>
  .regtable{width:600px;background:#fff;border-radius:5px;padding-top:30px;padding-bottom:100px}
@@ -35,22 +17,32 @@
  </tr>
  <tr>
    <td  class="lefttd">用户名:</td>
-   <td class="righttd"><input type="text" name="userName" id="txtUserName" class="text"/></td> 
+   <td class="righttd"><input type="text" name="userName"  class="text"/></td> 
  </tr>
  
+  <tr>
+   <td  class="lefttd">邮箱:</td>
+   <td class="righttd"><input type="text" name="userEmail"  class="text"/></td> 
+ </tr>
  <tr>
    <td  class="lefttd">密码:</td>
-   <td  class="righttd"><input type="password" name="userPwd" id="txtUserPwd" class="text"/></td> 
+   <td  class="righttd"><input type="password" name="userPwd1" class="text"/></td> 
  </tr>
-
+  <tr>
+   <td  class="lefttd">确认密码:</td>
+   <td  class="righttd"><input type="password" name="userPwd2" class="text"/></td> 
+ </tr>
+ <tr>
+  <td></td>
+  <td class="righttd"><input type="checkbox" name="cbRead" /> <a href="#">请先阅读《程序员在囧途》网站用户条款</td></a>
+ </tr>
  <tr>
   <td></td>
   <td class="righttd" >
-    <input type="submit" value="登陆" name="cmdLogin"  id="cmdLogin" display="none" />
+    <input type="submit" value="注册" name="cmdReg"  id="cmdReg" />
   </td>
  
  </tr>
 </table>
-
  </form>
  

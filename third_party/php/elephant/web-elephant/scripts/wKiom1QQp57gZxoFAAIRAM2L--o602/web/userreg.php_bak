@@ -1,0 +1,10 @@
+<?php  //此为用户注册界面 
+ include 'includefiles/top.php';
+?>
+
+
+
+
+  <?php 
+    include 'includefiles/bottom.php';
+  ?>
