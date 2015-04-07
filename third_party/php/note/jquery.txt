@@ -1,0 +1,33 @@
+-------------------
+      jQuery
+------------------
+
+1. 版本
+1.7.1 性能较高
+1.4.2 兼容性和稳定性较好
+1.9  最后支持 IE 6/7/8 版本
+
+建议使用 1.9
+
+----- 语法 ------------
+1. 选择某个元素
+
+$("#username") 代表 id = "username" 的元素
+<div id="username"></div?
+
+$(".user") 代表元素中的clss中包含user的元素
+<div class="common user"></div>
+
+$("input") 代表元素名是input 的元素
+<input type="text" value="">
+
+2.对值的操作
+# <input id="textUserName" type="text" value="" />
+使用 val() 来获取值
+var getValue = $("#txtUserName").val(); // 这是get方法
+
+$("#txtUserNmae").val("shenyi") // 这是 set方法
+
+# <div id="ddd">这里是要获取的值</div?
+$("#ddd").html() // get方法
+$("#ddd").html("新值") // set
