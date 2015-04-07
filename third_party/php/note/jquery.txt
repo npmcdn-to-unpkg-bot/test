@@ -31,3 +31,24 @@ $("#txtUserNmae").val("shenyi") // 这是 set方法
 # <div id="ddd">这里是要获取的值</div?
 $("#ddd").html() // get方法
 $("#ddd").html("新值") // set
+
+3. 操作属性
+$("#user").attr("aa", "111")
+原本是 <div id="user"></div>
+执行后变成
+<div id="user" aa="111"></div>
+
+4.操作css
+$("#user").css("border", "solid 1px red")
+原本是 <div id="user"></div>
+执行后变成
+<div id="user" stype="border: solid 1px red"></div>
+
+5. 理解 document, window
+很重要的函数
+$(document).ready(function(){})
+
+6.事件
+# click 事件 , each遍历
+
+# 一定要使用智能编辑器来学习jquery
