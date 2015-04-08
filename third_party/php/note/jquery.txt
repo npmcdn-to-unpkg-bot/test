@@ -52,3 +52,55 @@ $(document).ready(function(){})
 # click 事件 , each遍历
 
 # 一定要使用智能编辑器来学习jquery
+
+7.---------------
+# parent()
+	<div id="outer"><input type="text" id="txtname"></div>
+	$("#txtname").parent() 就是取的outer
+
+# find()
+	<div id="outer"><input type="text" class="textc"></div>
+	$("#outer").find(".textc") 查找outer里的 class包含 textc的元素
+	$("#outer").find("input") 查找outer里的元素名为input的元素
+# find和children的区别
+	<ul class="cul1"></ul>
+	<li>第一个li</li>
+	<li>
+		<ul class="cul2">
+			<li>内部第一个li</li>
+		</ul>
+	</li>
+	1. $("ul") 可以取出 ul, $("ul .cul1") 可以取出ul里的class=cul1的元素
+	2. $("ul .cul1").children().css("color", "red") 代表cul1下面的第一级li字红色,
+		不可操作cul2
+	3. $("ul .cul1").find("li").css("color", "red") 代表cul1下面的所有li
+
+# append()
+	真实项目开发中往往需要动态添加一些元素,来减少页面的html复杂度
+	<div id="outer"></div>
+	$("#outer").append("<input type='text' id='txtname'/>"")
+	变为
+	<div id="outer"><input type='text' id='txtname'/></div>
+
+# Blur
+# $_POST
+	$_POST("server.php?type=1", {username:'shenyi'}, function(result) {
+		....
+	})
+
+# $_Ajax
+  最原始的函数
+  $.ajax({
+  	url:url,
+  	type: "POST",
+  	data: {name:name},
+  	timeout: 30000, // 毫秒
+  	dataType: "json",
+  	success:function(data){
+  	....
+  	},
+  	error: function() {
+
+  	}
+  })
+  还有很多,比如 complete beforeSend

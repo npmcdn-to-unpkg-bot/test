@@ -36,3 +36,7 @@ class webnews implements news
     
 }
 ?>
+
+
+
+
