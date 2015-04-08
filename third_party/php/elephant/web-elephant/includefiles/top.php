@@ -45,6 +45,8 @@
   .newsregion dd{width:90%;line-height:20px;text-align: left;padding:10px;text-indent:2em;}
   .newsregion .pubtime{border:0;background:url(/images/newsbar.jpg);
   width:100%;padding:0;height:35px;padding-top:10px;border-top:solid 1px #ddd;}
+  
+  .readyShow {display: none;}
 </style>
  </head>
  <body>

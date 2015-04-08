@@ -1,3 +1,11 @@
+<script>
+$(document).ready(function(){
+	#("#cmdReg").click(function(){
+		if ()
+	})
+})
+</script>
+
 <form method="post"> <!--默认是get 所有method=post一定要写 -->
 <style>
  .regtable{width:600px;background:#fff;border-radius:5px;padding-top:30px;padding-bottom:100px}
@@ -40,7 +48,7 @@
  <tr>
   <td></td>
   <td class="righttd" >
-    <input type="submit" value="注册" name="cmdReg"  id="cmdReg" />
+    <input type="submit" value="注册" name="cmdReg"  id="cmdReg" class="readyShow" />
   </td>
  
  </tr>
