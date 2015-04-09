@@ -1,13 +1,28 @@
-function isBlank(objid, border)
+function isBlank(objid,border) //判断是否为空
 {
-	console.log($("#"+objid).val().replace(/^\s*$/g, "") + "dafei");
-	
-	if($("#"+objid).val().replace(/^\s*$/g, '') == "") {
-		if (border != "") {
-			$("#"+objid).css("border", "solid 1px "+border);
-		}
+    if($("#"+objid).val().replace(/^\s*$/g,'')=="")
+    {
+       
+        if(border!="")
+        {
+            $("#"+objid).css("border","solid 1px "+border);
+        }
+        return true;
+    }
+    return false;
+}
+
+function isEqual(objd1, objd2)
+{
+	if ($("#"+objd1).val() == $("#"+objd2).val())
 		return true;
-	}
+	return false;
+}
+
+function isCheck(objd)
+{
+	if($("#"+objd).prop("checked"))
+		return true;
 	return false;
 }
 

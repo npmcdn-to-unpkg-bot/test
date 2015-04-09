@@ -1,7 +1,26 @@
 <script>
 $(document).ready(function(){
-	#("#cmdReg").click(function(){
-		if ()
+	$("#cmdReg").click(function(){
+		if (isBlank("userName", "red")) {
+			return false;
+		}
+		if (isBlank("userEmail", "red")) {
+			return false;
+		}
+		if (isBlank("userPwd1", "red")) {
+			return false;
+		}
+		if (isBlank("userPwd2", "red")) {
+			return false;
+		}
+		if (!isEqual("userPwd1", "userPwd2")) {
+			alert("两次输入密码不一致");
+			return false;
+		}
+		if (!isCheck("cbRead")) {
+			alert("请阅读条款");
+			return false;
+		}
 	})
 })
 </script>
@@ -26,24 +45,24 @@ $(document).ready(function(){
  </tr>
  <tr>
    <td  class="lefttd">用户名:</td>
-   <td class="righttd"><input type="text" name="userName"  class="text"/></td> 
+   <td class="righttd"><input type="text" name="userName" id="userName"  class="text"/></td> 
  </tr>
  
   <tr>
    <td  class="lefttd">邮箱:</td>
-   <td class="righttd"><input type="text" name="userEmail"  class="text"/></td> 
+   <td class="righttd"><input type="text" name="userEmail" id="userEmail" class="text"/></td> 
  </tr>
  <tr>
    <td  class="lefttd">密码:</td>
-   <td  class="righttd"><input type="password" name="userPwd1" class="text"/></td> 
+   <td  class="righttd"><input type="password" name="userPwd1" id="userPwd1" class="text"/></td> 
  </tr>
   <tr>
    <td  class="lefttd">确认密码:</td>
-   <td  class="righttd"><input type="password" name="userPwd2" class="text"/></td> 
+   <td  class="righttd"><input type="password" name="userPwd2" id="userPwd2" class="text"/></td> 
  </tr>
  <tr>
   <td></td>
-  <td class="righttd"><input type="checkbox" name="cbRead" /> <a href="#">请先阅读《程序员在囧途》网站用户条款</td></a>
+  <td class="righttd"><input type="checkbox" id="cbRead" name="cbRead" /> <a href="#">请先阅读《程序员在囧途》网站用户条款</td></a>
  </tr>
  <tr>
   <td></td>
