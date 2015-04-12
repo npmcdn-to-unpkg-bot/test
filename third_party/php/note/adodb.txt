@@ -1,0 +1,16 @@
+Active Data Object Data Base
+
+php操作数据的没有标准化,adob诞生解决这个问题
+
+支持 mysql, sqlserver, oracle ...
+
+#  链接
+$db = NewADOConnection("mysqli"); // mysqli 是mysql的类库
+$db->connect(地址, 用户名, 密码, 数据库名);
+$db->Query("set names utf8"); // 执行的数据的语句, 告诉数据库我发送的是utf8
+$db->SetFetchMode(ADODB_FETCH_ASSOC); // 代表取出的数组是按照
+
+# 执行
+$result=$db->Execute($sql);
+
+然后对result进行操作

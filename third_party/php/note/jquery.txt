@@ -83,6 +83,8 @@ $(document).ready(function(){})
 	<div id="outer"><input type='text' id='txtname'/></div>
 
 # Blur
+	跟foucus 相反,是失去焦点
+
 # $_POST
 	$_POST("server.php?type=1", {username:'shenyi'}, function(result) {
 		....
