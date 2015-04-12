@@ -12,6 +12,19 @@ function isBlank(objid,border) //判断是否为空
     return false;
 }
 
+function execServer(type, params, func)
+{
+	$.post("/server/userSvr.php?type="+type, params, func);	
+}
+
+function blankBlur(objid)
+{
+	// 失去焦点时 红色框提醒
+	$("#"+objid).blur(function(){
+		isBlank(objid, "red"));
+	})
+}
+
 function isEqual(objd1, objd2)
 {
 	if ($("#"+objd1).val() == $("#"+objd2).val())

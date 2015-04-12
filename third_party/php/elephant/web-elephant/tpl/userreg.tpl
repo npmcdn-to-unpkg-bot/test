@@ -1,5 +1,26 @@
 <script>
 $(document).ready(function(){
+	function showError()
+	{
+		if ($("#userName").parent().find(".errInfo").length > 0) {
+			$("#userName").parent().find(".errInfo").html("用户名被占用了");
+		} else {
+			$("#userName").parent().append("<span class='errInfo'>用户名被占用了</span>");
+		}
+	}
+	
+		$("#userName").blur(function() {
+			if (isBlank("userName", "red")) return;
+			// foucus相反,失去焦点
+			execServer(1, {userName: $("#userName").val()}, function(result){
+				if (result == null || result != "1") {
+					showError();
+				}
+			})
+		});
+	
+		blankBlur("userEmail");
+		
 	$("#cmdReg").click(function(){
 		if (isBlank("userName", "red")) {
 			return false;
@@ -25,7 +46,7 @@ $(document).ready(function(){
 })
 </script>
 
-<form method="post"> <!--默认是get 所有method=post一定要写 -->
+<form method="post" id="regForm"> <!--默认是get 所有method=post一定要写 -->
 <style>
  .regtable{width:600px;background:#fff;border-radius:5px;padding-top:30px;padding-bottom:100px}
  .regtable th{font-size:26px;color:#9c9c9c;font-weight:normal}
@@ -67,7 +88,7 @@ $(document).ready(function(){
  <tr>
   <td></td>
   <td class="righttd" >
-    <input type="submit" value="注册" name="cmdReg"  id="cmdReg" class="readyShow" />
+    <input type="button" value="注册" name="cmdReg"  id="cmdReg" class="readyShow" />
   </td>
  
  </tr>
