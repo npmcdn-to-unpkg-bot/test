@@ -77,45 +77,51 @@ class webuser //用户处理类
         else if($methodName=="login") //用户登录
         {
             //使用用户名和邮箱均可登录
-            if ($this->validateArgs($args, 2)) {
-            	$this->userLogin($args[0], $args[1]);
+            if($this->validateArgs($args,2))
+            {
+                $this->userLogin($args[0],$args[1]);
             }
         }
         else if($methodName=="logout") //注销
         {
-            $this->userLogout();
+            $this->userLogout();//用户注销
         }
     }
-	
-	private function userLogin($username, $userpwd)
-	{
-		if (trim($username) == "")
-			return;
-		setcookie("mywebuser_shenyi", $username, time()+200, "/"); // path很重要,不填写只会在当前文件夹生效
-	}
-	
-	static public function userIsLogged()
-	{
-		if (isset($_COOKIE["mywebuser_shenyi"]) && $_COOKIE["mywebuser_shenyi"] != "") { // cookie 是否存在
-			return true;
-		}
-		return false;
-	}
-	
+    static public function userIsLogged()
+    {
+        //用户是否登录
+          if(isset($_COOKIE["mywebuser_Shenyi"]) && $_COOKIE["mywebuser_Shenyi"]!="")  // cookie是否存在
+        {
+           return true; 
+        } 
+        return false;
+        
+    }
     static public function getCurrentUser() //获取当前登录用户
     {
-        if (self::userIsLogged()) {
-        	return $_COOKIE["mywebuser_shenyi"];
-        } else {
-        	return "guest";
+        //echo "欢迎回来：沈逸";
+      
+        if(self::userIsLogged())
+        {
+            return $_COOKIE["mywebuser_Shenyi"];
         }
-		
+        else
+        {
+            return "游客";
+        }
     }
-	
-	private function userLogout() {
-		setcookie("mywebuser_shenyi", "", time() - 3600, "/"); // path很重要,不填写只会在当前文件夹生效
-	}
     
+    private function userLogout()
+    {
+      setcookie("mywebuser_Shenyi","",time()-3600,"/");  
+    }
+    
+    private function userLogin($username,$userpwd)
+    {
+        //数据库程序暂时省略
+        if(trim($username)=="") return;
+        setcookie("mywebuser_Shenyi",$username,time()+200,"/");
+    }
     private function addUser($userName,$userEmail,$userPwd1,$userPwd2) //往数据库插入用户
     {
         

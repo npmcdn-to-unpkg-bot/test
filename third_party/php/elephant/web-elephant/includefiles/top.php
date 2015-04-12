@@ -6,10 +6,8 @@
  <head>
  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title><?php echo $config_defaulttitle ?></title>  
-  
-  <script src="../scripts/jquery-1.9.1.js"></script>
-  <script src="../scripts/common.js"></script>
-  
+  <script src="/scripts/jq.js"></script>
+  <script src="/scripts/common.js"></script>
   <style>
  *{margin:0 auto;text-align:center;font-size:14px;font-family:"微软雅黑"; }
  body{background: url(/images/bg.jpg);}
@@ -46,7 +44,9 @@
   .newsregion .pubtime{border:0;background:url(/images/newsbar.jpg);
   width:100%;padding:0;height:35px;padding-top:10px;border-top:solid 1px #ddd;}
   
-  .readyShow {display: none;}
+  .blankred{border:solid 1px red}
+  .readyShow{display:none}
+  .errInfo{color:red}
 </style>
  </head>
  <body>
@@ -60,7 +60,7 @@
   <?php
     require_once("module/webuser.php"); 
     echo webuser::getCurrentUser(); //获取当前登录用户名
-//  
+    
   /*  $user=new webuser(); //实例化类
     
     //用户注册信息 作为属性值传入到 用户类
@@ -71,12 +71,12 @@
  
     // $user->add();//新增用户*/
   
-  ?></span> 
-  <?php if(webuser::userIsLogged()): ?>
-  <a href="/logout">安全退出</a>
-  <?php else: ?>
-  <a href="/login">立即登录</a>
-<?php endif; ?>  
+  ?></span>
+   <?php if(webuser::userIsLogged()):?>
+   | <a href="/logout">安全退出</a>
+   <?php else:?>
+   | <a href="/login">立即登录</a>
+   <?php endif;?>
   </div>
   
   

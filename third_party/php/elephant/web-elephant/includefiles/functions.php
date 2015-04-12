@@ -1,18 +1,20 @@
 <?php
-
-	function func_doAction($posts)
-	{
-		if (isset($_GET["type"])) {
-			if ($_GET["type"] =="login" && isset($posts["cmdLogin"])) {
-				// 代表用户在登陆界面点了登陆方法
-				require("module/webuser.php");
-				$user= new webuser();
-				$user->login($posts["userName"], $posts["userPwd"]);
-				header("location:/"); //返回到首页
-			}
-		}
-	}
-
+    function func_doAction($posts)
+    {
+        //$posts["userName"] == $_POST["userName"]
+        if(isset($_GET["type"]))
+        {
+            if($_GET["type"]=="login" && isset($posts["cmdLogin"]))
+            {
+                //代表用户在登录界面点了登录方法 
+                require_once("module/webuser.php");
+                $user=new webuser();
+                $user->login($posts["userName"],$posts["userPwd"]);
+                header("location:/");//返回到首页
+            }
+        }
+    }
+  
   //建立一些通用函数，来给各个页面调用
    function func_loadTpl()
    {
@@ -23,9 +25,9 @@
     $tpl_set=array(
     "news"=>"news.tpl",//新闻的模板
     "reg"=>"userreg.tpl",//注册的模板
-    "index"=>"index.tpl", //首页的模板
-    "login"=>"userlogin.tpl",
-    "logout"=>"userlogout.tpl"
+    "index"=>"index.tpl" ,//首页的模板
+    "login"=>"userlogin.tpl", //登录页模板
+    "logout"=>"userlogout.tpl" //退出登录模板
     );
    
      //加载模板
