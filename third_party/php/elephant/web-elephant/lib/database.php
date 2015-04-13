@@ -7,6 +7,7 @@
     public $_dbName="money"; //数据库名
     public $_dbUser="root"; //用户名
     public $_dbPwd="123";//密码
+    public $_db = false;
     function myDataBase()
     {
         //写一些数据库  connect 过程 
@@ -38,6 +39,21 @@
     {
       //执行一个sql语句 ，返回字符串
     }
+	
+	function test()
+	{
+		$this->$_db = NewADOConnection("mysqli");
+		$this->$_db->connect($this->_dbAddr, $this->_dbUser, $this->_dbPwd, $this->_dbName);
+		$this->$_db->Query("set names utf8");
+		$this->$_db->SetFetchMole(ADODB_FETCH_ASSOC);
+		
+		$result = $this->$_db->Execute("select * from friendlinks order by id desc");
+		
+		while(!$result->EOF) {
+			$returnArray[] = $result->fields;
+			$result->MoveNext();
+		}
+	}
  }
  
  $myDB=new myDataBase();
