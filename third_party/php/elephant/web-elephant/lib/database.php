@@ -1,4 +1,5 @@
 <?php
+require("adodb.inc.php");
  class myDataBase 
  {
     //数据库处理类
@@ -6,54 +7,65 @@
     public $_dbAddr="localhost"; //数据库服务器IP
     public $_dbName="money"; //数据库名
     public $_dbUser="root"; //用户名
-    public $_dbPwd="123";//密码
-    public $_db = false;
-    function myDataBase()
+    public $_dbPwd="";//密码
+    public $_db=false;
+    function myDataBase() // __construct
     {
         //写一些数据库  connect 过程 
+    }
+    function __destruct() //析构函数
+    {
+         if($this->_db && $this->_db->IsConnected())
+            $this->_db->disconnect();
+    }
+    function initConnect()
+    {
+        //初始化 数据库链接
+        if($this->_db && $this->_db->IsConnected())
+         return;
+        $this->_db=NewADOConnection("mysqli");
+        $this->_db->connect($this->_dbAddr,$this->_dbUser,$this->_dbPwd,$this->_dbName);
+        $this->_db->Query("set names utf8"); //客户端编码
+        $this->_db->SetFetchMode(ADODB_FETCH_ASSOC); 
+         
     }
     function execForArray($sql)
     {
         //执行一个sql语句 ，返回类型是数组
+        $this->initConnect();
+        $result=$this->_db->Execute($sql);
+        if($result)
+        {
+            $returnArray=array();
+            while(!$result->EOF)
+            {
+                $returnArray[]=$result->fields;
+                $result->MoveNext();
+            }
+            return $returnArray;
+        }
+        else
+            return  false;
+          
         
-        $link1=array(
-            "title"=>"51cto",
-            "href"=>"www.51cto.com",
-            "target"=>"_blank"
-        );
-        
-         $link2=array(
-            "title"=>"程序员在囧途",
-            "href"=>"www.jtthink.com",
-            "target"=>"_blank"
-        );
-        
-        $links[]=$link1;
-        $links[]=$link2;
-     //   array_push($links,$link2);//把元素 压到数组（从后面压)
-        
-        //array_unshift($links,$link2);//把元素 压到数组（从前面压)
-        return $links;
     }
     function execForOne($sql)
     {
       //执行一个sql语句 ，返回字符串
+      
+      
     }
-	
-	function test()
-	{
-		$this->$_db = NewADOConnection("mysqli");
-		$this->$_db->connect($this->_dbAddr, $this->_dbUser, $this->_dbPwd, $this->_dbName);
-		$this->$_db->Query("set names utf8");
-		$this->$_db->SetFetchMole(ADODB_FETCH_ASSOC);
-		
-		$result = $this->$_db->Execute("select * from friendlinks order by id desc");
-		
-		while(!$result->EOF) {
-			$returnArray[] = $result->fields;
-			$result->MoveNext();
-		}
-	}
+    
+    function test()
+    {
+        
+       $ret=$this->execForArray("select * from friendlinks order by id desc ");
+       
+       var_export($ret);
+        
+        
+    }
+   
  }
  
  $myDB=new myDataBase();

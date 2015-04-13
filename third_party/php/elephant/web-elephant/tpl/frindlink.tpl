@@ -1,1 +1,1 @@
-<a href="http://<?php echo $link['href'] ?>" target="<?php echo $link['target'] ?>"><?php echo $link['title'] ?></a> |
+<a href="http://<?php echo $link['furl'] ?>" target="<?php echo $link['target'] ?>"><?php echo $link['fname'] ?></a> |

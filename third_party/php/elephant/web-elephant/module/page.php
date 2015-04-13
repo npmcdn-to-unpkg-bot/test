@@ -9,7 +9,7 @@
         
         //第二种写法
          global $myDB;
-         return $myDB->execForArray("select * from frindlinks");
+         return $myDB->execForArray("select * from friendlinks ");
         
       
     }
