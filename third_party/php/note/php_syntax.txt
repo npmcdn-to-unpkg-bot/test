@@ -118,3 +118,11 @@
 6. Cookie
   setcookie("key", "value", 持续时间, 路径)
   $_COOKIE["key"]
+
+# 虚拟类
+1. 并不用实例化具体某个类
+2. 通过配置文件读取来产生虚拟类写法
+  $c = new myClass("lib/myclassconf/users.xml")
+  $c->userClass; // 这一步把$c变成一个userClass类
+  $ret=$c->user_reg(); // 直接执行一个不存在的方法
+  
