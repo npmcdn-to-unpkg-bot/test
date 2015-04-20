@@ -45,14 +45,15 @@ int main()
     recbytes = 0;
     int i = -1;
     do {
-        i = read(fd, buffer, 1024);
+        i = read(fd, buffer, 50);
         if (i == -1) {
             printf("read error\n");
             return -1;
         }
 
         if (i == 0) {
-            printf("nothing read\n")
+            printf("nothing read\n");
+            break;
         } else {
             recbytes += i;
             printf("receive %d, all received %d\n", i, recbytes);
@@ -60,7 +61,7 @@ int main()
             if (recbytes == 20 *1024 *1024)
                 break;
         }
-    } while (i >= 0)
+    } while (i >= 0);
 
     close(fd);
     return 0;

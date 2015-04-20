@@ -54,29 +54,13 @@ int main()
         }
         printf("accept ok!\nServer start get connect from %s : %d\n", inet_ntoa(c_add.sin_addr), ntohs(c_add.sin_port));
 
-        printf("We are going to send 20M data\n");
-
-        int buffer_size = 20 * 1024 * 1024;
-        char buffer[buffer_size]= { 0 };
-        for (int i=0; i< buffer_size; i++)
-            buffer[i] = 'a';
-
-        int left = buffer_size;
-        while (left > 0) {
-            int i = write(nfp, buffer, buffer_size);
-            if (i == -1) {
-                printf("write failed\n");
-                exit(-1);
-            }
-            if (i == 0) {
-                printf("return 0, nothing write\n");
-            } else {
-                printf("write %d data\n", i);
-                left -= i;
-            }
+        const char* hello_msg = "hello,welcome to my server \n";
+        if(-1 == write(nfp, hello_msg, strlen(hello_msg) + 1))
+        {
+            printf("write fail!\n");
+            return -1;
         }
-
-        printf("write ok! close socket\n");
+        printf("write ok!\n");
         close(nfp);
     }
     close(sfp);

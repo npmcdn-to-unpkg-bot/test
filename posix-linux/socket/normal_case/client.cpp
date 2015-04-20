@@ -42,26 +42,15 @@ int main()
     }
     printf("connect ok !\n");
 
-    recbytes = 0;
-    int i = -1;
-    do {
-        i = read(fd, buffer, 1024);
-        if (i == -1) {
-            printf("read error\n");
-            return -1;
-        }
-
-        if (i == 0) {
-            printf("nothing read\n")
-        } else {
-            recbytes += i;
-            printf("receive %d, all received %d\n", i, recbytes);
-
-            if (recbytes == 20 *1024 *1024)
-                break;
-        }
-    } while (i >= 0)
-
+    if(-1 == (recbytes = read(fd,buffer,1024)))
+    {
+        printf("read data fail !\n");
+        return -1;
+    }
+    printf("read ok\nREC:\n");
+    buffer[recbytes]='\0';
+    printf("%s\n",buffer);
+    getchar();
     close(fd);
     return 0;
 }

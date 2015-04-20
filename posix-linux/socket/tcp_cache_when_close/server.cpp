@@ -22,6 +22,10 @@ int main()
     }
     printf("socket ok !\n");
 
+    // bind right away.
+    int on = 1;
+    setsockopt( sfp, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on) );
+
     bzero(&s_add,sizeof(struct sockaddr_in));
     s_add.sin_family = AF_INET;
     s_add.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -56,28 +60,30 @@ int main()
 
         printf("We are going to send 20M data\n");
 
-        int buffer_size = 20 * 1024 * 1024;
-        char buffer[buffer_size]= { 0 };
+        int buffer_size = 1900;
+        char *buffer = new char[buffer_size];
         for (int i=0; i< buffer_size; i++)
             buffer[i] = 'a';
 
-        int left = buffer_size;
-        while (left > 0) {
-            int i = write(nfp, buffer, buffer_size);
-            if (i == -1) {
-                printf("write failed\n");
-                exit(-1);
-            }
-            if (i == 0) {
-                printf("return 0, nothing write\n");
-            } else {
-                printf("write %d data\n", i);
-                left -= i;
+        for  (int i=0 ; i <100; i++) {
+            int left = buffer_size;
+            while (left > 0) {
+                int i = write(nfp, buffer, buffer_size);
+                if (i == -1) {
+                    printf("write failed\n");
+                    exit(-1);
+                }
+                if (i == 0) {
+                    printf("return 0, nothing write\n");
+                } else {
+                    printf("write %d data\n", i);
+                    left -= i;
+                }
             }
         }
-
         printf("write ok! close socket\n");
         close(nfp);
+        break;
     }
     close(sfp);
     return 0;
