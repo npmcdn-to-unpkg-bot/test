@@ -65,7 +65,8 @@ int main()
         for (int i=0; i< buffer_size; i++)
             buffer[i] = 'a';
 
-        for  (int i=0 ; i <100; i++) {
+        int sent = 0;
+        for  (int i=0 ; i <1000; i++) {
             int left = buffer_size;
             while (left > 0) {
                 int i = write(nfp, buffer, buffer_size);
@@ -76,7 +77,8 @@ int main()
                 if (i == 0) {
                     printf("return 0, nothing write\n");
                 } else {
-                    printf("write %d data\n", i);
+                    sent += i;
+                    printf("write %d data\n", sent);
                     left -= i;
                 }
             }
