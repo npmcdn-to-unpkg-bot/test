@@ -1,0 +1,3 @@
+It seems TCP will send data after close().
+
+http://stackoverflow.com/questions/8874021/close-socket-directly-after-send-unsafe
