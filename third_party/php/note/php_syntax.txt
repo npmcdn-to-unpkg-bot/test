@@ -125,4 +125,5 @@
   $c = new myClass("lib/myclassconf/users.xml")
   $c->userClass; // 这一步把$c变成一个userClass类
   $ret=$c->user_reg(); // 直接执行一个不存在的方法
-  
+
+# 读取文件
