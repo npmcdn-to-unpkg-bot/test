@@ -54,6 +54,12 @@ var HelloWorldLayer = cc.Layer.extend({
             rotation: 180
         });
         this.addChild(this.sprite, 0);
+        
+        // Add my lable
+        var myLabel = new cc.LabelTTF("Dafei", "Arail", 50)
+        myLabel.x = size.width/3;
+        myLabel.y = size.height/3;
+        this.addChild(myLabel, 6);
 
         this.sprite.runAction(
             cc.sequence(
