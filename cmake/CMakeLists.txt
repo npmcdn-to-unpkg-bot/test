@@ -10,6 +10,11 @@ set(THIS_IS_A_LIST
     -DLOGGING=1
 )
 
+set(THIS_IS_A_LIST
+    ${THIS_IS_A_LIST}  # must add this as append.
+    -DAPPEND_ONE # see if this is an append one
+)
+
 message("THIS_IS_A_LIST with quotations :")        # no ""
 message(${THIS_IS_A_LIST})
 message("\n")
