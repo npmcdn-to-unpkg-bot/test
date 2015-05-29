@@ -1,0 +1,27 @@
+
+
+in cmake:
+if Value is a list
+set(Value 
+    aa 
+    bb 
+    cc)
+then:
+    message(${Value})
+    aabbcc    # all print without delimiter
+    message("${Value}")
+    aa;bb;cc  # with ;
+
+http://www.cmake.org/pipermail/cmake/2009-April/028692.html
+The real solution is to use the list already in CMake.  It was a mistake 
+to have CMAKE_CXX_FLAGS and CMAKE_C_STANDARD_LIBRARIES be strings they 
+should have been lists.  If you want to convert a string to a list you 
+can do it like this:
+
+set(list ${string})
+
+That will make the space separated list string into a ; separated list. 
+  If you want to keep string a string you need quotes:
+set(newstring "${string}").
+
+Converting a list back into a string requires a foreach loop or a regex.
