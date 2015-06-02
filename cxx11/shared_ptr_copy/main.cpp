@@ -30,7 +30,10 @@ public:
 int main() {
     B b;
     B bb = b;
+    std::shared_ptr<B> bbb = std::make_shared<B>();
+    *bbb = b;
     std::cout << "a in b:" << b.m_a.get() << std::endl;
     std::cout << "a in bb:" << bb.m_a.get() << std::endl;
+    std::cout << "a in bbb:" << bbb->m_a.get() << std::endl;
 
 }
