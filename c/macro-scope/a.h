@@ -1,0 +1,2 @@
+#define DAFEI
+#define XIAOFEI

@@ -1,0 +1,17 @@
+
+compile:
+g++ b.cpp -c
+g++ main.cpp b.o
+
+
+
+----------------------
+
+If you undef in b.h
+then you include b.h
+it's undef
+
+
+If you undef in b.cpp
+then you include b.h
+it's still defined.
