@@ -1,3 +1,5 @@
 http://www.cplusplus.com/doc/tutorial/exceptions/
 
 g++ xx.cpp
+
+g++ standard_exception.cpp --std=c++11
