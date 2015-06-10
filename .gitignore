@@ -1,6 +1,7 @@
 staging
 a.out
 *.o
+core
 *.log
 *.png
 *.jpg
