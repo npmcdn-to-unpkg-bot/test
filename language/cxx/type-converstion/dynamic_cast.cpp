@@ -16,6 +16,17 @@ is a valid complete object of the target type. For example:
 */
 
 
+/*
+Compatibility note: 
+-------------------
+This type of dynamic_cast requires Run-Time Type Information (RTTI) to keep track of dynamic types. 
+Some compilers support this feature as an option which is disabled by default. 
+This needs to be enabled for runtime type checking using dynamic_cast to work properly with these types.
+
+try this:
+  g++ dynamic_cast.cpp -fno-rtti
+*/
+
 // dynamic_cast
 #include <iostream>
 #include <exception>
