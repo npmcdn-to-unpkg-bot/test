@@ -43,7 +43,6 @@ int main() {
     // Part One
     std::thread t1(thread1);
     std::thread t2(thread2, 10, "wahaha");
-
     std::cout << "main, thread1, thread2 now execute concurrently\n";
 
     t1.join();
