@@ -1,0 +1,9 @@
+Timed mutex class
+A timed mutex is a time lockable object that is designed to signal when critical sections of code 
+need exclusive access, just like a regular mutex, but additionally supporting 
+timed try-lock requests.
+      ^^^^^^^
+As such, a timed_mutex has two additional members: 
+    try_lock_for and try_lock_until.
+    ^^^^^^^^^^^       ^^^^^^^^^^^^
+It is guaranteed to be a standard-layout class.

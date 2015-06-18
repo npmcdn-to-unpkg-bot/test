@@ -1,0 +1,7 @@
+
+
+class recursive_timed_mutex;
+Recursive timed mutex
+A recursive timed mutex combines both the features of recursive_mutex and the features of timed_mutex into a single class: it supports both acquiring multiple lock levels by a single thread and also timed try-lock requests.
+
+It is guaranteed to be a standard-layout class.

@@ -1,0 +1,19 @@
+
+Recursive mutex class
+
+A recursive mutex is a lockable object, just like mutex, but allows the same thread to acquire multiple levels of ownership over the mutex object.
+
+This allows to lock (or try-lock) the mutex object from a thread that is already locking it, acquiring a new level of ownership over the mutex object: the thread will remain locked until member unlock is called as many times as this level of ownership.
+
+It is guaranteed to be a standard-layout class.
+
+Member types
+member type description
+native_handle_type  Type returned by native_handle (only defined if library implementation supports it)
+
+Member functions
+(constructor)   Construct recursive_mutex (public member function )
+lock            Lock recursive mutex (public member function )
+try_lock        Lock mutex if not locked by other threads (public member function )
+unlock          Unlocks mutex (public member function )
+native_handle   Get native handle (public member function )
