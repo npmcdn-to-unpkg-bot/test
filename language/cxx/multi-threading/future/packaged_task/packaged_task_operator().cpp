@@ -12,7 +12,7 @@ int main() {
     std::future<int> fut = task.get_future();
 
     try {
-        task(10); // why ???? got exception ??
+        task(10); // why ???? got exception ?? but if we reset and use it in another thread, it will be ok again. see reset.cpp
     } catch (std::exception& e) {
         std::cout << "exception caught: " << e.what() << std::endl;
         return 0;
