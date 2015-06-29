@@ -1,0 +1,37 @@
+Duration
+A duration object expresses a time span by means of a count and a period.
+
+Internally, the object stores the count as an object of member type rep 
+(an alias of the first template parameter, Rep), which can be retrieved by calling member function count.
+
+This count is expresed in terms of periods. The length of a period is integrated in the type (on compile time) by its second template parameter (Period), which is a ratio type that expresses the number (or fraction) of seconds that elapse in each period.
+
+
+Template parameters
+Rep
+    An arithmetic type, or a class emulating an arithmetic type, to be used as the type for the internal count.
+Period
+    A ratio type that represents the period in seconds.
+
+
+Template instantiations
+The following convenience typedefs of instantiations of duration are also defined in this namespace:
+type            Representation                              Period
+-----------------------------------------------------------------
+hours           signed integral type of at least 23 bits    ratio<3600,1>
+minutes         signed integral type of at least 29 bits    ratio<60,1>
+seconds         signed integral type of at least 35 bits    ratio<1,1>
+milliseconds    signed integral type of at least 45 bits    ratio<1,1000>
+microseconds    signed integral type of at least 55 bits    ratio<1,1000000>
+nanoseconds     signed integral type of at least 64 bits    ratio<1,1000000000>
+----------------------------------------------------------------
+
+Member types
+The following aliases are member types of duration. They are widely used as parameter and
+return types by member functions:
+
+member type           definition                    notes
+-----------------------------------------------------------------------
+rep      The first template parameter (Rep)       Representation type used as the type for the internal count object.
+period   The second template parameter (Period)   The ratio type that represents a period in seconds.
+-----------------------------------------------------------------------
