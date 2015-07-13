@@ -1,6 +1,7 @@
 staging
 a.out
 *.o
+*.pyc
 core
 *.log
 *.png
