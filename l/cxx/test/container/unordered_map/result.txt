@@ -1,10 +1,12 @@
 
 
-1. unordered_map
+01. unordered_map
    insert. emplace return value is a pair <iteractor, bool>
 
    ret = map.insert(std::make_pair<std::string, std::string>("aa", "bb"))
    ret = map.emplace("aa", "bb"); // emplace need no construct.
 
-2.
+02. 
+   atuo& v = a_map[10]; // This will contruct an element (10, vector())
+                        // After this, there will be key = 10 in a_map.
 
