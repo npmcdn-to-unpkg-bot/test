@@ -15,6 +15,10 @@ process.stdin.flush()
 
 time.sleep(1) # give stdout time to prepare
 
+# There is a problem, because subprocess is not block anymore,
+# so if we read out, there will be an error.
+# and we have no way to know when it's going to be ok to read again
+# we have to set timer for read and catch the execption like server.py did.
 # receive the data
 output = process.stdout
 r = 'a'
