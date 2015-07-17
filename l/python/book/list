@@ -1,4 +1,8 @@
 c03
     - dir()
 c04
-    - 
+    - built-in-types
+    - match
+    - random
+    - string
+    - re
