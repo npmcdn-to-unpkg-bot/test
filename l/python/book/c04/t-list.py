@@ -45,3 +45,21 @@ print col2
 print [row[1] + 2 for row in M] # add 2 to each item in column 2
 
 print [row[1] for row in M if row[1] % 2 == 0] # Filter out odd items
+
+print [M[i][i] for i in [0,1,2]]
+
+print [ c*2 for c in 'spam']
+
+G = (sum(row) for row in M)
+print G
+print next(G)
+print next(G)
+
+print map(sum, M)
+
+print {sum(row) for row in M}
+print { i : sum(M[i]) for i in range(3)}
+
+print [ord(x) for x in 'spam']
+print {ord(x) for x in 'spam'}
+print { x: ord(x) for x in 'spam'}
