@@ -21,6 +21,8 @@ while True:
 i = iter(L)
 # print i.__next__()
 print next(i)
+# next(i) = '555'
+print 'Can asaign to iter next(): Wrong next(iter(L)) = 10'
 
 print 'iteractor for dict'
 d = { "A":1, "b":2}
@@ -30,3 +32,4 @@ print 'key',next(i)
 
 for key in d:
 	print key, '->', d[key]
+

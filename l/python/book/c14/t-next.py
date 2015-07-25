@@ -5,7 +5,15 @@ print r'next(X) == x.__next__()'
 
 f = open('data.txt', 'r')
 # print f.__next__() # 
-print next(f)
-print next(f)
-print next(f)
-print next(f)
+while True:
+	try:
+		print f.next(),
+	except Exception, e:
+		print 'Iteracte is done'
+		break
+	else:
+		pass
+	finally:
+		pass
+
+	
