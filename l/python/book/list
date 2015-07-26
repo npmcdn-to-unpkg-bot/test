@@ -37,3 +37,10 @@ c16 # 函数基础
 c17 # 作用域
 
 c18 # 参数
+      *args, **kargs
+c19 # 函数的高级话题
+      recurrsive, 函数属性, 注解,lambda, map, filter, reduce
+c20 # 迭代和解析
+
+c21 # 模块
+    p 539/572
