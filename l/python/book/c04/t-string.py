@@ -15,6 +15,13 @@ ss = "  aaaaaaaaa" \
     "ccccc"
 print "[{}]".format(ss)
 
+# a better way using ()
+ss = ("aaaa\n"
+    "bbbbbb"
+    "cccccc\n"
+    "dddddd")
+print "[{}]".format(ss)
+
 # len
 print len(s)
 
