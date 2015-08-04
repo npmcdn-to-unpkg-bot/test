@@ -1,3 +1,11 @@
+0. build osip
+   cd osp
+   mkdir bld-linux
+   cd bld-linux
+   ../configure  --enable-pthread  --enable-semaphore --enable-shared=no --prefix=/home/xren/dev/tmp/osip/bld-linux/staging
+   make
+   make install
+
 1. build osip.cpp
     g++ -I/usr/local/include/    \
         -I/home/xren/dev/tmp/osip/bld-linux/staging/include \
