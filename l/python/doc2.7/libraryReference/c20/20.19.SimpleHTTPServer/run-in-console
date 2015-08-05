@@ -1,0 +1,6 @@
+
+python -m SimpleHTTPServer 8000
+
+
+go to browser and navigate to
+localhost:8000
