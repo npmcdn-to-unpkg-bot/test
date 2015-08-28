@@ -1,6 +1,6 @@
 #coding:utf-8
 
-from flask import Flask
+from flask import Flask,request
 
 app = Flask(__name__)
 
@@ -34,6 +34,19 @@ def projects():
 @app.route('/about')
 def about():
     return 'The about page'
+
+# HTTP方法
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        return 'You are using POST'
+    else:
+        return 'You are using GET'
+
+@app.route('/test')
+def test():
+    with app.test_request_context('/login', method='POST'):
+        return 'browsing %s with method %s' % (request.path, request.method)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
