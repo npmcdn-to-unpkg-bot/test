@@ -5,8 +5,8 @@
 
 $ mkdir project-test
 $ cd project-test
-$ virtualenv pyenv
-$ . ./pyenv/bin/activate
+$ virtualenv .
+$ . ./bin/activate
 # deactivate
 
 $ pip install Flask
