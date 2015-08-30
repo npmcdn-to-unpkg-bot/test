@@ -1,0 +1,6 @@
+
+# how to use sublime in command line on OSX
+
+https://www.sublimetext.com/docs/3/osx_command_line.html
+
+sudo ln -s "/Applications/Sublime Textß.app/Contents/SharedSupport/bin/subl" /usr/bin/subl

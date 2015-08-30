@@ -1,0 +1,14 @@
+
+# http://www.mikeobrien.net/blog/osx-git-bash-prompt/
+
+# First, must install git with brew
+$ brew install git
+$ brew install bash-completion
+
+
+# Add the following in ~/.bash_profile
+
+if [ -f $(brew --prefix)/etc/bash_completion ]; then
+  . $(brew --prefix)/etc/bash_completion
+fi
+source $(brew --prefix)/etc/bash_completion.d/git-prompt.sh
