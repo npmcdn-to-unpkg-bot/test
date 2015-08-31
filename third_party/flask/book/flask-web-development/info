@@ -5,4 +5,18 @@ https://github.com/miguelgrinberg/flasky
 
 
 # right now:
-page 13/34
+page 25/??
+
+# Jinja2变量过滤器
+-----------------------------------
+name           description
+-----------------------------------
+safe       渲染时不转义
+capitalize 把值的首字母转换成大写，其他转换为小写
+lower      把值转换为小写
+upper  	   把值转换为大写
+title      把值中每个单词的首字母转换为大写
+trim       把值的首尾空格去掉
+striptags  渲染之前把值中所有的html标签都删掉
+-----------------------------------
+
