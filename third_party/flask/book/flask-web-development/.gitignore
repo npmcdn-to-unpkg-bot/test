@@ -1,2 +1,2 @@
 flasky
-data.sqlite
+*.sqlite
