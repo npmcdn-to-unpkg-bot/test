@@ -1,0 +1,5 @@
+# env
+    $ virtualenv pyenv
+    $ source pyenv/bin/activate
+    $ pip install apns-client
+
