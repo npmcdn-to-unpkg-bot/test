@@ -3,3 +3,10 @@
     $ source pyenv/bin/activate
     $ pip install apns-client
 
+#!!!!!!!!!!!
+# the pakage isntalled by pip is too old and got a lot of issues
+# clone the latest one
+    $ sudo apt-get install mercurial
+    # yeah, it's using a tool named hg
+    $ hg clone https://bitbucket.org/sardarnl/apns-client
+    $

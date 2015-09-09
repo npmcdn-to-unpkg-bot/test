@@ -1,0 +1,9 @@
+
+# install
+$ git clone https://github.com/gilles/flask-apns.git
+$ tar zcvf flask-apns.tar.gz flask-apns
+$ virtualenv venv
+$ source venv/bin/activate
+$ pip install flask-apns.tar.gz
+$ rm -rf flask-apns*
+
