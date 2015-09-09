@@ -1,0 +1,12 @@
+# install
+pip install flask
+
+# from tar.gz
+pip install flask.tar.gz
+
+# from git
+ pip install git+git://github.com/djacobs/PyAPNs.git
+ pip install git+https://github.com/djacobs/PyAPNs.git
+
+# from git a branch
+ pip install git+https://github.com/djacobs/PyAPNs.git@branch-name
