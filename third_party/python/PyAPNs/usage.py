@@ -1,6 +1,15 @@
 import time
 import os
+import sys
 from apns import APNs, Frame, Payload
+import logging
+logging.basicConfig()
+
+# config apns's logger
+logger = logging.getLogger("apns")
+stream_handler = logging.StreamHandler(sys.stderr)
+logger.addHandler(stream_handler)
+logger.setLevel(logging.DEBUG)
 
 apns = APNs(use_sandbox=True,
         cert_file=os.environ.get('APNS_CERT_FILE'),
@@ -51,5 +60,5 @@ def send_error_notification(times=1):
 # apns.gateway_server.send_notification_multiple(frame)
 
 if __name__ == '__main__':
-    send_notification(times=100 , interval=100)
-    # send_error_notification()
+    # send_notification(times=100 , interval=40)
+    send_error_notification(times=3)
