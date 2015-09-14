@@ -20,11 +20,11 @@ def response_listener(error):
     print 'Get error msg:' + str(error)
 apns.gateway_server.register_response_listener(response_listener)
 
-def send_notification(times=1, interval=None):
+def send_notification(times=1, interval=None, start_identifier=100):
     # Send a notification
     for i in range(times):
         token_hex = 'ab11333374c4bf4e631456bced816458824cf60a59dbf28e5652d3df9bd31ef4'
-        identifier = 100 + i
+        identifier = start_identifier + i
         payload = Payload(alert="This is the " + str(i) + " message", sound="default", badge=i)
         apns.gateway_server.send_notification(token_hex, payload, identifier=identifier)
         print 'send over for identifier:', identifier
@@ -32,7 +32,7 @@ def send_notification(times=1, interval=None):
             print 'sleep for ', interval, ' seconds...'
             time.sleep(interval)
 
-def send_error_notification(times=1):
+def send_error_notification(times=1, start_identifier=0):
     """
     send error notification
     """
@@ -48,7 +48,7 @@ def send_error_notification(times=1):
     for i in range(0, times):
         token_hex = generate_fake_token(i)
         payload = Payload(alert="This is " + str(i) + " message", badge=i)
-        apns.gateway_server.send_notification(token_hex, payload, identifier=i)
+        apns.gateway_server.send_notification(token_hex, payload, identifier= start_identifier + i)
         print 'send over'
 
 # Send multiple notifications in a single transmission
@@ -60,5 +60,5 @@ def send_error_notification(times=1):
 # apns.gateway_server.send_notification_multiple(frame)
 
 if __name__ == '__main__':
-    # send_notification(times=100 , interval=40)
-    send_error_notification(times=3)
+    send_notification(times=1, start_identifier=4294967291)
+    send_error_notification(times=1, start_identifier=4294967290)
