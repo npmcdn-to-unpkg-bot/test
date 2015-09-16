@@ -32,7 +32,7 @@ curl -l -H "Content-type: application/json" -X POST -d '{"id":"id-value","name":
 root_parser = reqparse.RequestParser()
 root_parser.add_argument('id', required=True, help='id string')
 root_parser.add_argument('name', required=True, help='name string')
-root_parser.add_argument('devices', type=list, required=True, help='a list of devices')
+root_parser.add_argument('devices', action='append', required=True, help='a list of devices')
 root_parser.add_argument('nested_one', type=dict, help='nested_one dict')
 root_parser.add_argument('nested_two', type=dict, required=True, help='nested_two dict')
 
