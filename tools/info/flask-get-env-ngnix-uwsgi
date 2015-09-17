@@ -1,0 +1,5 @@
+http://stackoverflow.com/questions/18487894/django-ignoring-environment-variables-when-run-via-uwsgi
+
+.ini
+env = DATABASE_URI=/a/path
+env = APP_CONFIG=developement
