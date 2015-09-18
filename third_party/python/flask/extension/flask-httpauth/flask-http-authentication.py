@@ -10,8 +10,8 @@ https://github.com/miguelgrinberg/Flask-HTTPAuth
 
 # use chrome to open http://127.0.0.1:5000
 
-# curl fails to authenticate. Use chrome to open the link 
-curl -u admin:admin http://127.0.0.1:5000 -v --digest
+# this needs cookie to work.
+curl -u admin:admin http://127.0.0.1:5000 -v --digest -c ./cookie
 
 """
 
@@ -37,7 +37,6 @@ def index():
     return 'Your authorization name is:%s' % auth.username()
 
 @app.route('/go')
-@auth.login_required
 def go():
     return 'Your are logged :%s' % auth.username()
 
