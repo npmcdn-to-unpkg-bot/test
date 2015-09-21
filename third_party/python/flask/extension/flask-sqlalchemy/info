@@ -1,0 +1,12 @@
+
+
+# multiple conditions filter
+
+    Table User
+    users = User.query.filter(
+                User.name == name
+            ).filter(
+                User.age != age
+            ).filter(
+                User.valid == True
+            )
