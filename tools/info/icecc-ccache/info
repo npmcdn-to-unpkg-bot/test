@@ -1,0 +1,14 @@
+# install icecc
+$ sudo apt-get install icecc
+$ sudo apt-get install icecc-monitor
+$ sudo service iceccd start
+$ sudo service icecc-scheduler start
+
+$
+
+# ccache for clang
+export USE_CCACHE=1
+export CCACHE_CPP2=yes
+export CCACHE_SLOPPINESS=time_macros
+export CC="ccache clang"
+export CXX="ccache clang++"
