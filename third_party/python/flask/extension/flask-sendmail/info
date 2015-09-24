@@ -1,0 +1,7 @@
+http://flask-sendmail.readthedocs.org/en/latest/
+https://github.com/ajford/flask-sendmail.git
+
+$ pip install flask-sendmail
+
+# this one can send email with localhost /usr/sbin/sendmail
+
