@@ -1,0 +1,6 @@
+I failed to start/restart mysql with
+$ sudo /etc/init.d/mysql restart
+
+But, I use 
+$ sudo service mysql restart
+It works but I don't know why
