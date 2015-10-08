@@ -20,7 +20,20 @@
       }
     });
     $('input[name=a]').focus();
+
+    var addRow = function() {
+      console.log('addRow')
+      $("table#mytable tr:last").after('<tr>' +
+        '<td>Row 1</td>' +
+        '<td><input type="text"></td>' +
+        '<td>Value</td>' +
+        '<td><input type="text"></td>' +
+      '</tr>')
+      return false;
+    };
+    $("a#addRow").bind('click', addRow);
   });
+
 </script>
 <h1>jQuery Example</h1>
 <p>
@@ -28,4 +41,17 @@
   <input type="text" size="5" name="b"> =
   <span id="result">?</span>
 <p><a href=# id="calculate">calculate server side</a>
+
+
+<table id="mytable">
+<tr>
+  <td>Row 1</td>
+  <td><input type="text"></td>
+  <td>Value</td>
+  <td><input type="text"></td>
+</tr>
+
+</table>
+<a href="#" id="addRow">Add Row</a>
+
 {% endblock %}
