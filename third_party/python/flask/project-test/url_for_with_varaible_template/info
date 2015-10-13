@@ -1,0 +1,6 @@
+
+If you need use url_for to generate a dynamic url in template
+do as follows
+
+{% set base_url= url_for('static', filename='uploads/') %}
+<img src="{{ base_url }}{{ image_name }}" />
