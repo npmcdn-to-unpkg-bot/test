@@ -24,14 +24,21 @@
     var addRow = function() {
       console.log('addRow')
       $("table#mytable tr:last").after('<tr>' +
-        '<td>Row 1</td>' +
-        '<td><input type="text"></td>' +
+        '<td>Key</td>' +
+        '<td><input type="text" name="key"></td>' +
         '<td>Value</td>' +
         '<td><input type="text"></td>' +
       '</tr>')
       return false;
     };
     $("a#addRow").bind('click', addRow);
+
+    var showValue = function(event) {
+      tablename = event.data.tablename
+      console.log("showValue:" + tablename)
+      
+    };
+    $("a#showValue").bind('click', {tablename: 'mytable'}, showValue)
   });
 
 </script>
@@ -52,6 +59,8 @@
 </tr>
 
 </table>
-<a href="#" id="addRow">Add Row</a>
-
+<a href="#" id="addRow">Add Row</a><br>
+<a href="#" id="showValue">Show</a>
+<br><br><br>
+<span id="showResult">?</span>
 {% endblock %}
