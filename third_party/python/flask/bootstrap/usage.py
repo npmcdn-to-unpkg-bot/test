@@ -16,5 +16,9 @@ def shange():
 def less():
     return render_template('less.html')
 
+@app.route('/layout')
+def layout():
+    return render_template('layout.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Bootstrap 101 Template</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">
+    div { border: 1px solid black;}
+    </style>
+  </head>
+  <body>
+    <div class="container">
+
+
+    <h1>h1. Bootstrap heading</h1>
+    <h2>h2. Bootstrap heading</h2>
+    <h3>h3. Bootstrap heading</h3>
+    <h4>h4. Bootstrap heading</h4>
+    <h5>h5. Bootstrap heading</h5>
+    <h6>h6. Bootstrap heading</h6>
+
+    <h1>h1. Bootstrap heading <small>Secondary text</small></h1>
+    <h2>h2. Bootstrap heading <small>Secondary text</small></h2>
+    <h3>h3. Bootstrap heading <small>Secondary text</small></h3>
+    <h4>h4. Bootstrap heading <small>Secondary text</small></h4>
+    <h5>h5. Bootstrap heading <small>Secondary text</small></h5>
+    <h6>h6. Bootstrap heading <small>Secondary text</small></h6>
+
+    <!-- 页面主体
+    Bootstrap 将全局 font-size 设置为 14px，line-height 设置为 1.428。这些属性直接赋予 <body> 元素和所有段落元素。另外，<p> （段落）元素还被设置了等于 1/2 行高（即 10px）的底部外边距（margin） -->
+
+    <p>页面主体
+    Bootstrap 将全局 font-size 设置为 14px，line-height 设置为 1.428。这些属性直接赋予 <body> 元素和所有段落元素。另外，<p> （段落）元素还被设置了等于 1/2 行高（即 10px）的底部外边距（margin）.</p>
+      
+    <!--   中心内容
+    通过添加 .lead 类可以让段落突出显示 -->
+    <p class="lead">中心内容  通过添加 .lead 类可以让段落突出显示</p>
+  
+    <p> You can use the mark tag to <mark>highlight</mark> text.</p>
+    <p>被删除的文本<del>This line of text is meant to be treated as deleted text.</del></p>
+    <p>无用文本<s>This line of text is meant to be treated as no longer accurate.</s></p>
+    <p>插入文本<ins>This line of text is meant to be treated as an addition to the document.</ins></p>
+    <p>带下划线的文本<u>This line of text will render as underlined</u></p>
+    <p>小号文本<small>This line of text is meant to be treated as fine print.</small></p>
+    <p>着重<strong>rendered as bold text</strong></p>
+    <p>斜体The following snippet of text is <em>rendered as italicized text</em>.</p>
+    <div>
+    <p class="text-left">Left aligned text.</p>
+    <p class="text-center">Center aligned text.</p>
+    <p class="text-right">Right aligned text.</p>
+    <p class="text-justify">Justified text.</p>
+    <p class="text-nowrap">No wrap text.</p>
+    </div>
+    <p class="text-lowercase">Lowercased text.</p>
+    <p class="text-uppercase">Uppercased text.</p>
+    <p class="text-capitalize">Capitalized text.</p>
+
+    <p><abbr title="attribute">基本缩略语attr</abbr></p>
+    <p><abbr title="HyperText Markup Language" class="initialism">首字母缩略语HTML</abbr></p>
+
+    <address>
+      <strong>地址</strong><br>
+      <strong>Twitter, Inc.</strong><br>
+      795 Folsom Ave, Suite 600<br>
+      San Francisco, CA 94107<br>
+      <abbr title="Phone">P:</abbr> (123) 456-7890
+    </address>
+
+    <address>
+      <strong>Full Name</strong><br>
+      <a href="mailto:#">first.last@example.com</a>
+    </address>
+
+
+    <blockquote>
+      <p>引用Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+    </blockquote>
+
+    <blockquote>
+      <p>多种引用样式Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+      <footer>Someone famous in <cite title="Source Title">Source Title</cite></footer>
+    </blockquote>
+
+    <ul>
+      <li> 无序列表 排列顺序无关紧要的一列元素</li>
+      <li> Lorem ipsum dolor sit amet </li>
+      <li> Consectetur adipiscing elit </li>
+      <li> Lorem ipsum dolor sit amet </li>
+      <li> Facilisis in pretium nisl aliquet </li>
+    </ul>
+
+    <ol>
+      <li> 有序列表 顺序至关重要的一组元素</li>
+      <li> Lorem ipsum dolor sit amet </li>
+      <li> Consectetur adipiscing elit </li>
+      <li> Lorem ipsum dolor sit amet </li>
+      <li> Facilisis in pretium nisl aliquet </li>
+    </ol>
+
+    <ul class="list-unstyled">
+      <li> 无序列表 移除了默认的 list-style 样式和左侧外边距的一组元素（只针对直接子元素）。这是针对直接子元素的，也就是说，你需要对所有嵌套的列表都添加这个类才能具有同样的样式</li>
+      <li> Lorem ipsum dolor sit amet </li>
+      <li> Consectetur adipiscing elit </li>
+      <li> Lorem ipsum dolor sit amet </li>
+      <li> Facilisis in pretium nisl aliquet </li>
+    </ul>
+
+    <ul class="list-inline">
+      <li> 内联列表
+          通过设置 display: inline-block; 并添加少量的内补（padding），将所有元素放置于同一行</li>
+      <li> line 1 </li>
+      <li> line 2 </li>
+    </ul>
+
+      <dl>
+        <dt> 描述 </dt>
+        <dd> 带有描述的短语列表 </dd>
+        <dt> Euismod </dt>
+        <dd> Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.
+            Donec id elit non mi porta gravida at eget metus. </dd>
+        <dt> Malesuada porta </dt>
+        <dd> Etiam porta sem malesuada magna mollis euismod. </dd>
+      </dl>
+
+      <dl class="dl-horizontal">
+        <dt> 水平排列的描述 </dt>
+        <dd> .dl-horizontal 可以让 dl 内的短语及其描述排在一行。开始是像 dl 的默认样式堆叠在一起，随着导航条逐渐展开而排列在一行 </dd>
+        <dt> Euismod </dt>
+        <dd> Vestibulum id ligula porta felis euismod semper eget lacinia odio sem nec elit.
+            Donec id elit non mi porta gravida at eget metus.Donec id elit non mi porta gravida at eget metus </dd>
+        <dt> Malesuada porta </dt>
+        <dd> Etiam porta sem malesuada magna mollis euismod. </dd>
+      </dl>
+
+      <p>内联代码For example, <code>&lt;section&gt;</code> should be wrapped as inline.</p>
+      <p>用户输入 通过 &lt;kbd&gt; 标签标记用户通过键盘输入的内容To switch directories, type <kbd>cd</kbd> followed by the name of the directory.<br>
+        To edit settings, press <kbd><kbd>ctrl</kbd> + <kbd>,</kbd></kbd></p> 
+
+        <pre></pre>
+       <pre>多行代码可以使用 &lt;pre&gt; 标签 <br>&lt;p&gt;代码块Sample text here...&lt;/p&gt;</pre>
+       <p>变量 通过 &lt;var&gt; 标签标记变量</p>
+       <p><var>y</var> = <var>m</var><var>x</var> + <var>b</var></p>
+       <p><samp>程序输出 This text is meant to be treated as sample output from a computer program.</samp></p>
+
+       <table class="table">
+        <caption>表格 基本实例</caption>
+        <tr><th>#</th><th>First Name</th><th>Last Name</th><th>Username</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+       </table>
+
+        <table class="table table-striped">
+        <caption>表格 条纹状表格 .table-striped 类</caption>
+        <tr><th>#</th><th>First Name</th><th>Last Name</th><th>Username</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+       </table>
+
+        <table class="table table-striped table-bordered">
+        <caption>表格 带边框的表格 .table-bordered 类</caption>
+        <tr><th>#</th><th>First Name</th><th>Last Name</th><th>Username</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+       </table>
+
+       <table class="table table-hover">
+        <caption>表格 鼠标悬停 .table-hover 类</caption>
+        <tr><th>#</th><th>First Name</th><th>Last Name</th><th>Username</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+       </table>
+
+       <table class="table table-condensed">
+        <caption>表格 紧缩表格 .table-condensed 类</caption>
+        <tr><th>#</th><th>First Name</th><th>Last Name</th><th>Username</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+        <tr><th>1</th><td>Mark</td><th>Otto</th><th>@mdo</th></tr>
+       </table>
+
+       <table class="table table-condensed">
+        <caption>状态类 通过这些状态类可以为行或单元格设置颜色</caption>
+        <tr class="active"><th>.active</th><th>鼠标悬停在行或单元格上时所设置的颜色</th></tr>
+        <tr class="sucess"><th>.success</th><th>标识成功或积极的动作</th></tr>
+        <tr class="info" ><th>.info</th><th>标识普通的提示信息或动作</th></tr>
+        <tr class="warning"><th>.warning</th><th>标识警告或需要用户注意</th></tr>
+        <tr class="danger"><th>.danger</th><th>标识危险或潜在的带来负面影响的动作</th></tr>
+       </table>
+
+       <div class="table-responsive">
+          <table class="table">
+          <caption>表格 响应式表格 将任何 .table 元素包裹在 .table-responsive 元素内，即可创建响应式表格，其会在小屏幕设备上（小于768px）水平滚动。当屏幕大于 768px 宽度时，水平滚动条消失</caption>
+          <tr><th>#</th><th>Table head</th><th>Table head</th><th>Table head</th><th>Table head</th></tr>
+          <tr><th>1</th><td>Table Cell</td><td>Table Cell</td><td>Table Cell</td><td>Table Cell</td></tr>
+          <tr><th>1</th><td>Table Cell</td><td>Table Cell</td><td>Table Cell</td><td>Table Cell</td></tr>
+          <tr><th>1</th><td>Table Cell</td><td>Table Cell</td><td>Table Cell</td><td>Table Cell</td></tr>
+         </table>
+       </div>
+
+
+<pre>表单
+基本实例
+单独的表单控件会被自动赋予一些全局样式。所有设置了 .form-control 类的 &lt;input>&gt;、&lt;textarea&gt; 和 &lt;select&gt; 元素都将被默认设置宽度属性为 width: 100%;。 将 label 元素和前面提到的控件包裹在 .form-group 中可以获得最好的排列。不要将表单组合输入框组混合使用
+不要将表单组直接和输入框组混合使用。建议将输入框组嵌套到表单组中使用
+</pre>
+       <form>
+        <div class="form-group">
+          <label for="exampleInputEmail1">Email address</label>
+          <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+        </div>
+        <div class="form-group">
+          <label for="exampleInputPassword1">Password</label>
+          <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+        </div>
+        <div class="form-group">
+          <label for="exampleInputFile">File input</label>
+          <input type="file" id="exampleInputFile">
+          <p class="help-block">Example block-level help text here.</p>
+        </div>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox"> Check me out
+          </label>
+        </div>
+        <button type="submit" class="btn btn-default">Submit</button>
+      </form>
+<pre>
+内联表单
+为 &lt;form&gt; 元素添加 .form-inline 类可使其内容左对齐并且表现为 inline-block 级别的控件。只适用于视口（viewport）至少在 768px 宽度时（视口宽度再小的话就会使表单折叠）
+可能需要手动设置宽度
+在 Bootstrap 中，输入框和单选/多选框控件默认被设置为 width: 100%; 宽度。在内联表单，我们将这些元素的宽度设置为 width: auto;，因此，多个控件可以排列在同一行。根据你的布局需求，可能需要一些额外的定制化组件。
+一定要添加 label 标签
+如果你没有为每个输入控件设置 label 标签，屏幕阅读器将无法正确识别。对于这些内联表单，你可以通过为 label 设置 .sr-only 类将其隐藏。还有一些辅助技术提供label标签的替代方案，比如 aria-label、aria-labelledby 或 title 属性。如果这些都不存在，屏幕阅读器可能会采取使用 placeholder 属性，如果存在的话，使用占位符来替代其他的标记，但要注意，这种方法是不妥当的。
+</pre>
+
+<form class="form-inline">
+  <div class="form-group">
+    <label for="exampleInputName2">Name</label>
+    <input type="text" class="form-control" id="exampleInputName2" placeholder="Jane Doe">
+  </div>
+  <div class="form-group">
+    <label for="exampleInputEmail2">Email</label>
+    <input type="email" class="form-control" id="exampleInputEmail2" placeholder="jane.doe@example.com">
+  </div>
+  <button type="submit" class="btn btn-default">Send invitation</button>
+</form>
+
+<form class="form-inline">
+  <div class="form-group">
+    <label class="sr-only" for="exampleInputEmail3">Email address</label>
+    <input type="email" class="form-control" id="exampleInputEmail3" placeholder="Email">
+  </div>
+  <div class="form-group">
+    <label class="sr-only" for="exampleInputPassword3">Password</label>
+    <input type="password" class="form-control" id="exampleInputPassword3" placeholder="Password">
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox"> Remember me
+    </label>
+  </div>
+  <button type="submit" class="btn btn-default">Sign in</button>
+</form>
+
+<form class="form-inline">
+  <div class="form-group">
+    <label class="sr-only" for="exampleInputAmount">Amount (in dollars)</label>
+    <div class="input-group">
+      <div class="input-group-addon">$</div>
+      <input type="text" class="form-control" id="exampleInputAmount" placeholder="Amount">
+      <div class="input-group-addon">.00</div>
+    </div>
+  </div>
+  <button type="submit" class="btn btn-primary">Transfer cash</button>
+</form>
+
+
+<pre>水平排列的表单
+通过为表单添加 .form-horizontal 类，并联合使用 Bootstrap 预置的栅格类，可以将 label 标签和控件组水平并排布局。这样做将改变 .form-group 的行为，使其表现为栅格系统中的行（row），因此就无需再额外添加 .row 了</pre>
+
+<form class="form-horizontal">
+  <div class="form-group">
+    <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
+    <div class="col-sm-10">
+      <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
+    <div class="col-sm-10">
+      <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox"> Remember me
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-2 col-sm-10">
+      <button type="submit" class="btn btn-default">Sign in</button>
+    </div>
+  </div>
+</form>
+
+  </div>
+
+      
+  
+    </div>
+    </body>
+</html>
