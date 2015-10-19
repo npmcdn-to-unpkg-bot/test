@@ -10,3 +10,30 @@
             ).filter(
                 User.valid == True
             )
+
+
+
+# Instance <xxxxx> is not bound to a Session; attribute refresh operation cannot proceed
+
+flask-slqalchemy 的session是很奇怪的,
+是 scoped 的,要把一次操作放在一个scoped  里,
+如:
+---------------------
+user = User.query.first()
+id = user.id
+roles = Rolse.query.filter_by(id = id) 
+这样就会出现错误,修复这个错误,把 Rolse的query放到一个函数里
+
+user = User.query.first()
+id = user.id
+do_with_role(id=id)# 这里你不能直接用 id = user.id 要不也会出错.
+# 如果你确定user在后面不修改,你可以先 db.session.expuge(user)
+然后就可以 id=user.id 
+
+
+-------------------------
+roles = Rolse.query.all()
+for role in roles:
+  id = role.id # 这里容易出现错误
+替换为
+for role in Roles.query.all()
