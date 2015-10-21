@@ -68,4 +68,23 @@ print type(result) # type unicode
 print result.encode('utf-8')        # {"v1": "大飞", "v2": "大飞"}
 print repr(result.encode('utf-8'))  # '{"v1": "\xe5\xa4\xa7\xe9\xa3\x9e", "v2": "\xe5\xa4\xa7\xe9\xa3\x9e"}'
 
+# ascii and unicode obj will be treated as unicode
+ascii_unicode_obj = {
+    'v1' : u'大飞',
+    'v2' : u'大飞'
+}
+result = json.dumps(ascii_unicode_obj)
+print '-' * 50
+print result       # {"v1": "\u5927\u98de", "v2": "\u5927\u98de"}
+print repr(result) # '{"v1": "\\u5927\\u98de", "v2": "\\u5927\\u98de"}'  !!!!! 注意和下面的区别 
+print type(result) # str type json dumps result default will encode with utf-8 
+
+result = json.dumps(ascii_unicode_obj, ensure_ascii=False)
+print '-' * 50
+print result       # {"v1": "大飞", "v2": "大飞"}
+print repr(result) # u'{"v1": "\u5927\u98de", "v2": "\u5927\u98de"}'
+print type(result) # type unicode
+
+print result.encode('utf-8')        # {"v1": "大飞", "v2": "大飞"}
+print repr(result.encode('utf-8'))  # '{"v1": "\xe5\xa4\xa7\xe9\xa3\x9e", "v2": "\xe5\xa4\xa7\xe9\xa3\x9e"}'
 
