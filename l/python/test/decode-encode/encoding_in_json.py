@@ -88,3 +88,9 @@ print type(result) # type unicode
 print result.encode('utf-8')        # {"v1": "大飞", "v2": "大飞"}
 print repr(result.encode('utf-8'))  # '{"v1": "\xe5\xa4\xa7\xe9\xa3\x9e", "v2": "\xe5\xa4\xa7\xe9\xa3\x9e"}'
 
+# json loads default make an obj with unicode
+obj = json.loads('{"v1": "\xe5\xa4\xa7\xe9\xa3\x9e", "v2": "\xe5\xa4\xa7\xe9\xa3\x9e"}')
+print obj
+
+obj = json.loads(u'{"v1": "\u5927\u98de", "v2": "\u5927\u98de"}')
+print obj
