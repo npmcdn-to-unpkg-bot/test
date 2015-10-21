@@ -13,7 +13,25 @@ usage: *.py 'this is ascii' '这是一个中文的'
 
 要统一 encoding
 1. # coding:utf-8
-2. 所有的 unicode 是转化为字符串的时候都 encode('utf-8)
+2. 所有的 unicode 是转化为字符串的时候都 encode('utf-8')
+
+原始的字符串,应该是utf-8编码的
+
+flask 是用 unicode 来编码的
+当使用ascii的时候,就直接用,例如 'abbd'
+如果当使用任何非 ascii的时候,使用 u'大诶'
+当实现__repr__的时候,
+如果你确定所有的字符都是 ascii ,那就直接return '{} {}'.format(v1,v2)
+如果你不确定,那么这样 u'{} {}'format(v1, v2).encode('utf-8')
+为什么要这样 ?
+1. 如果v1 v2是ascii字符串,ok,可以自动转化为unicode object
+2. 如果v1 v2是unicode,那么也ok
+例外情况.不能把 utf-8编码的 str和 unicode一直用
+例如:
+v1 = u'will be utf-8 string'.encode('utf-8')
+这时候 v1 是str type
+如果 print '{}'.formart(v1)  OK
+如果 print u'{}'.format(v1) NOT ok, 因为 这个str type 不能自动转化为unicode object.
 
 """
 

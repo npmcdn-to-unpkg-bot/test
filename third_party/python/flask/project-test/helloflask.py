@@ -1,16 +1,65 @@
 #coding:utf-8
 
-from flask import Flask,request
+from flask import Flask,request, make_response
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return 'This is index'
+    print '-------------request ---------------'
+    print request
+    print '-------------request form---------------'
+    print request.form
+    print '-------------request args---------------'
+    print request.args
+    print '-------------request values---------------'
+    print request.values
+    print '-------------request cookies---------------'
+    print request.cookies
+    print '-------------request headers---------------'
+    print request.headers
+    print '-------------request data---------------'
+    print request.data
+    print '-------------request files---------------'
+    print request.files
+    print '-------------request method---------------'
+    print request.method
+    print '-------------request json---------------'
+    print request.json
+    print u'json get: {}'.format(request.json.get('c'))
+    print type(request.json.get('c'))
 
-@app.route('/hello')
+    print '-------------request path---------------'
+    print request.path
+    print '-------------request environ---------------'
+    print request.environ
+
+    # default flask will encode data to utf-8.
+    r = make_response(u'This is index来设置好')
+    print '-------------response headers---------------'
+    print r.headers  # default Content-Type: text/html; charset=utf-8
+    print '-------------response status---------------'
+    print r.status
+    print '-------------response status_code---------------'
+    print r.status_code
+    print '-------------response data---------------'
+    print r.data
+    print 'type of data : {}'.format(type(r.data)) # str, because flask encode it to utf-8
+    print '-------------response mimetype---------------'
+    print r.mimetype
+
+    return r
+
+@app.route('/charset-not-set')
 def hello_world():
-    return 'hello_world'
+        # default flask will encode data to utf-8.
+    r = make_response(u'This is index来设置好')
+    print '-------------response headers---------------'
+    print r.headers  # default Content-Type: text/html; charset=utf-8
+    r.headers['Content-Type'] = 'Content-Type: text/html'
+    print r.headers  # default Content-Type: text/html; charset=utf-8
+    return r
+
 
 # 转换器有下面几种
 # int     接受整数
