@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>Bootstrap 101 Template</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+    <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="//cdn.bootcss.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style type="text/css">
+
+html,body{
+        width: 100%;
+        height: 100%;
+        background: lightblue;
+}
+p{
+    margin: 20px;
+    border: 2px solid red;
+    background-color: green
+}
+div {
+    margin-left: 15%;
+    margin-right:15%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    height: 50%;
+    border: 3px solid black;
+    position: relative;
+}
+
+.Absolute-Center {  
+  margin: auto;  
+  position: absolute;  
+  top: 0; left: 0; bottom: 0; right: 0;  
+} 
+.Absolute-Center.is-Fixed {
+  position: fixed;
+  z-index: 999;
+}
+
+.Absolute-Center.is-Right {
+  left: auto; right: 20px;
+  text-align: right;
+}
+
+.Absolute-Center.is-Left {
+  right: auto; left: 20px;
+  text-align: left;
+}
+
+.Absolute-Center.is-Responsive {
+  width: 60%; 
+  height: 60%;
+  min-width: 200px;
+  max-width: 400px;
+  padding: 40px;
+}
+
+.Absolute-Center.is-Overflow {  
+  overflow: auto;  
+}
+
+.Absolute-Center.is-Resizable {
+  min-width: 20%;
+  max-width: 80%;
+  min-height: 20%;
+  max-height: 80%;
+  resize: both;
+  overflow: auto;
+}
+.Absolute-Center.is-Image {
+  height: auto;
+}
+
+.Absolute-Center.is-Image img { 
+  width: 100%;
+  height: auto;
+}
+
+
+</style>
+  </head>
+  <body>
+    <div><p>这事一个正常的p放在一个height=50%的div里</p>
+        <p>http://blog.csdn.net/freshlover/article/details/11579669</p>
+    </div>
+    <div><p class="Absolute-Center"> 这个红色框框包着的绿色的是个 &lt;p&gt;父元素必须要是  position: relative;否则他将会占满整个屏幕.由此看来,绝对居中是完全填满</p></div>
+
+    <div><p class="Absolute-Center" style="width:50%; height:50%;">这个例子跟上面一样,只不过是p的width=50%, height=50%;</p></div>
+
+    <div><p class="Absolute-Center is-Fixed" style="width:15%; height:15%;">想让内容块一直停留在可视区域内？将内容块设置为position:fixed;并设置一个较大的z-index层叠属性值.试试把 width height调成 100%, 会占满屏幕</p></div>
+
+    <div><p class="Absolute-Center is-Left">
+        如果你要设置一个固顶的头或增加其他的边栏，只需要在内容块的样式中加入像这样的CSS样式代码：top:70px;bottom:auto;<br>
+        由于已经声明了margin:auto;，该内容块将会垂直居中于你通过top,left,bottom和right属性定义的边界框内.</p></div>
+    <div><p class="Absolute-Center is-Right">如果你要设置一个固顶的头或增加其他的边栏，只需要在内容块的样式中加入像这样的CSS样式代码：top:70px;bottom:auto;<br>
+        由于已经声明了margin:auto;，该内容块将会垂直居中于你通过top,left,bottom和right属性定义的边界框内.</p></div>
+
+    <div><p class="Absolute-Center is-Responsive" >绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.</p></div>
+
+
+    <div><p class="Absolute-Center is-Responsive is-Overflow" >溢出情况(Overflow)<br>绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.</p></div>
+
+    <div><p class="Absolute-Center is-Resizable" > risize:both<br>你可以使用其他class类或javascript代码来重绘内容块同时保证居中，无须手动重新计算中心尺寸。当然，你也可以添加resize属性来让用户拖拽实现内容块的重绘。
+    绝对居中（Absolute Centering）可以保证内容块始终居中，无论内容块是否重绘。可以通过设置min-/max-来根据自己需要限制内容块的大小，并防止内容溢出窗口/容器.</p></div>
+
+
+    <div><p class="Absolute-Center is-Resizable" > 绝对居中（AbsoluteCentering）也适用于图片。对图片自身应用class类或CSS样式，并给图片添加height:auto样式，图片会自适应居中显示，如果外层容器可以resize则随着容器的重绘，图片也相应重绘，始终保持居中。
+
+需要注意的是height:auto虽然对图片居中有用，但如果是在图片外层的内容块上应用了height:auto则会产生一些问题：规则的内容块会被拉伸填充整个容器。这时，我们可以使用可变高度(Variable Height)方式解决这个问题。问题的原因可能是渲染图片时要计算图片高度，这就如同你自己定义了图片高度一样，浏览器得到了图片高度就不会像其他情况一样去解析margin:auto垂直居中了。所以我们最好对图片自身应用这些样式而不是父元素。</p>
+    <img class="Absolute-Center is-Image" src="http://placekitten.com/g/500/200" class="Absolute-Center is-Image" alt="" />
+    </div>
+
+
+
+  </body>
+</html>
