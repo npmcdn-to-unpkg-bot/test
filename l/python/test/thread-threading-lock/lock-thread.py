@@ -28,8 +28,9 @@ def thread_func(arg):
         mutex.acquire()
         count += 1
         # release the lock
-        mutex.release()
         print thread_name, x, count
+        mutex.release()
+
         time.sleep(1)
 
 def main(num):
