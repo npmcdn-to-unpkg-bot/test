@@ -30,9 +30,9 @@ html,body{
 p{
     margin: 20px;
     border: 2px solid red;
-    background-color: green
+    background-color: green;
 }
-div {
+.wrapper {
     margin-left: 15%;
     margin-right:15%;
     margin-top: 20px;
@@ -40,6 +40,10 @@ div {
     height: 50%;
     border: 3px solid black;
     position: relative;
+}
+
+.Center-Container {
+  position: relative;
 }
 
 .Absolute-Center {  
@@ -91,41 +95,81 @@ div {
   height: auto;
 }
 
+.Center-Container .is-Table {
+  border: 1px solid red;
+  width: 100%;
+  height: 100%;
+  display: table; }
+.is-Table .Table-Cell {
+  display: table-cell;
+  vertical-align: middle;
+}
+.is-Table .Center-Block {
+  width: 50%;
+  margin: 0 auto;
+}
+.Center-Block p {
+  text-align: center;
+}
 
 </style>
   </head>
   <body>
-    <div><p>这事一个正常的p放在一个height=50%的div里</p>
+    <div class="wrapper">
+        <p>这事一个正常的p放在一个height=50%的div里</p>
         <p>http://blog.csdn.net/freshlover/article/details/11579669</p>
     </div>
-    <div><p class="Absolute-Center"> 这个红色框框包着的绿色的是个 &lt;p&gt;父元素必须要是  position: relative;否则他将会占满整个屏幕.由此看来,绝对居中是完全填满</p></div>
 
-    <div><p class="Absolute-Center" style="width:50%; height:50%;">这个例子跟上面一样,只不过是p的width=50%, height=50%;</p></div>
 
-    <div><p class="Absolute-Center is-Fixed" style="width:15%; height:15%;">想让内容块一直停留在可视区域内？将内容块设置为position:fixed;并设置一个较大的z-index层叠属性值.试试把 width height调成 100%, 会占满屏幕</p></div>
+    <div class="wrapper">
+      <p class="Absolute-Center"> 这个红色框框包着的绿色的是个 &lt;p&gt;父元素必须要是  position: relative;否则他将会占满整个屏幕.由此看来,绝对居中是完全填满</p></div>
 
-    <div><p class="Absolute-Center is-Left">
+
+    <div class="wrapper">
+      <p class="Absolute-Center" style="width:50%; height:50%;">这个例子跟上面一样,只不过是p的width=50%, height=50%;</p></div>
+
+
+    <div class="wrapper">
+      <p class="Absolute-Center is-Fixed" style="width:15%; height:15%;">想让内容块一直停留在可视区域内？将内容块设置为position:fixed;并设置一个较大的z-index层叠属性值.试试把 width height调成 100%, 会占满屏幕</p></div>
+
+
+    <div class="wrapper">
+      <p class="Absolute-Center is-Left">
         如果你要设置一个固顶的头或增加其他的边栏，只需要在内容块的样式中加入像这样的CSS样式代码：top:70px;bottom:auto;<br>
         由于已经声明了margin:auto;，该内容块将会垂直居中于你通过top,left,bottom和right属性定义的边界框内.</p></div>
-    <div><p class="Absolute-Center is-Right">如果你要设置一个固顶的头或增加其他的边栏，只需要在内容块的样式中加入像这样的CSS样式代码：top:70px;bottom:auto;<br>
+
+
+    <div class="wrapper">
+      <p class="Absolute-Center is-Right">如果你要设置一个固顶的头或增加其他的边栏，只需要在内容块的样式中加入像这样的CSS样式代码：top:70px;bottom:auto;<br>
         由于已经声明了margin:auto;，该内容块将会垂直居中于你通过top,left,bottom和right属性定义的边界框内.</p></div>
 
-    <div><p class="Absolute-Center is-Responsive" >绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.</p></div>
 
 
-    <div><p class="Absolute-Center is-Responsive is-Overflow" >溢出情况(Overflow)<br>绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.</p></div>
+    <div class="wrapper"><p class="Absolute-Center is-Responsive" >绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.</p></div>
 
-    <div><p class="Absolute-Center is-Resizable" > risize:both<br>你可以使用其他class类或javascript代码来重绘内容块同时保证居中，无须手动重新计算中心尺寸。当然，你也可以添加resize属性来让用户拖拽实现内容块的重绘。
+
+    <div class="wrapper"><p class="Absolute-Center is-Responsive is-Overflow" >溢出情况(Overflow)<br>绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.绝对居中最大的优势应该就是对百分比形式的宽高支持的非常完美。甚至min-width/max-width 和min-height/max-height这些属性在自适应盒子内的表现也和预期很一致.</p></div>
+
+
+    <div class="wrapper"><p class="Absolute-Center is-Resizable" > risize:both<br>你可以使用其他class类或javascript代码来重绘内容块同时保证居中，无须手动重新计算中心尺寸。当然，你也可以添加resize属性来让用户拖拽实现内容块的重绘。
     绝对居中（Absolute Centering）可以保证内容块始终居中，无论内容块是否重绘。可以通过设置min-/max-来根据自己需要限制内容块的大小，并防止内容溢出窗口/容器.</p></div>
 
 
-    <div><p class="Absolute-Center is-Resizable" > 绝对居中（AbsoluteCentering）也适用于图片。对图片自身应用class类或CSS样式，并给图片添加height:auto样式，图片会自适应居中显示，如果外层容器可以resize则随着容器的重绘，图片也相应重绘，始终保持居中。
+    <div class="wrapper"><p class="Absolute-Center is-Resizable" > 绝对居中（AbsoluteCentering）也适用于图片。对图片自身应用class类或CSS样式，并给图片添加height:auto样式，图片会自适应居中显示，如果外层容器可以resize则随着容器的重绘，图片也相应重绘，始终保持居中。
 
 需要注意的是height:auto虽然对图片居中有用，但如果是在图片外层的内容块上应用了height:auto则会产生一些问题：规则的内容块会被拉伸填充整个容器。这时，我们可以使用可变高度(Variable Height)方式解决这个问题。问题的原因可能是渲染图片时要计算图片高度，这就如同你自己定义了图片高度一样，浏览器得到了图片高度就不会像其他情况一样去解析margin:auto垂直居中了。所以我们最好对图片自身应用这些样式而不是父元素。</p>
     <img class="Absolute-Center is-Image" src="http://placekitten.com/g/500/200" class="Absolute-Center is-Image" alt="" />
     </div>
 
-
+  <div class="Center-Container wrapper">
+      <div class="Center-Container is-Table">
+      <div class="Table-Cell">
+        <div class="Center-Block">
+        <p>实现这些文字垂直居中</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   </body>
 </html>
