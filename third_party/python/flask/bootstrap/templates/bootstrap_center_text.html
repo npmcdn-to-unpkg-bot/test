@@ -44,11 +44,11 @@ div {
 .vcenter {
     display: table;
 }
-.vcenter img {
+/*.vcenter img {
   border: 1px solid blue;
   display: table-cell;
   vertical-align: middle;
-}
+}*/
 .vcenter .is-left-bottom {
     display: table-cell;
     vertical-align: bottom;
@@ -82,6 +82,13 @@ div {
     text-align: center;
 }
 
+.vcenter-img-container {
+    float:none;
+    display:inline-block;
+    vertical-align:middle;
+    /*margin-right:-4px;*/
+}
+
 </style>
 </head>
 
@@ -89,10 +96,10 @@ div {
   <div class="container">
     <div class="row">
       <div class="vcenter col-sm-3">
-        <img src="{{ url_for('static', filename='head.jpg') }}" alt="..." class="center-block">
+        <img class="img-responsive" src="https://avatars0.githubusercontent.com/u/5219641?v=3&amp;s=460" alt="..." >
       </div>
       <div class="vcenter col-sm-3">
-        <p class="is-left-bottom">测试文字</p>
+        <p class="is-left-bottom">图片是 img-responsive 和 center-block,所以不会超过框框,但是,只会水平居中</p>
       </div>
       <div class="vcenter col-sm-3">
         <p class="is-left-top">测试文字</p>
@@ -104,7 +111,7 @@ div {
 
      <div class="row">
       <div class="vcenter col-sm-3">
-        <img src="{{ url_for('static', filename='head.jpg') }}" alt="..." class="center-block">
+        <img class="img-responsive center-block" src="https://avatars0.githubusercontent.com/u/5219641?v=3&amp;s=460" alt="..." >
       </div>
       <div class="vcenter col-sm-3">
         <p class="is-center-bottom">测试文字</p>
@@ -118,6 +125,17 @@ div {
     </div>
 
 
+    <div class="row">
+      <div class="col-sm-6">
+            <img class="img-responsive center-block" src="http://placehold.it/300x300"/>
+      </div>
+      <div class="col-sm-6 vcenter">
+          <div class="is-center-center">
+              <h1>Title</h1>
+              <p>Paragraph</p>
+          </div>
+      </div>
+    </div>
 
   </div>
 </body>

@@ -9,8 +9,9 @@ pages = (
     ('less', u'Less mixin 和变量'),
     ('layout', u'排版'),
     ('html_body_width_height', u'Html body width height test'),
-    ('center_element', u'center-element'),
-    ('bootstrap_table', u'bootstrap table')
+    ('center_element', u'center_element'),
+    ('bootstrap_center_text', u'bootstrap_center_text'),
+    ('bootstrap_center_image', u'bootstrap_center_image'),
 )
 
 @app.route('/')
@@ -33,13 +34,17 @@ def layout():
 def html_body_width_height():
     return render_template('html_body_width_height.html')
 
-@app.route('/center-element')
+@app.route('/center_element')
 def center_element():
-    return render_template('center-element.html')
+    return render_template('center_element.html')
 
-@app.route('/bootstrap-table')
-def bootstrap_table():
-    return render_template('bootstrap-table.html')
+@app.route('/bootstrap_center_text')
+def bootstrap_center_text():
+    return render_template('bootstrap_center_text.html')
 
+@app.route('/bootstrap_center_image')
+def bootstrap_center_image():
+    return render_template('bootstrap_center_image.html')
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
