@@ -9,7 +9,8 @@ pages = (
     ('less', u'Less mixin 和变量'),
     ('layout', u'排版'),
     ('html_body_width_height', u'Html body width height test'),
-    ('center_element', u'center-element')
+    ('center_element', u'center-element'),
+    ('bootstrap_table', u'bootstrap table')
 )
 
 @app.route('/')
@@ -35,5 +36,10 @@ def html_body_width_height():
 @app.route('/center-element')
 def center_element():
     return render_template('center-element.html')
+
+@app.route('/bootstrap-table')
+def bootstrap_table():
+    return render_template('bootstrap-table.html')
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
