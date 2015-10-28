@@ -1,0 +1,27 @@
+
+1. go to http://redis.io/
+   to download redis-3.0.5.tar.gz
+
+ # you can read README in redis-3.0.5
+
+2. tar xvf redis-3.0.5.tar.gz
+   cd redis-3.0.5
+   make
+   make test
+   sudo make install
+   cd utils
+   sudo ./install-server.sh
+
+3 . play
+    $ redis-cli
+    redis> ping
+    PONG
+    redis> set foo bar
+    OK
+    redis> get foo
+    "bar"
+    redis> incr mycounter
+    (integer) 1
+    redis> incr mycounter
+    (integer) 2
+    redis> 
