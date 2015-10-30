@@ -27,7 +27,7 @@ roles = Rolse.query.filter_by(id = id)
 user = User.query.first()
 id = user.id
 do_with_role(id=id)# 这里你不能直接用 id = user.id 要不也会出错.
-# 如果你确定user在后面不修改,你可以先 db.session.expuge(user)
+# 如果你确定user在后面不修改,你可以先 db.session.expunge(user)
 然后就可以 id=user.id 
 
 

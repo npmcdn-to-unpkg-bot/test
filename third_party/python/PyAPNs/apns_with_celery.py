@@ -14,6 +14,8 @@ $ export APNS_CERT_FILE=
 $ export APNS_KEY_FILE=
 $ pip install -U celery[redis]
 
+$ celery -A apns_with_celery worker --loglevel=debug 
+
 """
 
 class CustomTask(Task):
