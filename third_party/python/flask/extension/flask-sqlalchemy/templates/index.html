@@ -1,0 +1,17 @@
+<p>User info</p>
+<p>id: {{ user.id }}</p>
+<p>name: {{ user.name }}</p>
+<p>create_time: {{ user.create_time }}</p>
+<p>Detail</p>
+<p>id: {{ user.d.id }}</p>
+<p>user_id: {{ user.d.user_id }}</p>
+<p>sex: {{ user.d.sex }}</p>
+<p>password: {{ user.d.password }}</p>
+<p>email: {{ user.d.email }}</p>
+<p>mobile: {{ user.d.mobile }}</p>
+
+<p>Profit</p>
+{% for entry in user.p %}
+<p>profit: {{ entry.profit }}</p>
+<p>date: {{ entry.date }}</p>
+{% endfor %}
