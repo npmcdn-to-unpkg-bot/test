@@ -4,8 +4,6 @@ a.out
 *.pyc
 core
 *.log
-*.png
-*.jpg
 *.gif
 *.metadata
 pyenv
