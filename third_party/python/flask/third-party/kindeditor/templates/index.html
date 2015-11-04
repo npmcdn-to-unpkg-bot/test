@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<!-- Bootstrap -->
+<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+<style type="text/css">
+  /*div { border: 1px solid black;}*/
+</style>
+
+<script charset="utf-8" src="{{ url_for('static', filename='kindeditor/kindeditor.js') }}"></script>
+<script charset="utf-8" src="{{ url_for('static', filename='kindeditor/lang/zh_CN.js') }}"></script>
+<script>
+    KindEditor.ready(function(K) {
+        window.editor = K.create('#editor_id', {
+            uploadJson : "{{ url_for('upload') }}",
+            fileManagerJson : "{{ url_for('upload') }}",
+            allowFileManager : true
+        });
+
+    });
+
+    $(function() {
+        $(".show-html").bind('click', function() {
+            html = window.editor.html()
+            window.editor.sync();
+            console.log($("#editor_id").val())
+        })
+    });
+</script>
+</head>
+
+<body>
+  <div class="container">      
+    <textarea id="editor_id" name="content" style="width:700px;height:300px;">
+      &lt;strong&gt;HTML内容&lt;/strong&gt;
+    </textarea>
+    <button class="show-html btn btn-info">show html</button>
+  </div>
+</body>
+</html>

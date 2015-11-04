@@ -1,0 +1,12 @@
+
+# http://kindeditor.net/docs/usage.html
+# https://github.com/kindsoft/kindeditor
+
+您可以根据需求删除以下目录后上传到服务器。
+
+    asp - ASP程序
+    asp.net - ASP.NET程序
+    php - PHP程序
+    jsp - JSP程序
+    examples - 演示文件
+
