@@ -14,17 +14,6 @@
 
 <style type="text/css">
 
-body { 
-    font-family:Arial, Helvetica, sans-serif; 
-    font-size:12px; 
-    margin:0; 
-} 
-#main { 
-    height:1800px; 
-    padding-top:90px; 
-    text-align:center; 
-} 
-
 #fullbg { 
     background-color:gray; 
     left:0; 
@@ -39,14 +28,11 @@ body {
 #dialog { 
     background-color:#fff; 
     border:5px solid rgba(0,0,0, 0.4); 
-    height:400px; 
-    left:50%; 
-    margin:-200px 0 0 -200px; 
-    padding:1px; 
     position:fixed !important; /* 浮动对话框 */ 
     position:absolute; 
-    top:50%; 
-    width:400px; 
+    width:500px;
+    height:800px; 
+
     z-index:5; 
     border-radius:5px; 
     display:none; 
@@ -64,10 +50,6 @@ body {
 #dialog p.close a { 
     color:#fff; 
     text-decoration:none; 
-} 
-
-div {
-    border: 1px solid black;
 }
 </style>
 
@@ -77,8 +59,8 @@ function showBg() {
     var bh = $("body").height(); 
     var bw = $("body").width(); 
     $("#fullbg").css({ 
-    height:bh, 
-    width:bw, 
+    height: bh, 
+    width: bw, 
     display:"block" 
     }); 
     $("#dialog").show(); 
@@ -97,18 +79,21 @@ function showalert() {
 
 <body>
 <div class="container">
+<div class="row">
+    <div class="col-xs-12 col-md-12" style="text-algin:center">
+        <a href="javascript:showBg();">点击这里查看效果, 会弹出一个div框, 里面有个iframe会打开百度</a> <br><br><br>
+        <button class="btn btn-info" onclick="showalert()">click me <br>弹出框之后就没响应了</button>
+    </div>
 
-<div id="main">
-    <a href="javascript:showBg();">点击这里查看效果, 会弹出一个div框, 里面有个iframe会打开百度</a> <br><br><br>
-    <button class="btn btn-info" onclick="showalert()">click me <br>弹出框之后就没响应了</button>
+    <!-- /*这个是用来遮挡整个屏幕的,可以屏蔽其他的事件,因他的z大*/ -->
+    <div id="fullbg"></div>
 
-    <div id="fullbg"></div> 
-    <div id="dialog"> 
-        <p class="close"><a href="#" onclick="closeBg();">关闭</a>  
-        <div>正在加载，请稍后....</div> 
+    <div id="dialog" class="col-md-4 col-offset-4"> 
+        <p class="close"><a href="#" onclick="closeBg();">关闭</a>
+        <div>正在加载，请稍后....</div>
         <iframe src="http://www.baidu.com" style="height:inherit"></iframe>
     </div> 
-</div> 
+</div>
 
 
 </div>
