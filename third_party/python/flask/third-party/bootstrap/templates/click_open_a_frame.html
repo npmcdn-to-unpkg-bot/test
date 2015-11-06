@@ -14,12 +14,19 @@
 
 <style type="text/css">
 
+.container {
+    border: 3px solid green;
+}
+
+.row {
+    border: 1px solid blue;
+}
+
 #fullbg { 
-    background-color:gray; 
-    left:0; 
+    border: 10px solid red;
+    background-color:gray;
+    position: absolute; /* 必须是absolute的,这样不会改变已有的布局  */
     opacity:0.5; 
-    position:absolute; 
-    top:0; 
     z-index:3; 
     filter:alpha(opacity=50); 
     -moz-opacity:0.5; 
@@ -28,25 +35,38 @@
 #dialog { 
     background-color:#fff; 
     border:5px solid rgba(0,0,0, 0.4); 
-    position:fixed !important; /* 浮动对话框 */ 
-    position:absolute; 
-    width:500px;
-    height:800px; 
+    position:fixed !important; /* 浮动对话框 */
+    /* fixed总是根据body来定位的,所以,我们要居中,那么就下面4行的来 */
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    /*position:absolute;*/
+    width:510px; /* 800+10 10是两边border的大小,然内容是800,也是iframe的大小 */
+    height:810px; 
 
     z-index:5; 
     border-radius:5px; 
     display:none; 
 } 
+#dialog iframe {
+    border: 0;
+    height: 800px;
+    width: 500px;
+}
 #dialog p { 
-    margin:0 0 12px; 
+    position: absolute; /* 让关闭按钮不脱离文档流,这样iframe可以铺满整个div */
+    right: 0; /* 让close靠右边 */
     height:24px; 
     line-height:24px; 
-    background:#CCCCCC; 
+    background:#CCCCCC;
 } 
 #dialog p.close { 
     text-align:right; 
     padding-right:10px; 
 } 
+
 #dialog p.close a { 
     color:#fff; 
     text-decoration:none; 
@@ -56,13 +76,14 @@
 <script type="text/javascript"> 
 //显示灰色 jQuery 遮罩层 
 function showBg() { 
-    var bh = $("body").height(); 
-    var bw = $("body").width(); 
+    var bh = $("body").height();
+    var bw = $("body").width();
     $("#fullbg").css({ 
-    height: bh, 
-    width: bw, 
-    display:"block" 
-    }); 
+        height: bh,
+        width: bw,
+        display:"block",
+    });
+
     $("#dialog").show(); 
 } 
 //关闭灰色 jQuery 遮罩 
@@ -78,21 +99,41 @@ function showalert() {
 </head>
 
 <body>
+<!-- /*这个是用来遮挡整个屏幕的,可以屏蔽其他的事件,因他的z大
+    放到body里,是为了遮挡整个body,你也可以放到你想遮住的部分位置
+    */ -->
+<div id="fullbg">
+</div>
+<div id="dialog">
+    <p class="close"><a href="#" onclick="closeBg();">关闭</a></p>
+    <iframe src="http://www.baidu.com" ></iframe>
+</div>
+
+
 <div class="container">
+<div class="row">
+    <p>ahahahahahahahah</p>
+    <p>placeholer</p>
+</div>
+<div class="row">
+    <p>ahahahahahahahah</p>
+    <p>placeholer</p>
+</div>
+<div class="row">
+    <p>ahahahahahahahah</p>
+    <p>placeholer</p>
+</div>
 <div class="row">
     <div class="col-xs-12 col-md-12" style="text-algin:center">
         <a href="javascript:showBg();">点击这里查看效果, 会弹出一个div框, 里面有个iframe会打开百度</a> <br><br><br>
         <button class="btn btn-info" onclick="showalert()">click me <br>弹出框之后就没响应了</button>
     </div>
 
-    <!-- /*这个是用来遮挡整个屏幕的,可以屏蔽其他的事件,因他的z大*/ -->
-    <div id="fullbg"></div>
-
-    <div id="dialog" class="col-md-4 col-offset-4"> 
-        <p class="close"><a href="#" onclick="closeBg();">关闭</a>
-        <div>正在加载，请稍后....</div>
-        <iframe src="http://www.baidu.com" style="height:inherit"></iframe>
-    </div> 
+    <div class="col-xs-12 col-md-12">
+        <p>placeholder</p>
+        <p>placeholder</p><p>placeholder</p><p>placeholder</p><p>placeholder</p><p>placeholder</p>
+    </div>
+</div>
 </div>
 
 
