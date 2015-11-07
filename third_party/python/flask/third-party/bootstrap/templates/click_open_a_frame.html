@@ -22,19 +22,19 @@
     border: 1px solid blue;
 }
 
-#fullbg { 
+#fullbg {
     border: 10px solid red;
     background-color:gray;
     position: absolute; /* 必须是absolute的,这样不会改变已有的布局  */
-    opacity:0.5; 
-    z-index:3; 
-    filter:alpha(opacity=50); 
-    -moz-opacity:0.5; 
-    -khtml-opacity:0.5; 
-} 
-#dialog { 
-    background-color:#fff; 
-    border:5px solid rgba(0,0,0, 0.4); 
+    opacity:0.5;
+    z-index:3;
+    filter:alpha(opacity=50);
+    -moz-opacity:0.5;
+    -khtml-opacity:0.5;
+}
+#dialog {
+    background-color:#fff;
+    border:5px solid rgba(0,0,0, 0.4);
     position:fixed !important; /* 浮动对话框 */
     /* fixed总是根据body来定位的,所以,我们要居中,那么就下面4行的来 */
     left: 0;
@@ -44,52 +44,52 @@
     margin: auto;
     /*position:absolute;*/
     width:510px; /* 800+10 10是两边border的大小,然内容是800,也是iframe的大小 */
-    height:810px; 
+    height:810px;
 
-    z-index:5; 
-    border-radius:5px; 
-    display:none; 
+    z-index:5;
+    border-radius:5px;
+    display:none;
 } 
 #dialog iframe {
     border: 0;
     height: 800px;
     width: 500px;
 }
-#dialog p { 
+#dialog p {
     position: absolute; /* 让关闭按钮不脱离文档流,这样iframe可以铺满整个div */
     right: 0; /* 让close靠右边 */
-    height:24px; 
-    line-height:24px; 
+    height:24px;
+    line-height:24px;
     background:#CCCCCC;
-} 
-#dialog p.close { 
-    text-align:right; 
-    padding-right:10px; 
-} 
+}
+#dialog p.close {
+    text-align:right;
+    padding-right:10px;
+}
 
-#dialog p.close a { 
-    color:#fff; 
-    text-decoration:none; 
+#dialog p.close a {
+    color:#fff;
+    text-decoration:none;
 }
 </style>
 
-<script type="text/javascript"> 
-//显示灰色 jQuery 遮罩层 
-function showBg() { 
+<script type="text/javascript">
+//显示灰色 jQuery 遮罩层
+function showBg() {
     var bh = $("body").height();
     var bw = $("body").width();
-    $("#fullbg").css({ 
+    $("#fullbg").css({
         height: bh,
         width: bw,
         display:"block",
     });
 
-    $("#dialog").show(); 
-} 
-//关闭灰色 jQuery 遮罩 
-function closeBg() { 
-  $("#fullbg,#dialog").hide(); 
-} 
+    $("#dialog").show();
+}
+//关闭灰色 jQuery 遮罩
+function closeBg() {
+  $("#fullbg,#dialog").hide();
+}
 
 function showalert() {
     alert('haha')
