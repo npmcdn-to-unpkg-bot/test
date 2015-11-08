@@ -13,6 +13,7 @@ pages = (
     ('bootstrap_center_text', u'bootstrap_center_text'),
     ('bootstrap_center_image', u'bootstrap_center_image'),
     ('click_open_a_frame', u'点击弹框'),
+    ('click_show_big_picture', u'点击图片查看原图'),
 )
 
 @app.route('/')
@@ -50,6 +51,10 @@ def bootstrap_center_image():
 @app.route('/click_open_a_frame')
 def click_open_a_frame():
     return render_template('click_open_a_frame.html')
+
+@app.route('/click_show_big_picture')
+def click_show_big_picture():
+    return render_template('click_show_big_picture.html')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
