@@ -1,0 +1,89 @@
+# We'll test nginx + uwsgi + flask + mysql
+
+
+
+# install dependencies
+    $ sudo apt-get update
+    $ sudo apt-get install git python-setuptools python-dev python build-essential nginx mysql-server mysql-client libmysqlclient-dev
+    $ sudo easy_install pip
+    $ sudo pip install virtualenv uwsgi
+
+    # virtualenv
+    $ virtualenv venv
+    $ source venv/bin/activate
+    $ pip install -r requirements.txt
+
+
+# configure
+    # for mysql
+    $ export DEV_DATABASE_URL='mysql://root:password@localhost/p_test'
+
+    # for nginx
+    $ cd $(project path)
+    $ sudo ln -s `pwd` /var/www/p_test
+
+# nginx
+    #  !!!!!!!!!!!!!!!!!!!!!!!!!
+    # modify default worker_connections
+    $ sudo vi /etc/nginx/nginx.conf
+    events {
+        worker_connections 5000;
+        # multi_accept on;
+    }
+
+
+    $ sudo cp localhost-p-test-nginx.conf /etc/nginx/sites-available
+    $ sudo ln -s /etc/nginx/sites-available/localhost-p-test-nginx.conf /etc/nginx/sites-enabled/p_test
+    $ sudo service nginx restart
+
+# create_database
+        $ mysql --user root --password xxxxx
+        $ drop database p_test;
+        $ create database p_test DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
+
+    # create tables
+        $ python manage.py shell
+        $ db.create_all()
+
+# test
+    # start uwsgi
+    $ uwsgi uwsgi.ini
+
+# use uwsgitop to see uwsgi workers
+    $ pip install uwsgitop
+    # set in uwsgi.ini file 状态检测地址 stats = 127.0.0.1:9001
+    $ uwsgitop 127.0.0.1:9001 
+
+# 测试结果
+    # 不带 数据库, 1000并发没问题
+    $ ab -n 100000 -c 1000 ip:port/
+
+    # 数据库
+
+增加并发的一些设置:
+nginx:
+1. worker_connections => 2000 -> 5000
+
+uwsgi:
+  process = 50-100 
+  listen = 1000+
+
+# 增加listen是需要修改系统的默认值的
+  $ cat /proc/sys/net/core/somaxconn
+  在/etc/sysctl.conf中添加如下
+    net.core.somaxconn = 2048
+  然后在终端中执行
+  $ sysctl -p
+  $ cat /proc/sys/net/core/somaxconn
+
+
+需要计算带宽：
+    上传带宽:
+    假设 上传并发是100/s
+    平均每个用户上传100Kb
+    那么 100Kb*100 = 10000Kb 那么带宽至少要比这个大2倍才能保证流畅，考虑
+    到还要接受用户的正常的get post请求，那么还要加上其他的带宽
+    假设普通的请求是300/s
+    响应用户的大小平均是 500Kb,那么
+    300*500 = 150,000 Kb/s
+    相当大的带宽!!
