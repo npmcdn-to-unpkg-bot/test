@@ -11,7 +11,7 @@ _root_logger = logging.getLogger(__name__)
 # Add handler for logger or you will see No handlers could be found for logger "app"
 ch = logging.StreamHandler()
 # set format
-formatter = logging.Formatter("[%(asctime)s][%(levelname)s][%(name)s] %(message)s")
+formatter = logging.Formatter("[%(asctime)s][%(levelname)s][%(name)s:line %(lineno)d] %(message)s")
 ch.setFormatter(formatter)
 
 _root_logger.addHandler(ch)

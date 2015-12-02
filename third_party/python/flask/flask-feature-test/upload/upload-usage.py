@@ -28,15 +28,45 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             return redirect(url_for('upload_file', filename=filename))
+        return 'No file'
+    return '''
+    <!doctype html>
+    <title>Upload new File</title>
+    <h1>Upload new File</h1>
+
+    <form action="" method=post enctype=multipart/form-data>
+        <input type=file name=file>
+        <input type=submit value=Upload>
+    </form>
+
+    '''   
+@app.route('/upload_form', methods=['GET', 'POST'])
+def upload_form():
+    if request.method == 'POST':
+        print request.form;
+        print request.files;
+        for field in request.form:
+            print field
+
+        for file in request.files:
+            filename = file.filename
+            print filename
+        return 'good'
     return '''
     <!doctype html>
     <title>Upload new File</title>
     <h1>Upload new File</h1>
     <form action="" method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
+        <input type="text" name="id">
+        <input type=submit value=Upload>
     </form>
-    '''
+
+    <form action="" method=post enctype=multipart/form-data>
+        <input type=file name=file>
+        <input type=submit value=Upload>
+    </form>
+
+    '''   
 
 if __name__ == '__main__':
     # set the secret key.  keep this really secret:
