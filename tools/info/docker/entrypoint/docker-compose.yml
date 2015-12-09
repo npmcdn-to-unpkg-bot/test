@@ -1,0 +1,10 @@
+test:
+    restart: always
+    build: .
+    links:
+    - redis:redis
+
+redis:
+    restart: always
+    image: redis:3.0.5
+
