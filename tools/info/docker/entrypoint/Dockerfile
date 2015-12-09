@@ -10,3 +10,4 @@ EXPOSE 80
 
 COPY run.sh /usr/bin/run.sh
 ENTRYPOINT ["run.sh"]
+CMD ['A', 'B', 'C']
