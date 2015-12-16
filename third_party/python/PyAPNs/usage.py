@@ -34,13 +34,15 @@ def send_notification(token_hex=None,
         interval=_DEFAULT_PUSH_INVTERVAL,
         start_identifier=_DEFAULT_START_IDENTIFIER,
         cert_file=None,
-        key_file=None):
+        key_file=None,
+        use_sandbox=True):
     # apns certificate files
     if None in (cert_file, key_file):
         (cert_file, key_file) = get_certicate_from_environment()
 
     # create apns
-    apns = APNs(use_sandbox=True, cert_file=cert_file, key_file=key_file, enhanced=True)
+    print '>>> Connect to *{}* server......'.format('Sandbox' if use_sandbox else 'Production')
+    apns = APNs(use_sandbox=use_sandbox, cert_file=cert_file, key_file=key_file, enhanced=True)
     apns.gateway_server.register_response_listener(response_listener)
 
     start_time = time.time()
@@ -91,6 +93,7 @@ if __name__ == '__main__':
     parser.add_argument('-I', '--interval', help='push interval, default {} seconds'.format(_DEFAULT_PUSH_INVTERVAL), type=int, default=_DEFAULT_PUSH_INVTERVAL)
     parser.add_argument('--cert_file', help='apns cert file, you can also export APNS_CERT_FILE=xxx')
     parser.add_argument('--key_file', help='apns key file, you can also export APNS_KEY_FILE=xxx')
+    parser.add_argument('--no-sandbox', help='use production server, default is sandbox', action="store_true")
 
     args = parser.parse_args()
 
@@ -98,4 +101,5 @@ if __name__ == '__main__':
             interval=args.interval,
             start_identifier=args.identifier,
             cert_file=args.cert_file,
-            key_file=args.key_file)
+            key_file=args.key_file,
+            use_sandbox=False if args.no_sandbox else True)
