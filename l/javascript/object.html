@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script type="text/javascript">
+
+// object
+var flight = {
+    airline : "Oceanic",
+    number : 815,
+    departure : {
+        IATA : "SYD",
+        time : "2004-09-22 14:55",
+        city : "Sydney"
+    },
+    arrival : {
+        IATA : "LAX",
+        time : "2004-09-23 10:42",
+        city : "Los Angeles"
+    }
+};
+
+console.log("Print difined attribute");
+console.log(flight.departure.IATA);
+console.log("Print undifined attribute");
+console.log(flight.not_defined);
+// Uncaught TypeError: Cannot read property 'not_defined' of undefined
+// should use && to avoid this
+// console.log(flight.not_defined.not_defined)
+if (flight.not_defined && flight.not_defined.not_defined) {
+    console.log('flight.not_defined.not_defined exsits ');
+} else {
+    console.log('flight.not_defined.not_defined doesnt exsits ');
+}
+
+console.log("Use || to init a varible");
+var middle = flight["middle-name"] || "(none)";
+console.log(middle);
+
+console.log("Update a new attr to an object")
+flight.number = 888
+flight.times = 123 // this is new
+
+console.log('Object **always** use refrence')
+var flight2 = flight
+console.log(flight2.number, ':', flight.number)
+flight.number = 900
+console.log(flight2.number, ':', flight.number)
+
+// Prototype
+console.log('=====Prototype=======')
+if (typeof Object.beget !== 'function') {
+    Object.beget = function(o) {
+        var F = function(o) {};
+        F.prototype = o;
+        return new F();
+    };
+}
+var flight3 = Object.beget(flight)
+console.log(flight3.number + ':' + flight2.number + ':' + flight.number)
+flight3.number = 1000
+console.log(flight3.number + ':' + flight2.number + ':' + flight.number)
+
+console.log('Add an attr crash to prototype,所有继承他的原型都立即可见了')
+flight.crash = 'never'
+console.log(flight3.crash + ':' + flight2.crash + ':' + flight.crash)
+
+// Reflection
+console.log('=====Reflection=======')
+console.log(typeof flight.number)
+console.log(typeof flight.airline)
+console.log(typeof flight.departure)
+console.log(typeof flight.toString)
+console.log(typeof flight.constructor)
+
+console.log('hasOwnProperty 不会检查原型链')
+// number 被 flight3修改过了,所以使用的是自己的属性了,而不是原型中的那个
+console.log('filght3 has attr number? ', flight3.hasOwnProperty('number'))
+console.log('filght3 has attr crash? ',flight3.hasOwnProperty('crash'))
+
+// Enumeration
+console.log("for in 可以用来便利一个对象肿的所有属性名.该过程会列出所有的属性.包括函数和你可能不关心的原型中的属性.所以可以用 hasOwnProperty来过滤,以及typeof来排除函数. 顺序是不确定的.");
+for (var name in flight3) {
+    console.log(name + ': type ' + typeof(name) + ': hasOwnProperty :' + flight3.hasOwnProperty(name))
+}
+console.log("如果想要固定顺序,那么定义一个数组,用for而不是for in")
+var properties = ["number", "airline"]
+for (var i=0; i<properties.length; i++) {
+    name = properties[i]
+    console.log(name + ': type ' + typeof(name) + ': hasOwnProperty :' + flight3.hasOwnProperty(name))
+}
+
+
+// Delete
+console.log('=====Delete=======')
+console.log('delete 运算符可以删除对象的属性.它将移除对象中确定包含的属性.它不会初级原型链中的任何对象.删除对象的属性可能会让来自原型链中的属性浮现出来.')
+console.log('flight3.number = ' + flight3.number )
+delete flight3.number
+// 删除对象的属性可能会让来自原型链中的属性浮现出来
+console.log('flight3.number = ' + flight3.number )
+
+console.log('flight3.airline = ' + flight3.airline )
+delete flight3.airline
+// delete移除对象中确定包含的属性.它不会初级原型链中的任何对象
+console.log('flight3.airline = ' + flight3.airline )
+
+
+// 减少全局变量的污染
+console.log('=====减少全局变量的污染=======')
+console.log('最小化使用全局变量的一个方法是在你的应用中只创建唯一一个全局变量')
+var MYAPP = {};
+MYAPP.flight = {
+
+};
+MYAPP.stooge = {
+
+};
+
+
+function onload() {
+}
+</script>
+</head>
+<body onload="onload()">
+</body>
+</html>
