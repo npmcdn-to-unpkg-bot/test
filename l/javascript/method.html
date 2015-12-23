@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script type="text/javascript">
+
+var print_boarder = function (tag) {
+    console.log('-----' + tag + '-----');
+};
+
+// Array
+console.log('=== Array ===')
+
+print_boarder('array.concat(item...)')
+var a = ['a', 'b', 'c'];
+var b = ['x', 'y', 'z'];
+var c = a.concat(b, true, false, a);
+console.log(c);
+
+
+print_boarder('array.join(sparator)');
+var a = ['a', 'b', 'c'];
+console.log(a.join('##'));
+
+
+// last element
+print_boarder('array.pop()');
+var a = ['a', 'b', 'c'];
+console.log(a.pop());
+console.log(a);
+
+// first element
+print_boarder('array.shift()');
+var a = ['a', 'b', 'c'];
+console.log(a.shift());
+console.log(a);
+
+// in the end
+print_boarder('array.push(item...)');
+var a = ['a', 'b', 'c'];
+var b = ['x', 'y', 'z'];
+var c = a.push(b, true, false);
+console.log('new length of arrya:' + c);
+console.log(a);
+
+// in the beggining
+print_boarder('array.unshift(item...)');
+var a = ['a', 'b', 'c'];
+var b = ['x', 'y', 'z'];
+var c = a.unshift(b, true, false);
+console.log('new length of arrya:' + c);
+console.log(a);
+
+print_boarder('array.reverse()');
+var a = ['a', 'b', 'c'];
+var b = a.reverse();
+console.log(a);
+console.log(b);
+
+print_boarder('array.slice(start, end)  [start, end)');
+var a = ['a', 'b', 'c' ,'d'];
+console.log(a.slice(1));
+console.log(a.slice(0,2));
+console.log(a.slice(1,10));
+
+print_boarder('array.sort(comparefnc)');
+var a = [4, 8, 15, 16, 23];
+console.log(a.sort()); // sort 默认是给字符串排序,所以不能很好的给数字排序,需要我们指定规则
+console.log(a.sort(function(a,b) {
+    return a - b;
+}));
+
+print_boarder('array.splice(start, deleteCount, item...)');
+var a = ['a', 'b', 'c'];
+var r = a.splice(1, 1, 'x', 'y')
+console.log(a);
+console.log(r);
+
+
+
+// Function
+console.log('=== FUNCTION ===')
+print_boarder('function.apply(thisArg, argArray)');
+
+
+// Number
+console.log('=== Number ===')
+print_boarder('number.toExponential(fractionDigits)');
+console.log(Math.PI.toExponential(0));
+console.log(Math.PI.toExponential(2));
+console.log(Math.PI.toExponential(7));
+console.log(Math.PI.toExponential(16));
+console.log(Math.PI.toExponential());
+
+
+print_boarder('number.toFixed(fractionDigits)');
+console.log(Math.PI.toFixed(0));
+console.log(Math.PI.toFixed(2));
+console.log(Math.PI.toFixed(7));
+console.log(Math.PI.toFixed(16));
+console.log(Math.PI.toFixed());
+
+
+print_boarder('number.toPrecision(precision)');
+console.log(Math.PI.toPrecision(2));
+console.log(Math.PI.toPrecision(7));
+console.log(Math.PI.toPrecision(16));
+console.log(Math.PI.toPrecision());
+
+
+print_boarder('number.toString(radix)');
+console.log(Math.PI.toString(2));
+console.log(Math.PI.toString(8));
+console.log(Math.PI.toString(16));
+console.log(Math.PI.toString());
+
+
+// Object
+console.log('=== Object ===')
+print_boarder('object.hasOwnProperty(name)');
+var a = { member : true };
+var B = function () {};
+B.prototype = a;
+
+var b = new B();
+console.log(a.hasOwnProperty('member'))
+console.log(b.hasOwnProperty('member'))
+console.log(b.member)
+console.log(b)
+
+
+// RegExp
+console.log('=== RegExp ===')
+print_boarder('regexp.exec(string)');
+print_boarder('regexp.test(string)');
+
+
+// String
+console.log('=== String ===')
+print_boarder('string.charAt(pos)');
+var name = 'Curly';
+console.log(name + ' at 0 :[' + name.charAt(0) + ']');
+console.log(name + ' at -2 :[' + name.charAt(-2) + ']');
+console.log(name + ' at 100 :[' + name.charAt(100) + ']');
+
+
+print_boarder('string.charCodeAt(pos)');
+var name = 'Curly';
+console.log(name + ' at 0 :[' + name.charCodeAt(0) + ']');
+console.log(name + ' at -2 :[' + name.charCodeAt(-2) + ']');
+console.log(name + ' at 100 :[' + name.charCodeAt(100) + ']');
+
+print_boarder('string.concat(string...)');
+console.log('C'.concat('a', 't'));
+
+print_boarder('string.indexOf(searchString, position)');
+var text = 'Mississippi';
+console.log(text.indexOf('ss'));
+console.log(text.indexOf('ss', 3));
+console.log(text.indexOf('ss', 6));
+
+print_boarder('string.lastIndexOf(searchString, position)');
+var text = 'Mississippi';
+console.log(text.lastIndexOf('ss'));
+console.log(text.lastIndexOf('ss', 3));
+console.log(text.lastIndexOf('ss', 6));
+
+print_boarder('string.localCompare(that)');
+print_boarder('string.match(regexp)');
+print_boarder('string.replace(serachValue, replaceValue)');
+print_boarder('string.search(regexp)');
+print_boarder('string.slice(start, end)');
+print_boarder('string.split(separator, limit)');
+print_boarder('string.substring(start, end)');
+print_boarder('string.toLocalLowerCase()');
+print_boarder('string.toLocalUpperCase()');
+print_boarder('string.toLowerCase()');
+print_boarder('string.toUpperCase()');
+print_boarder('string.fromCharCode(char...)');
+
+
+
+</script>
+</head>
+<body>
+</body>
+</html>
