@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script type="text/javascript">
+
+// Add method to prototype
+Function.prototype.method = function (name, func) {
+    this.prototype[name] = func;
+    return this;
+};
+
+// 伪类
+var Mammal = function (name) {
+    this.name = name;
+};
+
+Mammal.prototype.get_name = function () {
+    return this.name;
+};
+
+Mammal.prototype.says = function() {
+    return this.saying || '';
+}
+
+var myMammal = new Mammal('Herb the Mammal');
+console.log(myMammal.get_name());
+
+
+var Cat = function (name) {
+    this.name = name;
+    this.saying = 'meow';
+};
+Cat.prototype = new Mammal();
+Cat.prototype.purr = function () {
+    return 'rrrrr';
+};
+Cat.prototype.get_name = function () {
+    return this.says() + ' ' + this.name + ' ' + this.says();
+};
+
+var myCat = new Cat('Kitty');
+console.log(myCat.says());
+console.log(myCat.purr());
+console.log(myCat.get_name());
+
+Function.method('inherit', function(Parent) {
+    this.prototype = new Parent();
+    return this;
+});
+
+var Dog = function (name) {
+    this.name = name;
+    this.saying = 'wang';
+}.inherit(Mammal).method('purr', function() {
+    return 'rrrrr';
+}).method('get_name', function() {
+    return this.says() + ' ' + this.name + ' ' + this.says();
+});
+
+// 对象说明符
+// var myObject = maker(f, l, m, c, s);
+// var myObject = maker ( {
+//     first : f,
+//     last : l,
+//     state : s,
+//     city : c
+// });
+
+
+if (typeof Object.beget !== 'function') {
+    Object.beget = function(o) {
+        var F = function(o) {};
+        F.prototype = o;
+        return new F();
+    };
+}
+
+// Prototypal
+
+
+// Functional
+
+var mammal = function (spec) {
+    var that = {};
+    that.get_name = function() {
+        return spec.name;
+    };
+    that.says = function () {
+        return spec.saying || '';
+    };
+    return that;
+};
+var myMammal = mammal({ name : 'Herb'})
+
+var cat = function (spec) {
+    spec.saying = spec.saying || 'meow';
+    var that = mammal(spec);
+    that.purr = function () {
+        return 'rrrrr';
+    };
+    that.get_name = function () {
+        return that.says() + ' ' + spec.name + ' ' + that.says();
+    };
+    return that;
+};
+var myCat = cat({name : 'Henrietta'});
+
+Object.method('super', function (name) {
+    // super其实就是cache原来的函数在这个闭包里,当子类的这个函数改变了,原来的函数仍然cache在这里,就可以调用了.
+    var that = this, method = that[name];
+    return function () {
+        return method.apply(that, arguments);
+    }
+});
+
+var coolcat = function (spec) {
+    // 如果这里直接用 super_get_name = that.get_name
+    // 那么,一会 get_name 改变的时候,会发现已经改变了
+    var that = cat(spec), super_get_name = that.super('get_name');
+    that.get_name = function (n) {
+        return 'like ' + super_get_name() + ' baby';
+    };
+    return that;
+};
+var myCoolCat = coolcat({name : 'bix'});
+console.log(myCoolCat.get_name());
+
+
+
+// Parts
+var eventuality = function (that) {
+    var registry = {};
+    that.fire = function (event) {
+        var array,
+            func,
+            handler,
+            i,
+            type = typeof event === 'string' ? event : event.type;
+        if (registry.hasOwnProperty(type)) {
+            array = registry[type];
+            for (i=0; i<array.length; i ++) {
+                handler = array[i];
+                func = handler.method;
+                if (typeof func === 'string') {
+                    func = this[func];
+                }
+                func.apply(this, handler.parameters || [event]);
+            }
+        }
+        return this;
+    };
+
+    that.on = function (type, method, parameters) {
+        var handler = {
+            method : method,
+            parameters : parameters
+        };
+        if (registry.hasOwnProperty(type)) {
+            registry[type].push(handler);
+        } else {
+            registry[type] = [handler];
+        }
+        return this;
+    };
+
+    return that;
+}
+
+
+</script>
+</head>
+<body>
+</body>
+</html>
