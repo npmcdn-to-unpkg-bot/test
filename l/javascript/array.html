@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script type="text/javascript">
+
+Function.prototype.method = function (name, func) {
+    this.prototype[name] = func;
+    return this;
+};
+
+var print_array = function (array) {
+    for (var i=0; i<array.length; i++) {
+        console.log('array[' + i + ']=' + array[i]);
+    }
+};
+
+// Array Literals
+var empty = [];
+var numbers = [
+        'zero', 'one', 'two', 'three', 'four',
+        'five', 'six', 'seven', 'eight', 'nine'];
+console.log(empty[0]);
+console.log(numbers[0]);
+
+console.log(empty.length);
+console.log(numbers.length);
+
+var misc = [
+        'string', 98.6, true, false, null, undefined,
+        ['nested', 'array'],
+        {object : true},
+        NaN,
+        Infinity  
+];
+console.log(misc.length);
+print_array(misc);
+
+// Length
+var myArray = [];
+console.log(myArray.length);
+
+myArray[10] = true;
+console.log(myArray.length);
+print_array(myArray);
+
+myArray['sss'] = 'sss';
+console.log(myArray['sss']);
+// we can't get 'sss' with for (var i=0; i<myArray.length; i++)
+print_array(myArray);
+console.log(myArray);
+
+// Delete
+delete numbers[2];
+print_array(numbers);
+numbers.splice(2, 3); // delete from 2 with total 3 elements. 2,3,4
+console.log('---------------');
+print_array(numbers);
+
+// Enumeration
+for (var i=0; i<numbers.length; i++) {
+    // In order
+}
+console.log('---------------');
+// Like object, now we can get 'sss'
+for (e  in myArray) {
+    console.log(e + ':' + myArray[e]);
+}
+
+// Confusion
+console.log('type of array is ' + typeof myArray);
+console.log('array.constructor is ' +  myArray.constructor);
+
+// Methods
+Array.method('reduce', function (f, value) {
+    for (var i=0; i<this.length; i++) {
+        value= f(this[i], value);
+    }
+    return value;
+});
+
+
+// Dimensions
+Array.dim = function (dimension, initial) {
+    var a = [], i;
+    for (i=0; i<dimension; i++) {
+        a[i] = initial;
+    }
+    return a;
+}
+var myArray = Array.dim(10, 0);
+print_array(myArray);
+
+var matrix = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8]
+];
+console.log(matrix[2][1]);
+
+
+</script>
+</head>
+<body>
+</body>
+</html>
