@@ -1,17 +1,86 @@
 "use strict";
 
-var apn = require ("../index.js");
+// npm install apn
+// npm install commander
 
-var tokens = ["<insert token here>", "<insert token here>"];
 
-if(tokens[0] === "<insert token here>") {
-    console.log("Please set token to a valid device token for the push notification service");
-    process.exit();
+var apn = require ("apn");
+var args = require ('commander');
+var fs = require ('fs');
+
+var apns_conf = {
+    certFile : process.env['CERT_FILE'],
+    keyFile : process.env['KEY_FILE'],
+    production : false,
+    sendTimes : 1,
+    tokens : []
+};
+
+var path_exists = function (path) {
+    try {
+        status = fs.accessSync(path, fs.F_OK);
+    } catch (e) {
+        if (e.errorno === -2) {
+            console.log(e);
+            return false;
+        }
+    }
+    return true;
+};
+
+var token_list = function (val) {
+    console.log(val)
+    return val.split(' ');
+};
+
+args.version('0.0.1')
+    .usage('token1 token2... [options]')
+    .option('--production', 'Use production server')
+    .option('--cert-file [path]', 'cert file for apns server')
+    .option('--key-file [path]', 'private key file for apns server')
+    .option('-n, --number <n>', 'How many times to send', parseInt)
+    .parse(process.argv)
+
+if (args.certFile) {
+    apns_conf.certFile = args.certFile;
+}
+if (args.keyFile) {
+    apns_conf.keyFile = args.keyFile;
+}
+if (args.production) {
+    apns_conf.production = true;
+}
+if (args.number) {
+    apns_conf.sendTimes = args.number;
+}
+if (!args.args.length) {
+    console.log('  Need tokens ...');
+    args.help();
+    process.exit(-1);
+}
+// Unparsed args as tokens
+apns_conf.tokens = apns_conf.tokens.concat(args.args);
+
+if (!apns_conf.certFile || !apns_conf.keyFile) {
+    console.log('Please export CERT_FILE=/path/to/cert-file');
+    console.log('       export KEY_FILE=/path/to/key-file');
+    console.log('Or use --cert-file=/path/to/cert-file');
+    console.log('       --cert-file=/path/to/key-file');
+    process.exit(-1);
 }
 
-// Create a connection to the service using mostly default parameters.
+if (!path_exists(apns_conf.certFile) || !path_exists(apns_conf.keyFile)) {
+    process.exit(-1);
+}
 
-var service = new apn.connection({ production: false });
+
+// Create a connection to the service using mostly default parameters.
+var options = {
+    cert : apns_conf.certFile,
+    key : apns_conf.keyFile,
+    production : apns_conf.production
+};
+var service = new apn.connection(options);
 
 service.on("connected", function() {
     console.log("Connected");
@@ -40,7 +109,7 @@ service.on("socketError", console.error);
 
 
 // If you plan on sending identical paylods to many devices you can do something like this.
-function pushNotificationToMany() {
+function pushNotificationToMany(tokens) {
     console.log("Sending the same notification each of the devices with one call to pushNotification.");
     var note = new apn.notification();
     note.setAlertText("Hello, from node-apn!");
@@ -49,11 +118,9 @@ function pushNotificationToMany() {
     service.pushNotification(note, tokens);
 }
 
-pushNotificationToMany();
-
 
 // If you have a list of devices for which you want to send a customised notification you can create one and send it to and individual device.
-function pushSomeNotifications() {
+function pushSomeNotifications(tokens) {
     console.log("Sending a tailored notification to %d devices", tokens.length);
     tokens.forEach(function(token, i) {
         var note = new apn.notification();
@@ -64,4 +131,15 @@ function pushSomeNotifications() {
     });
 }
 
-pushSomeNotifications();
+function pushNotificationWithNumber(token, sendTimes) {
+    sendTimes = arguments[1] ? arguments[1] : 1;
+    for (var i=1; i<sendTimes+1; i++) {
+        var note = new apn.notification();
+        note.setAlertText('This is the ' + i + ' time to push ...');
+        note.badge = i;
+
+        service.pushNotification(note, token);
+    }
+}
+
+pushNotificationWithNumber(apns_conf.tokens[0], apns_conf.sendTimes);
