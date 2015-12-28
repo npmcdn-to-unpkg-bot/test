@@ -101,10 +101,31 @@ var select = function () {
 
 
 // associations
+// 1:1
+// in mysql, use 'desc Source1to1' to see the table.
 var Source1to1 = sequelize.define('Source1to1', {})
   , Target1to1 = sequelize.define('Target1to1', {});
 Source1to1.hasOne(Target1to1);
 Target1to1.belongsTo(Source1to1);
+// Even if we didn't define any foreign key or something else,
+// instances of Target will have a column SourceId!
+
+
+// 1:N
+var Source1toN = sequelize.define('Source1toN', {})
+  , Target1toN = sequelize.define('Target1toN', {});
+Source1toN.hasMany(Source1toN);
+Target1toN.belongsTo(Target1toN);
+// Even if we didn't define any foreign key or something else,
+// instances of Target will have a column SourceId!
+
+// N:N
+var SourceNtoN = sequelize.define('SourceNtoN', {})
+  , TargetNtoN = sequelize.define('TargetNtoN', {});
+SourceNtoN.hasMany(SourceNtoN);
+TargetNtoN.hasMany(TargetNtoN);
+// Even if we didn't define any foreign key or something else,
+// Sequelize will create a table SourcesTargets.
 
 // create all tables
 sequelize
