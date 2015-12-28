@@ -12,6 +12,7 @@ var apns_conf = {
     certFile : process.env['CERT_FILE'],
     keyFile : process.env['KEY_FILE'],
     production : false,
+    silience : false,
     sendTimes : 1,
     tokens : []
 };
@@ -39,6 +40,7 @@ args.version('0.0.1')
     .option('--cert-file [path]', 'cert file for apns server')
     .option('--key-file [path]', 'private key file for apns server')
     .option('-n, --number <n>', 'How many times to send', parseInt)
+    .option('--silience', 'push a silience notification')
     .parse(process.argv)
 
 if (args.certFile) {
@@ -49,6 +51,9 @@ if (args.keyFile) {
 }
 if (args.production) {
     apns_conf.production = true;
+}
+if (args.silience) {
+    apns_conf.silience = true;
 }
 if (args.number) {
     apns_conf.sendTimes = args.number;
@@ -131,15 +136,19 @@ function pushSomeNotifications(tokens) {
     });
 }
 
-function pushNotificationWithNumber(token, sendTimes) {
+function pushNotificationWithNumber(token, sendTimes, silience) {
     sendTimes = arguments[1] ? arguments[1] : 1;
     for (var i=1; i<sendTimes+1; i++) {
         var note = new apn.notification();
-        note.setAlertText('This is the ' + i + ' time to push ...');
-        note.badge = i;
-
+        if (!silience) {
+            note.setAlertText('This is the ' + i + ' time to push ...');
+            note.badge = i;
+        } else {}
+            note.payload = { 'data' : 'wahaha'};
+            note.contentAvailable = true;
+        }
         service.pushNotification(note, token);
     }
 }
 
-pushNotificationWithNumber(apns_conf.tokens[0], apns_conf.sendTimes);
+pushNotificationWithNumber(apns_conf.tokens[0], apns_conf.sendTimes, apns_conf.silience);
