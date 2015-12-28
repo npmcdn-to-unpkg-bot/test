@@ -1,0 +1,2 @@
+npm install --save sequelize
+npm install --save mysql
