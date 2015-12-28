@@ -35,7 +35,8 @@ def send_notification(token_hex=None,
         start_identifier=_DEFAULT_START_IDENTIFIER,
         cert_file=None,
         key_file=None,
-        use_sandbox=True):
+        use_sandbox=True,
+        silience=False):
     # apns certificate files
     if None in (cert_file, key_file):
         (cert_file, key_file) = get_certicate_from_environment()
@@ -49,7 +50,11 @@ def send_notification(token_hex=None,
     # Send a notification
     for i in range(times):
         identifier = start_identifier + i
-        payload = Payload(alert=_DEFAULT_PUSH_MESSAGE.format(i+1), sound="default", badge=i+1)
+        payload = None
+        if silience:
+            payload = Payload(content_available=1, custom={'type' : 'connect-to-me'})
+        else:
+            payload = Payload(alert=_DEFAULT_PUSH_MESSAGE.format(i+1), sound="default", badge=i+1)
         apns.gateway_server.send_notification(token_hex, payload, identifier=identifier)
         print '> send over for identifier:<{}>'.format(identifier)
         if interval is not None:
@@ -94,6 +99,7 @@ if __name__ == '__main__':
     parser.add_argument('--cert_file', help='apns cert file, you can also export APNS_CERT_FILE=xxx')
     parser.add_argument('--key_file', help='apns key file, you can also export APNS_KEY_FILE=xxx')
     parser.add_argument('--no-sandbox', help='use production server, default is sandbox', action="store_true")
+    parser.add_argument('--silience', help='push a silience notification', action="store_true")
 
     args = parser.parse_args()
 
@@ -102,4 +108,5 @@ if __name__ == '__main__':
             start_identifier=args.identifier,
             cert_file=args.cert_file,
             key_file=args.key_file,
-            use_sandbox=False if args.no_sandbox else True)
+            use_sandbox=False if args.no_sandbox else True,
+            silience=args.silience)
