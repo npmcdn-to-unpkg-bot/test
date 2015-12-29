@@ -143,7 +143,7 @@ function pushNotificationWithNumber(token, sendTimes, silience) {
         if (!silience) {
             note.setAlertText('This is the ' + i + ' time to push ...');
             note.badge = i;
-        } else {}
+        } else {
             note.payload = { 'data' : 'wahaha'};
             note.contentAvailable = true;
         }
