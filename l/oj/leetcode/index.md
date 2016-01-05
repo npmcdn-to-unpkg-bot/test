@@ -1,2 +1,2 @@
-001 Two Sum
-003 Longest Substring Without Repeating Characters
+0001 Two Sum
+0003 Longest Substring Without Repeating Characters
