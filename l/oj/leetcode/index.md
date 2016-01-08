@@ -6,5 +6,6 @@
 0048 Rotate Image
 0049 Group Anagrams
 0077 Combinations
+0094 Binary Tree Inorder Traversal
 0199 Binary Tree Right Side View
 0322 Coin Change
