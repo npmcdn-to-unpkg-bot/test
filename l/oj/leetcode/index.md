@@ -5,6 +5,7 @@
 0014 Longest Common Prefix
 0048 Rotate Image
 0049 Group Anagrams
+0070 Climbing Stairs
 0077 Combinations
 0094 Binary Tree Inorder Traversal
 0099 Recover Binary Search Tree
