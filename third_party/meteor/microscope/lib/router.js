@@ -12,6 +12,7 @@ Router.route('/posts/:_id', {
   name: 'postPage',
   data: function() { return Posts.findOne(this.params._id); }
 });
+Router.route('/submit', {name: 'postSubmit'});
 
 // 如果有人输入了像 http://localhost:3000/posts/xyz 这种格式的 URL,
 // xyz 不是一个合法的帖子 _id 怎么办？虽然是合法的路由，但是没有指向任何数据。
