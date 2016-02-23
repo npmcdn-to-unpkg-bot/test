@@ -14,6 +14,9 @@ meteor add accounts-ui                    # accounts ui
 meteor add ian:accounts-ui-bootstrap-3    # style is different from default
 meteor add accounts-password 
 
+meteor add check
+
+
 # remove packages
 meteor remove autopublish
 meteor remove insecure

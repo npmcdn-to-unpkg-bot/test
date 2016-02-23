@@ -22,3 +22,16 @@ Router.route('/submit', {name: 'postSubmit'});
 // 每当 data 函数返回“falsy”（比如 null、false、undefined 或 空）对象时，显示“无法找到”的页面。
 //      ^^^  
 Router.onBeforeAction('dataNotFound', {only: 'postPage'});
+
+var requireLogin = function() {
+  if (!Meteor.user()) {
+    if (Meteor.loggingIn()) {
+      this.render(this.loadingTemplate);
+    } else {
+      this.render('accessDenied');
+    }
+  } else {
+    this.next();
+  }
+}
+Router.onBeforeAction(requireLogin, {only: 'postSubmit'});
