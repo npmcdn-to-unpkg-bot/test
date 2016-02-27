@@ -3,15 +3,31 @@ Posts = new Mongo.Collection('posts');
 // 在 Meteor 中, 关键字 var 限制对象的作用域在文件范围内.
 // 我们想要 Posts 作用于整个应用范围内，因此我们在这里不要 Var 这个关键字
 
+validatePost = function(post) {
+  var errors = {};
+  if (!post.title)
+    errors.title = '请填写标题';
+  if (!post.url)
+    errors.url = '请填写 URL';
+  return errors;
+}
+
 Posts.allow({
   update: function(userId, post) { return ownsDocument(userId, post); },
   remove: function(userId, post) { return ownsDocument(userId, post); }
 });
 
 Posts.deny({
-  update: function(userId, post, fieldNames) {
+  update: function(userId, post, fieldNames, modifier) {
     // 只能更改如下两个字段
     return (_.without(fieldNames, 'url', 'title').length > 0);
+  }
+});
+
+Posts.deny({
+  update: function(userId, post, fieldNames, modifier) {
+    var errors = validatePost(modifier.$set);
+    return errors.title || errors.url;
   }
 });
 
@@ -22,6 +38,10 @@ Meteor.methods({
       title: String,
       url: String
     });
+
+    var errors = validatePost(postAttributes);
+    if (errors.title || errors.url)
+      throw new Meteor.Error('invalid-post', '你必须为你的帖子填写标题和 URL');
 
     if (Meteor.isServer) {
       postAttributes.title += "(server)";

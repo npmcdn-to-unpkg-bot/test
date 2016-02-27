@@ -8,6 +8,10 @@ Template.postEdit.events({
       title: $(e.target).find('[name=title]').val()
     }
 
+    var errors = validatePost(PostProperties);
+    if (errors.url || errors.title)
+      return Session.set('postEditErrors', errors);
+
     Posts.update(currentPostId, {$set: PostProperties}, function(error) {
       if (error) {
         throwError(error.reason);
@@ -24,5 +28,18 @@ Template.postEdit.events({
       Posts.remove(currentPostId);
       Router.go('postsList');
     }
+  }
+});
+
+Template.postEdit.onCreated(function() {
+  Session.set('postEditErrors', {});
+});
+
+Template.postEdit.helpers({
+  errorMessage: function(field) {
+    return Session.get('postEditErrors')[field];
+  },
+  errorClass: function(field) {
+    return !!Session.get('postEditErrors')[field] ? 'hass-error' : '';
   }
 });
