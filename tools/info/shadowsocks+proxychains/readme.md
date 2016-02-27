@@ -8,8 +8,9 @@ Mac OS X:
     $ brew install proxychains-ng
 
 配置文件
-编辑        ~/.proxychains/proxychains.conf:
-   sudo vi /etc/proxychains.conf
+编辑      
+  mac:    $ vi /usr/local/etc/proxychains.conf
+  ubuntu: $ sudo vi /etc/proxychains.conf
 
 
 [ProxyList]
