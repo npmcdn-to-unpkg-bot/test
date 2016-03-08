@@ -1,0 +1,2 @@
+webrtc/all.gyp
+disable samples and tests build. It will cut a lot of dependencies
