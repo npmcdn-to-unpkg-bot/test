@@ -25,8 +25,8 @@ func TestOps(t *testing.T) {
     }
 
     if m.Id != m0.Id || m.Artist != m0.Artist ||
-        m.Name != m0.Name || m.Genre != m0.Genre ||
-        m.Source != m0.Source || m.Type != m0.Type {
+        m.Name != m0.Name || m.Source != m0.Source ||
+        m.Type != m0.Type {
             t.Error("MusicManager.Find() failed. Item mismatch")
     }
 

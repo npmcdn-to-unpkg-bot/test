@@ -1,13 +1,14 @@
 package library
 
 import "errors"
+import "fmt"
+import "strconv"
 
 type MusicEntry struct {
     Id string
     Name string
     Artist string
     Source string
-    Genre string
     Type string
 }
 
@@ -62,4 +63,19 @@ func (m *MusicManager) Remove(index int) *MusicEntry {
         m.musics = m.musics[:index-1]
     }
     return removedMusic
+}
+
+func (m *MusicManager) RemoveByName(name string) {
+    entry := m.Find(name)
+    if entry == nil {
+        fmt.Println("Find no music ", name)
+        return
+    }
+
+    index, err := strconv.Atoi(entry.Id)
+    if err != nil {
+        fmt.Println("cannot convert entry.Id to int")
+        return
+    }
+    m.Remove(index)
 }

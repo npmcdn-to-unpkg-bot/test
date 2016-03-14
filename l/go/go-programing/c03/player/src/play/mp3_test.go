@@ -1,4 +1,0 @@
-package mp
-
-import "testing"
-
