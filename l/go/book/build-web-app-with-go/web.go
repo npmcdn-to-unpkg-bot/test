@@ -18,7 +18,7 @@ func sayHelloName(w http.ResponseWriter, r *http.Request) {
         fmt.Println(k, "=", strings.Join(v, ""))
     }
 
-    fmt.Fprintf(w, "Hello!!")
+    fmt.Fprintf(w, "Hello!!" + strings.Join(r.Form["name"], ""))
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
