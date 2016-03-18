@@ -7,6 +7,10 @@
     $ sudo apt-get install -y nodejs build-essential
 
 
+# npm usage
+	$ npm init # create a package with wizzard
+
+
 # sublime for nodejs
 
     https://github.com/tanepiper/SublimeText-Nodejs
