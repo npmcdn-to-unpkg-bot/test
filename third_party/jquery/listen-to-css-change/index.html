@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>jQuery Hello World</title>
+
+<!-- <script src="https://cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script> -->
+<script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="node_modules/jquery-watch/jquery-watch.min.js"></script>
+
+</head>
+
+<body>
+
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#msgid").html("This is Hello World by JQuery");
+
+    $('a').click(function() {
+        if ($('#style-change').css('display') !== 'none') {
+            $('#style-change').css('display', 'none');
+        } else {
+            $('#style-change').css('display', 'block');
+        }
+    });
+
+    $('#style-change').watch({
+        properties: 'display',
+        callback: function(data, i) {
+            var propChanged = data.props[i];
+            var newValue = data.vals[i];
+            console.log('display changed ' + propChanged + ' => ' + newValue);
+        }
+    });
+});
+
+</script>
+
+This is Hello World by HTML
+
+<div id="msgid">
+</div>
+<div id="style-change">
+    Hello style change
+</div>
+<a href="#">change style</a>
+
+</body>
+</html>
