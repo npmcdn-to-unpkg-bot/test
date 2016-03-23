@@ -44,8 +44,23 @@ page.onLoadStarted = function() {
 page.onNavigationRequested = function(url, type, willNavigate, main) {
     console.log('> Trying to navigate to: ' + url);
 };
-page.onCallback = function(data) {
-    console.log('onCallback:' + data.name + ', data:' + data.data);
+page.onCallback = function(event) {
+    console.log('Receive event [' + event.type + ']')
+    switch (event.type) {
+    case 'nocaptcha':
+        console.log('  ' + event.property + '=>' + event.value);
+        break;
+    case 'fillForm':
+        break;
+    case 'login':
+        break;
+    case 'report':
+        console.log('report');
+        break;
+    default:
+        console.log('unkonw event...');
+        console.log(event);
+    }
 };
 
 var url = 'https://login.taobao.com/';
@@ -58,64 +73,34 @@ page.clipRect = { top: 0, left: 0, width: 1920, height: 1080 };
 console.log('start to open ' + url);
 page.open(url, function(status) {
     if (status === 'success') {
-        // use jquery
         console.log('open success...');
-        page.includeJs('https://cdn.bootcss.com/jquery/2.2.1/jquery.min.js', function() {
-            console.log('jquery included ...');
-            page.render('p0.png');
 
-            console.log('start to run js in webpage...')
-            var result = page.evaluate(function(username, password) {
-                // test info
-                var detectNocaptcha = function() {
-                    console.log('>nocaptcha display is ' + $('#nocaptcha').css('display'));
-                };
+        var injectJs = function(name) {
+            if (page.injectJs(name)) {
+                console.log('Success to inject [' + name + ']');
+            } else {
+                console.log('Failed to inject [' + name + ']');
+                phantom.exit();
+            }
+        };
 
-                detectNocaptcha();
+        injectJs('./scripts/jquery.min.js');
+        injectJs('./scripts/jquery-watch.min.js');
+        injectJs('./utility.js');
 
-                console.log('TPL_username_1:' + $('#TPL_username_1').val());
-                $('#TPL_username_1').focus();
-                $('#TPL_username_1').val(username);
-                $('#TPL_password_1').focus();
-                $('#TPL_password_1').val(password);
+        // set listener for key element's css change
+        page.evaluateAsync(function(username, password) {
+            report();
+            setSentry();
 
-                detectNocaptcha();
-                window.callPhantom({'name' : 'testing', 'data' : 'ahahahahahah'});
-                return {
-                    'username' : $('#TPL_username_1').val(),
-                    'password' : $('#TPL_password_1').val()
-                }
-            }, username, password);
-            console.log('result is :' + result.username);
+            fillForm(username, password);
+            login();
+        }, 0, password, username); // it seems a bug, arguments are past in a reversed order
 
-            console.log('render p1.png');
-            page.render('p1.png');
-
-            page.evaluate(function() {
-                console.log('submit...');
-                $('#J_SubmitStatic').click();
-
-                var detectNocaptcha = function() {
-                    console.log('>nocaptcha display is ' + $('#nocaptcha').css('display'));
-                };
-                detectNocaptcha();
-            });
-            
-            console.log('p2.png');
-            page.render('p2.png');
-
-            page.evaluate(function() {
-                console.log('test for jquery:' + $('#nocaptcha').css('display'));
-                var detectNocaptcha = function() {
-                    console.log('>nocaptcha display is ' + $('#nocaptcha').css('display'));
-                };
-                detectNocaptcha();
-            });
-
-            setInterval(function() {
-                page.render('interval.png');
-            }, 500);
-        });
+        setInterval(function() {
+            console.log('render page interval')
+            page.render('interval.png');
+        }, 1000);
     } else {
         console.log('Fail to open ' + url);
         phantom.exit();
