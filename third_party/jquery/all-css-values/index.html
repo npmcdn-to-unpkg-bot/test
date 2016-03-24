@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+
+<body>
+<h1 id="myH1" style="color:red">My Header</h1>
+<p>Click the button to get the style property of the H1 element.</p>
+
+<button onclick="myFunction()">Try it</button>
+
+<p id="demo"></p>
+
+<script>
+function myFunction() {
+    var x = document.getElementById("myH1").style;
+    console.log(x);
+    document.getElementById("demo").innerHTML = x;
+}
+</script>
+
+</body>
+</html>

@@ -1,3 +1,5 @@
+"use strict";
+
 var webPage = require('webpage'),
     system = require('system');
 
@@ -44,23 +46,8 @@ page.onLoadStarted = function() {
 page.onNavigationRequested = function(url, type, willNavigate, main) {
     console.log('> Trying to navigate to: ' + url);
 };
-page.onCallback = function(event) {
-    console.log('Receive event [' + event.type + ']')
-    switch (event.type) {
-    case 'nocaptcha':
-        console.log('  ' + event.property + '=>' + event.value);
-        break;
-    case 'fillForm':
-        break;
-    case 'login':
-        break;
-    case 'report':
-        console.log('report');
-        break;
-    default:
-        console.log('unkonw event...');
-        console.log(event);
-    }
+page.onCallback = function(data) {
+    console.log('onCallback');
 };
 
 var url = 'https://login.taobao.com/';
@@ -85,17 +72,45 @@ page.open(url, function(status) {
         };
 
         injectJs('./scripts/jquery.min.js');
-        injectJs('./scripts/jquery-watch.min.js');
         injectJs('./utility.js');
 
         // set listener for key element's css change
-        page.evaluateAsync(function(username, password) {
-            report();
-            setSentry();
+        page.evaluate(function(username, password) {
+            login(username, password);
+        }, username, password);
 
-            fillForm(username, password);
-            login();
-        }, 0, password, username); // it seems a bug, arguments are past in a reversed order
+        waitFor(function check() {
+            injectJs('./scripts/jquery.min.js'); // why need to inject again?
+            injectJs('./utility.js');
+            return page.evaluate(function() {
+                return isNocaptchaReady();
+            });
+        }, function onReady() {
+            console.log('nocaptcha is showing...');
+            page.evaluate(function() {
+                report('#nocaptcha');
+                report('#nocaptcha #_nlz');
+                report('#nocaptcha #_bg');
+                report('#nocaptcha #_scale_text');
+            });
+
+            var pos = page.evaluate(function() {
+                return getPositions();
+            });
+            console.log('nocaptcha.x,y=' + pos.nocaptcha.x + ',' + pos.nocaptcha.y +
+                ', nlz offset:' + pos.nlz +
+                ', bg x,y=' + pos.bg.x + ',' + pos.bg.y);
+
+            console.log('mousedown...');
+            var downX = pos.bg.x + 20;
+            var downY = pos.bg.y + pos.bg.height/2;
+            page.sendEvent('mousedown', downX, downY);
+
+            console.log('mousemove...');
+            page.sendEvent('mousemove', downX + 20, downY);
+            page.sendEvent('mousemove', downX + pos.scale_text.width, downY);
+
+        }, 10000); // waitfor
 
         setInterval(function() {
             console.log('render page interval')
@@ -107,3 +122,25 @@ page.open(url, function(status) {
     }
 });
 
+function waitFor(testFx, onReady, timeOutMillis) {
+    var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 5000, //< Default Max Timout is 5s
+        start = new Date().getTime(),
+        condition = false,
+        interval = setInterval(function() {
+            if ( (new Date().getTime() - start < maxtimeOutMillis) && !condition ) {
+                // If not time-out yet and condition not yet fulfilled
+                condition = (typeof(testFx) === "string" ? eval(testFx) : testFx()); //< defensive code
+            } else {
+                if(!condition) {
+                    // If condition still not fulfilled (timeout but condition is 'false')
+                    console.log("'waitFor()' timeout");
+                    clearInterval(interval);
+                } else {
+                    // Condition fulfilled (timeout and/or condition is 'true')
+                    console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
+                    typeof(onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
+                    clearInterval(interval); //< Stop this interval
+                }
+            }
+        }, 250); //< repeat check every 250ms
+};
