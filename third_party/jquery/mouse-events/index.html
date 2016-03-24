@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+<script>
+$(document).ready(function(){
+    $(document).mousemove(function(event){
+        $("span").text(event.pageX + ", " + event.pageY);
+    });
+
+    var dafei = $("#dafei");
+    var xy = $("#xy");
+    var logMousedown = $("#logMousedown");
+    var logMousemove = $("#logMousemove");
+    xy.text("dafei x,y=(" + dafei.offset().left + "," + dafei.offset().top + ")");
+
+    dafei.mousedown(function(event) {
+        logMousedown.text("mousedown x,y=(" + event.pageX + "," + event.pageY +")");
+    });
+    dafei.mousemove(function(event) {
+        logMousemove.text("mousemove x,y=(" + event.pageX + "," + event.pageY +")");
+    })
+
+    var i = 0;
+    setInterval(function() {
+        i++;
+        var mouseDownEvt = $.Event("mousedown", {
+            which : 1,
+            pageX : dafei.offset().left + 5 * i,
+            pageY : dafei.offset().top + dafei.height()/2
+        });
+        dafei.trigger(mouseDownEvt);
+    }, 500)
+    setInterval(function() {
+        i++;
+        var mouseMoveEvt = $.Event("mousemove", {
+            which : 1,
+            pageX : dafei.offset().left + 5 * i,
+            pageY : dafei.offset().top + dafei.height()/2
+        });
+        dafei.trigger(mouseMoveEvt);
+    }, 100)
+
+});
+</script>
+</head>
+<body>
+
+<p>Mouse is at coordinates: <span></span>.</p>
+<div id="dafei" style="border: 1px solid">
+<p>aaaaaaaaaaaaaaaaaaaaaaaaaa</p>
+<p id="xy">x,y</p>
+<p id="logMousedown">log</p>
+<p id="logMousemove">log</p>
+</div>
+
+</body>
+</html>
