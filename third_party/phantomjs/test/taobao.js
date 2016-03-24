@@ -79,9 +79,14 @@ page.open(url, function(status) {
             login(username, password);
         }, username, password);
 
+        var injected = false;
         waitFor(function check() {
-            injectJs('./scripts/jquery.min.js'); // why need to inject again?
-            injectJs('./utility.js');
+            if (!injected) {
+                injectJs('./scripts/jquery.min.js'); // why need to inject again?
+                injectJs('./utility.js');
+                injected = true;
+            }
+
             return page.evaluate(function() {
                 return isNocaptchaReady();
             });
@@ -97,24 +102,36 @@ page.open(url, function(status) {
             var pos = page.evaluate(function() {
                 return getPositions();
             });
-            console.log('nocaptcha.x,y=' + pos.nocaptcha.x + ',' + pos.nocaptcha.y +
-                ', nlz offset:' + pos.nlz +
-                ', bg x,y=' + pos.bg.x + ',' + pos.bg.y);
 
-            console.log('mousedown...');
             var downX = pos.bg.x + 20;
             var downY = pos.bg.y + pos.bg.height/2;
+            console.log('mousedown...');
             page.sendEvent('mousedown', downX, downY);
 
             console.log('mousemove...');
             page.sendEvent('mousemove', downX + 20, downY);
             page.sendEvent('mousemove', downX + pos.scale_text.width, downY);
 
-        }, 10000); // waitfor
+            // set another waitFor to check picture
+            waitFor(function check() {
+                return page.evaluate(function() {
+                    return isClickCaptchaImgReady();
+                });
+            }, function onReady() {
+                var imgURL = page.evaluate(function() {
+                    return getClickCaptchaImgURL();
+                });
+                console.log('image src = ' + imgURL);
+            }); // waitFor
+
+        }, 10000); // waitFor
 
         setInterval(function() {
             console.log('render page interval')
             page.render('interval.png');
+            page.evaluate(function() {
+                report();
+            })
         }, 1000);
     } else {
         console.log('Fail to open ' + url);

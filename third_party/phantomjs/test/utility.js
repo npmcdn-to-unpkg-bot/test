@@ -22,19 +22,23 @@ function isNocaptchaReady() {
         && scale_text.height() > 0;
 }
 
+function isClickCaptchaImgReady() {
+    var img = $('#clickCaptcha .clickCaptcha_img img');
+    return img.length === 1;
+}
+
+function getClickCaptchaImgURL() {
+    var img = $('#clickCaptcha .clickCaptcha_img img');
+    if (img.length === 1) {
+        return img.attr('src');
+    }
+    return;
+}
+
 function getPositions() {
-    var nocaptcha = $('#nocaptcha');
-    var nlz = $('#nocaptcha #_nlz');
     var bg = $('#nocaptcha #_bg');
     var scale_text = $('#nocaptcha #_scale_text');
     return {
-        nocaptcha : {
-            x : nocaptcha.offset().left,
-            y : nocaptcha.offset().top,
-            width : nocaptcha.width(),
-            height : nocaptcha.height()
-        },
-        nlz : nlz.offset(),
         scale_text : {
             x : scale_text.offset().left,
             y : scale_text.offset().top,
@@ -51,18 +55,5 @@ function getPositions() {
 }
 
 function report(id) {
-    var element = $(id);
-    if (!element) {
-        console.log('element is ' + element);
-        return;
-    }
-    var position = element.position();
-    var left = position ? position.left : null;
-    var top = position ? position.top : null;
-    var offset = element.offset();
-    var x = offset ? offset.top : null;
-    var y = offset ?  offset.left : null;
-    console.log(id + ' width:' + element.width() + ', height:' + element.height()
-        + ',left:' + left + ', top:' + top
-        + '(' + x + "," + y + ")");
+
 }
