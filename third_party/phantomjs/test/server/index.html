@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+    </style>
+  </head>
+  <body>
+  <p>Task Page</p>
+  <div id="imgContainer">
+  </div>
+  <p id="desc"></p>
+  <ul id="log"></ul>
+  </body>
+    <script src="//cdn.bootcss.com/socket.io/1.4.5/socket.io.min.js"></script>
+    <script src="//cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+    <script>
+      var socket = io();
+
+      socket.on('worker', function(msg){
+        var info = JSON.parse(msg);
+        $('#desc').text(info.describe);
+        $('#log').append($('<li>').text(info.imgURL));
+        var img = $('#imgContainer img');
+        if (img.length === 0) {
+          $('#imgContainer').append('<img />');
+          img = $('#imgContainer img');
+        }
+        img.attr('src', info.imgURL);
+        img.click(function(data) {
+          var x = $(this).offset().left;
+          var y = $(this).offset().top;
+          var width = $(this).width();
+          var height = $(this).height();
+          var xPercent = (data.pageX - x)/width;
+          var yPercent = (data.pageY - y)/height;
+          console.log(data.pageX, data.pageY, x, y, xPercent, yPercent);
+          socket.emit('worker', JSON.stringify({'xPercent' : xPercent, 'yPercent': yPercent}));
+        });
+      });
+    </script>
+</html>

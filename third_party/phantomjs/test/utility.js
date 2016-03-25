@@ -27,12 +27,21 @@ function isClickCaptchaImgReady() {
     return img.length === 1;
 }
 
-function getClickCaptchaImgURL() {
+function isPassed() {
+    var passed = $('#nocaptcha #_scale_text b');
+    return passed.length === 1;
+}
+
+function getClickCaptchaInfo() {
     var img = $('#clickCaptcha .clickCaptcha_img img');
-    if (img.length === 1) {
-        return img.attr('src');
+    var desc = $('#clickCaptcha .captcha-error p').text();
+    return { 'imgURL' : img.attr('src'),
+        'describe' : desc,
+        'x' : img.offset().left,
+        'y' : img.offset().top,
+        'width' : img.width(),
+        'height' : img.height()
     }
-    return;
 }
 
 function getPositions() {

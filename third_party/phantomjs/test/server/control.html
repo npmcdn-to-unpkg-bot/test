@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+<body></body>
+<script src="//cdn.bootcss.com/socket.io/1.4.5/socket.io.min.js"></script>
+<script src="//cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+<script>
+
+var socket = io();
+socket.on('control', function(msg){
+    console.log('control page receive:' + msg);
+    window.callPhantom({
+        'type' : 'control',
+        'msg' : msg
+    })
+});
+
+</script>
+</html>
