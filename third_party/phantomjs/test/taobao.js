@@ -19,36 +19,51 @@ page.settings.loadImages = true;
 phantom.cookieEnabled = true;
 phantom.javascriptEnabled = true;
 
+// some status
+var needInjectJS = true;
+var loadFinished = false;
+
+// page callbacks
 page.onConsoleMessage = function(msg) {
     console.log(msg);
-}
+};
 
 page.onResourceReceived = function(response) {
     if (response.stage !== "end")
         return;
     // console.log('> Response (#' + response.id + ', stage "' + response.stage + '"): ' + response.url);
 };
+
 page.onResourceRequested = function(requestData, networkRequest) {
     // console.log('> Request (#' + requestData.id + '): ' + requestData.url);
 };
+
 page.onUrlChanged = function(targetUrl) {
     console.log('> New URL: ' + targetUrl);
 };
-var loaded = 0;
+
 page.onLoadFinished = function(status) {
+    loadFinished = true;
     console.log('> Load Finished: ' + status);
-    loaded = loaded + 1;
-    page.render('loaded' + loaded + '.png');
+    injectJsIfNeed();
 };
+
 page.onLoadStarted = function() {
     console.log('> Load Started');
 };
+
 page.onNavigationRequested = function(url, type, willNavigate, main) {
+    // injected js only exsits in the current page.
+    // so you need to reinject javascript again when you navigate to
+    // a new URL
+    needInjectJS = true;
     console.log('> Trying to navigate to: ' + url);
 };
+
 page.onCallback = function(data) {
     console.log('onCallback');
 };
+
 
 var url = 'https://login.taobao.com/';
 
@@ -57,36 +72,46 @@ page.viewportSize = { width: 1920, height: 1080 };
 //the clipRect is the portion of the page you are taking a screenshot of
 page.clipRect = { top: 0, left: 0, width: 1920, height: 1080 };
 
+var injectJsIfNeed = function() {
+    if (!needInjectJS) {
+        console.log('no need to inject...')
+        return;
+    }
+
+    var files = [
+        './scripts/jquery.min.js',
+        './utility.js'
+    ];
+
+    for (var i in files) {
+        var file = files[i];
+        if (page.injectJs(file)) {
+            console.log('Success to inject [' + file + ']');
+        } else {
+            console.log('Failed to inject [' + file + ']');
+            phantom.exit();
+        }
+    }
+    needInjectJS = false;
+};
+
 console.log('start to open ' + url);
 page.open(url, function(status) {
     if (status === 'success') {
         console.log('open success...');
 
-        var injectJs = function(name) {
-            if (page.injectJs(name)) {
-                console.log('Success to inject [' + name + ']');
-            } else {
-                console.log('Failed to inject [' + name + ']');
-                phantom.exit();
-            }
-        };
-
-        injectJs('./scripts/jquery.min.js');
-        injectJs('./utility.js');
-
-        // set listener for key element's css change
         page.evaluate(function(username, password) {
             login(username, password);
         }, username, password);
 
-        var injected = false;
+        // login will navigate to a new URL, so we need
+        // to check if load is finished.
         waitFor(function check() {
-            if (!injected) {
-                injectJs('./scripts/jquery.min.js'); // why need to inject again?
-                injectJs('./utility.js');
-                injected = true;
+            if (!loadFinished || needInjectJS) {
+                return false;
             }
 
+            // If InjectedJs not finished, isNocaptchaReady won't be found.
             return page.evaluate(function() {
                 return isNocaptchaReady();
             });
