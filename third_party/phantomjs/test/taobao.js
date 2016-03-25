@@ -161,11 +161,40 @@ page.open(url, function(status) {
                         page.evaluate(function(username, password) {
                             login(username, password);
                         }, username, password);
-                    });
-                });
-            }); // waitFor
+                        // really login, need to inject again
+                        waitFor(function check() {
+                            injectJsIfNeed();
+                            return page.evaluate(function() {
+                                return isLoginin();
+                            });
+                        }, function onReady() {
+                            // navigate to bought list, need to inject again
+                            console.log('open bought list page...');
+                            page.evaluate(function() {
+                                $('#bought').click();
+                            });
 
-        }, 10000); // waitFor
+                            // waitFor the boughtlist
+                            waitFor(function check() {
+                                injectJsIfNeed();
+                                return page.evaluate(function() {
+                                    return isInBoughtListPage();
+                                });
+                            }, function onReady() {
+                                var list = page.evaluate(function() {
+                                    return getBoughtList();
+                                });
+                                for (i in list) {
+                                    var item = list[i];
+                                    console.log(i);
+                                }
+                            }, 10000, 'isInBoughtListPage'); // waitFor
+                        }, 10000, 'isLoginin'); // waitFor
+                    }, 10000, 'isPassed'); // waitFor
+                });
+            }, 10000, 'isClickCaptchaImgReady'); // waitFor
+
+        }, 10000, 'isNocaptchaReady'); // waitFor
 
         setInterval(function() {
             console.log('render page interval')
@@ -200,7 +229,7 @@ var injectJsIfNeed = function() {
     needInjectJS = false;
 };
 
-function waitFor(testFx, onReady, timeOutMillis) {
+function waitFor(testFx, onReady, timeOutMillis, name) {
     var maxtimeOutMillis = timeOutMillis ? timeOutMillis : 5000, //< Default Max Timout is 5s
         start = new Date().getTime(),
         condition = false,
@@ -211,11 +240,11 @@ function waitFor(testFx, onReady, timeOutMillis) {
             } else {
                 if(!condition) {
                     // If condition still not fulfilled (timeout but condition is 'false')
-                    console.log("'waitFor()' timeout");
+                    console.log("waitFor(" + name + ") timeout");
                     clearInterval(interval);
                 } else {
                     // Condition fulfilled (timeout and/or condition is 'true')
-                    console.log("'waitFor()' finished in " + (new Date().getTime() - start) + "ms.");
+                    console.log("waitFor(" + name + ") finished in " + (new Date().getTime() - start) + "ms.");
                     typeof(onReady) === "string" ? eval(onReady) : onReady(); //< Do what it's supposed to do once the condition is fulfilled
                     clearInterval(interval); //< Stop this interval
                 }

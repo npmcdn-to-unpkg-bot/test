@@ -32,6 +32,22 @@ function isPassed() {
     return passed.length === 1;
 }
 
+function isLoginin() {
+    var loginInfoNick = $('#J_LoginInfo .login-info-nick');
+    return loginInfoNick.length === 1;
+}
+
+function isInBoughtListPage() {
+    return $('#J_bought_main').length === 1;
+}
+
+function getBoughtList() {
+    var list = [];
+    list.push({'id' : 1});
+    list.push({'id' : 2});
+    return list;
+}
+
 function getClickCaptchaInfo() {
     var img = $('#clickCaptcha .clickCaptcha_img img');
     var desc = $('#clickCaptcha .captcha-error p').text();
@@ -61,6 +77,10 @@ function getPositions() {
             height : bg.height()
         }
     }
+}
+
+function getBoughtList() {
+
 }
 
 function report(id) {
