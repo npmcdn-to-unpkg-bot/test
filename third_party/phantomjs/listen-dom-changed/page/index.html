@@ -53,7 +53,7 @@
 
 // css change
 $('#change-css #color').click(function() {
-  console.log('change the color');
+  // console.log('change the color');
   var t = $('#change-css h4');
   if (t.css('color') !== 'rgb(255, 0, 0)') {
     t.css('color', 'red');
@@ -62,7 +62,7 @@ $('#change-css #color').click(function() {
   }
 });
 $('#change-css #text').click(function() {
-  console.log('change the text');
+  // console.log('change the text');
   var t = $('#change-css h4');
   t.text(t.text() + 'a');
 });
@@ -74,31 +74,6 @@ $('#ele-change #add').click(function() {
 $('#ele-change #del').click(function() {
   $('#ele-change h4:last').remove();
 });
-
-
-
-// event listener
-// $('#change-css h4').on('DOMAttrModified', function(evt){ 
-//       console.log('attr changed:');
-// });
-// $('#change-css h4').on('DOMSubtreeModified', function() {
-//     console.log('change-css DOMSubtreeModified');
-// });
-// $('#change-css h4').on('DOMCharacterDataModified', function() {
-//     console.log('change-css DOMCharacterDataModified');
-// });
-
-// // dom add/delete
-// $('#ele-change').on('DOMSubtreeModified', function() {
-//     console.log('ele-change DOMSubtreeModified');
-// });
-// $('#ele-change').on('DOMNodeInserted', function() {
-//     console.log('ele-change DOMNodeInserted');
-// });
-// $('#ele-change').on('DOMNodeRemoved', function() {
-//     console.log('ele-change DOMNodeRemoved');
-// });
-
 
 // use mutation observer
 // var target = document.querySelector('#change-css h4');

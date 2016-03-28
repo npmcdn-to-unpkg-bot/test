@@ -17,20 +17,36 @@ page.open(url, function(status) {
 
         // set listener
         page.evaluate(function() {
-            var target = document.querySelector('#change-css h4');
             var observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(m) {
                 window.callPhantom({'type' : m.type});
-                if (m.type === 'attributes') {
-                    console.log(m.attributeName + ' changed: ' + m.oldValue + ', target:');
-                    console.log(m.target);
-                } else {
-                    console.log(m.type + ' changed, ');
+                switch (m.type) {
+                    case 'attributes':
+                        console.log('attributes:' + m.attributeName + ' changed: oldValue [' + m.oldValue + ']');
+                        break;
+                    case 'characterData':
+                        console.log('characterData:' + 'changed');
+                        break;
+                    case 'childList':
+                        console.log('childList:' + 'changed');
+                        break;
+                    default:
+                        console.log('unkown type:' + m.type);
                 }
               })
             });
-            var config = { attributes: true, childList: true, characterData: true};
-            observer.observe(target, config);
+            var config = { 
+                attributes: true,
+                childList: true,
+                characterData: true,
+                attributeOldValue: true,
+                subtree: true
+            };
+
+            var target1 = document.querySelector('#change-css h4');
+            var target2 = document.querySelector('#ele-change');
+            observer.observe(target1, config);
+            observer.observe(target2, config);
         });
 
         // change css
@@ -39,7 +55,20 @@ page.open(url, function(status) {
                 $('#change-css #color').click();
             });
         };
+        var addDom = function() {
+            page.evaluate(function() {
+                $('#ele-change #add').click();
+            })
+        };
+        var deleteDom = function() {
+            page.evaluate(function() {
+                $('#ele-change #del').click();
+            });
+        };
+
         setInterval(changeCSS, 1000);
+        setInterval(addDom, 2000);
+        setInterval(deleteDom, 4000);
 
     } else {
         console.log('failed to open')
