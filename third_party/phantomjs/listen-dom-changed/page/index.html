@@ -1,0 +1,119 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+<title>dom change events</title>
+
+
+
+<style type="text/css">
+
+</style>
+</head>
+
+<body>
+  <div class="container">
+    <div id="change-css" class="row">
+      <div class="col-sm-2">
+        <button id="color" class="btn btn-info">change color</button>
+      </div>
+      <div class="col-sm-2">
+        <button id="text" class="btn btn-info">change text</button>
+      </div>
+      <div class="col-sm-8">
+        <h4>change my color</h4>
+      </div>
+    </div>
+
+    <div id="ele-change" class="row">
+      <div class="col-sm-2">
+        <button id="add" class="btn btn-info">add dom</button>
+      </div>
+      <div class="col-sm-2">
+        <button id="del" class="btn btn-info">del dom</button>
+      </div>
+      <div id="content" class="col-sm-8">
+        <h4>hello hello!!!!!!</h4>
+      </div>
+    </div>
+
+  </div>
+</body>
+
+<!-- Bootstrap -->
+<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+<script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+
+// css change
+$('#change-css #color').click(function() {
+  console.log('change the color');
+  var t = $('#change-css h4');
+  if (t.css('color') !== 'rgb(255, 0, 0)') {
+    t.css('color', 'red');
+  } else {
+    t.css('color', 'green');
+  }
+});
+$('#change-css #text').click(function() {
+  console.log('change the text');
+  var t = $('#change-css h4');
+  t.text(t.text() + 'a');
+});
+
+// add and delete dom
+$('#ele-change #add').click(function() {
+  $('#ele-change #content').append('<h4>hello hello!!!!!!</h4>');
+});
+$('#ele-change #del').click(function() {
+  $('#ele-change h4:last').remove();
+});
+
+
+
+// event listener
+// $('#change-css h4').on('DOMAttrModified', function(evt){ 
+//       console.log('attr changed:');
+// });
+// $('#change-css h4').on('DOMSubtreeModified', function() {
+//     console.log('change-css DOMSubtreeModified');
+// });
+// $('#change-css h4').on('DOMCharacterDataModified', function() {
+//     console.log('change-css DOMCharacterDataModified');
+// });
+
+// // dom add/delete
+// $('#ele-change').on('DOMSubtreeModified', function() {
+//     console.log('ele-change DOMSubtreeModified');
+// });
+// $('#ele-change').on('DOMNodeInserted', function() {
+//     console.log('ele-change DOMNodeInserted');
+// });
+// $('#ele-change').on('DOMNodeRemoved', function() {
+//     console.log('ele-change DOMNodeRemoved');
+// });
+
+
+// use mutation observer
+// var target = document.querySelector('#change-css h4');
+// var observer = new MutationObserver(function(mutations) {
+//   mutations.forEach(function(m) {
+//     if (m.type === 'attributes') {
+//       console.log(m.attributeName + ' changed: ' + m.oldValue + ', target:');
+//       console.log(m.target);
+//     } else {
+//       console.log(m.type + ' changed, ');
+//     }
+//   })
+// });
+// var config = { attributes: true, childList: true, characterData: true};
+// observer.observe(target, config);
+
+</script>
+</html>
