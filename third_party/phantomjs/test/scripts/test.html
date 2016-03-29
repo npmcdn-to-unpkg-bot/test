@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+<title>jquery watch</title>
+</head>
+
+<body>
+</body>
+
+<script src="http://cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+<script src="jquery-watch.js"></script>
+<script>
+$('#dafei').watch({
+  properties: 'color',
+  callback: function(data, i) {
+    var propChanged = data.props[i];
+    var valChanged = data.vals[i];
+    console.log(propChanged + ' changed to ' + valChanged);
+  }
+});
+$('#dafei').watch({
+  properties: 'border-style',
+  callback: function(data, i) {
+    var propChanged = data.props[i];
+    var valChanged = data.vals[i];
+    console.log(propChanged + ' changed to ' + valChanged);
+  }
+});
+
+setTimeout(function() {
+  console.log('add #dafei');
+  $('body').append('<div><p id="dafei">HIHIHIHIHIHIHI</p></div>');
+
+  setInterval(function() {
+    var e = $('#dafei');
+    if (e.css('color') !== 'rgb(255, 0, 0)') {
+      e.css('color', 'red');
+    } else {
+      e.css('color', 'green');
+    }
+
+    if (e.css('border-style') !== 'solid') {
+      e.css('border-style', 'solid');
+    } else {
+      e.css('border-style', 'dashed');
+    }
+  }, 1000);
+}, 3000);
+
+</script>
+</html>

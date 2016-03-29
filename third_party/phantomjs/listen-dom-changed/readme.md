@@ -8,6 +8,8 @@ page is a server serving a webpage which will change dom.
 in another teminal
     to see if the injected js willlisten to events for dom changes.
     $ phantom monitor.js
+    or
+    $ phantom monitor-with-juqery-watch.js  # this works.
 
 
 Monitor CSS change:
