@@ -1,4 +1,3 @@
-
 function login(username, password) {
     console.log('fillForm username:' + username);
     $('#TPL_username_1').focus();
@@ -13,13 +12,73 @@ function login(username, password) {
     // });
 }
 
-function isNocaptchaReady() {
-    var nocaptcha = $('#nocaptcha');
-    var scale_text = $('#nocaptcha #_scale_text');
-    return nocaptcha.css('display') !== 'none'
-        && nocaptcha.width() > 0
-        && scale_text.width() > 0
-        && scale_text.height() > 0;
+function startWatching() {
+    detectNocaptcha();
+}
+
+function detectNocaptcha() {
+    watch('#nocaptcha');
+
+    function watch(selector) {
+        // check if ready
+        if (check()) {
+            onReady();
+            return;
+        }
+
+        $(selector).watch({
+            properties: 'prop_innerHTML',
+            callback: function() {
+                if (check()) onReady();
+            }
+        });
+    }
+
+    function check() {
+        var nocaptcha = $('#nocaptcha');
+        var scale_text = $('#nocaptcha #_scale_text');
+        console.log('nocaptcha display:' + nocaptcha.css('display')
+            + ', width:' + nocaptcha.width()
+            + ', scale_text width:' + scale_text.width()
+            + ', height:' + scale_text.height());
+
+        return nocaptcha.css('display') !== 'none'
+            && nocaptcha.width() > 0
+            && scale_text.width() > 0
+            && scale_text.height() > 0;
+    }
+
+    function onReady() {
+        console.log('nocaptcha is ready to move');
+        // tell phantom to sendEvent to move the button
+        var bg = $('#nocaptcha #_bg');
+        var scale_text = $('#nocaptcha #_scale_text');
+        var width = scale_text.width();
+        var startX = bg.offset().left + 20;
+        var startY = bg.offset().top + bg.height()/2;
+
+        var events = [
+            { type: 'mousedown',
+                x: startX,
+                y: startY },
+            { type: 'mousemove',
+                x: startX + 20,
+                y: startY },
+            { type: 'mousemove',
+                x: startX + width,
+                y: startY }
+
+        ];
+        window.callPhantom({
+            name: 'nocaptcha',
+            type: 'sendEvent',
+            events: events
+        });
+    }
+}
+
+function detectClickPiture() {
+
 }
 
 function isClickCaptchaImgReady() {

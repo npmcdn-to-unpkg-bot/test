@@ -12,10 +12,6 @@ var username = system.args[1];
 var password = system.args[2];
 console.log('username:' + username + ", password: xxxxx");
 
-// some status for page
-var needInjectJS = true;
-var loadFinished = false;
-
 var page = webPage.create();
 // page settings
 page.settings.userAgent = 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0';
@@ -47,7 +43,6 @@ page.onUrlChanged = function(targetUrl) {
 };
 
 page.onLoadFinished = function(status) {
-    loadFinished = true;
     console.log('=> Load Finished: ' + status);
     injectJsIfNeed();
 };
@@ -57,15 +52,22 @@ page.onLoadStarted = function() {
 };
 
 page.onNavigationRequested = function(url, type, willNavigate, main) {
-    // injected js only exsits in the current page.
-    // so you need to reinject javascript again when you navigate to
-    // a new URL
-    needInjectJS = true;
     console.log('=> Trying to navigate to: ' + url + ', type:' + type + ', willNavigate:' + willNavigate + ', main:' + main);
 };
 
-page.onCallback = function(data) {
-    console.log('onCallback');
+page.onCallback = function(event) {
+    console.log('onCallback: ' + event.name);
+    switch (event.type) {
+    case 'sendEvent':
+        for (var i in event.events) {
+            var evt = event.events[i];
+            console.log('  ' + evt.type + '=>(' + evt.x + ',' + evt.y + ')');
+            page.sendEvent(evt.type, evt.x, evt.y);
+        }
+        break;
+    default:
+        console.log('onCallback unkown type:' + event.type);
+    }
 };
 
 // control page.
@@ -106,30 +108,14 @@ page.open(url, function(status) {
         console.log('open success...');
 
         page.evaluate(function(username, password) {
-            var t = $('#J_LoginBox');
-            if (t.length > 0) {
-                console.log('t is not none');
-                t.watch({ properties:'display', callback: function(data, i) {
-                    console.log('callback aaaa:' + i);
-                }});
-            } else {
-                t.watch({properties:'display', callback: function(data, i) {
-                    console.log('callback bbbb');
-                }});
-                t.watch({properties : 'display'});
-            }
-
-            $('#dafei').watch({ watchChildren: true, callback: function(data, i) {
-                console.log('dafei aaaa:' + i);
-            }});
+            detectNocaptcha();
             login(username, password);
         }, username, password);
 
-
-        // setInterval(function() {
-        //     console.log('render page interval')
-        //     page.render('interval.png');
-        // }, 1000);
+        setInterval(function() {
+            console.log('render page interval')
+            page.render('interval.png');
+        }, 1000);
     } else {
         console.log('Fail to open ' + url);
         phantom.exit();
@@ -137,25 +123,44 @@ page.open(url, function(status) {
 });
 
 var injectJsIfNeed = function() {
-    if (!needInjectJS) {
-        console.log('no need to inject...')
-        return;
-    }
-
     var files = [
-        './scripts/jquery.min.js',
-        './scripts/jquery-watch.js',
-        './utility.js'
+        { exists: isJqueryIn, location: './scripts/jquery.min.js' },
+        { exists: isJQueryWatchIn, location: './scripts/jquery-watch.js' },
+        { exists: notIn, location: './utility.js'}
     ];
 
     for (var i in files) {
-        var file = files[i];
-        if (page.injectJs(file)) {
-            console.log('Success to inject [' + file + ']');
+        var entry = files[i];
+        if (!entry.exists()) {
+            if (page.injectJs(entry.location)) {
+                console.log('Success to inject [' + entry.location + ']');
+            } else {
+                console.log('Failed to inject [' + entry.location + ']');
+                phantom.exit();
+            }
         } else {
-            console.log('Failed to inject [' + file + ']');
-            phantom.exit();
+            console.log('already in???')
         }
     }
-    needInjectJS = false;
+
+    // do something initialization
+    page.evaluate(function() {
+        startWatching();
+    });
+
+    function isJqueryIn() {
+        return page.evaluate(function() {
+            return typeof jQuery !== 'undefined';
+        })
+    }
+    function isJQueryWatchIn() {
+        return page.evaluate(function() {
+            return typeof jQuery !== 'undefined' &&
+                typeof jQuery.fn.watch !== 'undefined';
+        })
+    }
+    function notIn() {
+        // TODO
+        return false;
+    }
 };

@@ -96,7 +96,6 @@ http://en.wikipedia.org/wiki/MIT_License
             });
 
             function waitUntilExists(selector, options) {
-                console.log('waitUntilExists:' + selector);
                 if (!hasWatchedRoot) {
                     var root$ = $('html');
                     if (root$.length < 1) {
@@ -114,6 +113,9 @@ http://en.wikipedia.org/wiki/MIT_License
                             mutations.forEach(function(m) {
                                 if (m.type === 'childList' && m.addedNodes.length > 0) {
                                     nodeAdded = true;
+                                    // for (var i=0; i<m.addedNodes.length; i++) {
+                                    //     console.log(m.addedNodes.item(i).innerText);
+                                    // }
                                 }
                             });
 
@@ -163,6 +165,9 @@ http://en.wikipedia.org/wiki/MIT_License
             }
 
             function __watcher(id, mRec, mObs) {
+                // mRec.forEach(function(m) {
+                //     console.log('id:' + id + 'watcher type:' + m.type + ', attributename:' + m.attributeName);
+                // })
                 var el$ = $(this);
                 var w = el$.data(id);
                 if (!w) return;
