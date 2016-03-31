@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<script type="text/javascript">
+
+var a = {
+    name: 'aaaa',
+    info: {
+        age: 10,
+        height : 11,
+        orders : 2
+    },
+    orders : [
+        { id: 1, fee: 11},
+        { id: 2, fee: 12}
+    ],
+    add : function(a, b) {
+        return a + b;
+    }
+}
+
+function pp(obj, parent) {
+    if (typeof obj !== 'object') {
+        console.log(parent + '.' + typeof obj);
+        return;
+    }
+
+    parent = parent ? parent : 'Object';
+
+    for (var p in obj) {
+        var type = typeof obj[p];
+        if (type === 'object') {
+            pp(obj[p], parent + '.' + p);
+        } else {
+            console.log(parent+'.' + p + ':' + type);
+        }
+    }
+}
+
+function findAttrIn(obj, attr, parent) {
+    if (typeof obj !== 'object') {
+        return;
+    }
+    parent = parent ? parent : 'Object';
+
+    for (var p in obj) {
+        var type = typeof obj[p];
+        if (p === attr) {
+            console.log(parent+'.' + p + ':' + type);
+        }
+
+        // Find more
+        if (type === 'object') {
+            findAttrIn(obj[p], attr, parent + '.' + p);
+        }
+    }
+}
+
+pp(a);
+console.log('----------------');
+findAttrIn(a, 'orders');
+
+</script>
+</head>
+<body>
+</body>
+</html>

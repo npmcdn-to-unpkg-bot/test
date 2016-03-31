@@ -32,10 +32,14 @@ page.onResourceReceived = function(response) {
         return;
     }
     // console.log('=> Response (#' + response.id + ', stage "' + response.stage + '"): ' + response.url);
+    // console.log(JSON.stringify(response));
 };
 
 page.onResourceRequested = function(requestData, networkRequest) {
     // console.log('=> Request (#' + requestData.id + '): ' + requestData.url);
+    console.log('onResourceRequested:' + JSON.stringify(requestData));
+    console.log('onResourceRequested networkRequest:' + JSON.stringify(networkRequest));
+    console.log('onResourceRequested cookies:' + JSON.stringify(page.cookies));
 };
 
 page.onUrlChanged = function(targetUrl) {
@@ -64,6 +68,33 @@ page.onCallback = function(event) {
             console.log('  ' + evt.type + '=>(' + evt.x + ',' + evt.y + ')');
             page.sendEvent(evt.type, evt.x, evt.y);
         }
+        break;
+    case 'controlMsg':
+        pushToServer(event.info, function onResult(result) {
+            var x = event.info.x + event.info.width * result.xPercent;
+            var y = event.info.y + event.info.height * result.yPercent;
+            console.log('   click on =>(' + x + ',' + y + ')');
+            page.sendEvent('click', x, y);
+        });
+        break;
+    case 'pageOpen':
+        page.open(event.url);
+        break;
+    case 'post':
+        console.log('post to ' + event.url + ', cookies:' + JSON.stringify(page.cookies));
+        var d = 'pageNum=1&pageSize=15&prePageNo=1';
+        page.customHeaders = {
+            "Refere": "https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm"
+        };
+        page.open(event.url, 'post', d, function(status) {
+            if (status === 'success') {
+                console.log('post success...');
+                console.log('content:' + page.content);
+                console.log('plainText:' + page.plainText);
+            } else {
+                console.log('post failed');
+            }
+        })
         break;
     default:
         console.log('onCallback unkown type:' + event.type);
@@ -108,7 +139,6 @@ page.open(url, function(status) {
         console.log('open success...');
 
         page.evaluate(function(username, password) {
-            detectNocaptcha();
             login(username, password);
         }, username, password);
 
@@ -126,7 +156,7 @@ var injectJsIfNeed = function() {
     var files = [
         { exists: isJqueryIn, location: './scripts/jquery.min.js' },
         { exists: isJQueryWatchIn, location: './scripts/jquery-watch.js' },
-        { exists: notIn, location: './utility.js'}
+        { exists: notIn, location: './scripts/utility.js'}
     ];
 
     for (var i in files) {
@@ -144,9 +174,9 @@ var injectJsIfNeed = function() {
     }
 
     // do something initialization
-    page.evaluate(function() {
-        startWatching();
-    });
+    page.evaluate(function(username, password) {
+        startWatching(username, password);
+    }, username, password);
 
     function isJqueryIn() {
         return page.evaluate(function() {
