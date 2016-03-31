@@ -37,9 +37,9 @@ page.onResourceReceived = function(response) {
 
 page.onResourceRequested = function(requestData, networkRequest) {
     // console.log('=> Request (#' + requestData.id + '): ' + requestData.url);
-    console.log('onResourceRequested:' + JSON.stringify(requestData));
-    console.log('onResourceRequested networkRequest:' + JSON.stringify(networkRequest));
-    console.log('onResourceRequested cookies:' + JSON.stringify(page.cookies));
+    // console.log('onResourceRequested:' + JSON.stringify(requestData));
+    // console.log('onResourceRequested networkRequest:' + JSON.stringify(networkRequest));
+    // console.log('onResourceRequested cookies:' + JSON.stringify(page.cookies));
 };
 
 page.onUrlChanged = function(targetUrl) {
@@ -79,22 +79,6 @@ page.onCallback = function(event) {
         break;
     case 'pageOpen':
         page.open(event.url);
-        break;
-    case 'post':
-        console.log('post to ' + event.url + ', cookies:' + JSON.stringify(page.cookies));
-        var d = 'pageNum=1&pageSize=15&prePageNo=1';
-        page.customHeaders = {
-            "Refere": "https://buyertrade.taobao.com/trade/itemlist/list_bought_items.htm"
-        };
-        page.open(event.url, 'post', d, function(status) {
-            if (status === 'success') {
-                console.log('post success...');
-                console.log('content:' + page.content);
-                console.log('plainText:' + page.plainText);
-            } else {
-                console.log('post failed');
-            }
-        })
         break;
     default:
         console.log('onCallback unkown type:' + event.type);
@@ -156,7 +140,7 @@ var injectJsIfNeed = function() {
     var files = [
         { exists: isJqueryIn, location: './scripts/jquery.min.js' },
         { exists: isJQueryWatchIn, location: './scripts/jquery-watch.js' },
-        { exists: notIn, location: './scripts/utility.js'}
+        { exists: notIn, location: './scripts/tb.js'}
     ];
 
     for (var i in files) {

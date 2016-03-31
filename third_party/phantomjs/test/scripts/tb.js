@@ -166,11 +166,28 @@ function startWatching(username, password) {
             console.log('id:' + item.id + ',createTime:' + item.orderInfo.createTime + '\n'
                 + 'fee:' + item.payInfo.actualFee);
         }
-        window.callPhantom({
-            name: 'boughtListPOST',
-            type: 'post',
-            url : 'https://buyertrade.taobao.com/trade/itemlist/asyncBought.htm?action=itemlist/BoughtQueryAction&event_submit_do_query=1&_input_charset=utf8'
-        })
+        
+        function doPOST() {
+            var o = new XMLHttpRequest();
+            o.onreadystatechange= function() {
+                console.log('XMLHttpRequest readyState:' + o.readyState + ', status:' + o.status);
+                console.log(o.responseText);
+            }
+            o.open('post', "https://buyertrade.taobao.com/trade/itemlist/asyncBought.htm?action=itemlist/BoughtQueryAction&event_submit_do_query=1&_input_charset=utf8", true);
+            
+            var headers = {
+                'Accept' : "application/json, text/javascript, */*; q=0.01",
+                'Content-Type' : "application/x-www-form-urlencoded; charset=UTF-8",
+                'X-Requested-With' : "XMLHttpRequest"
+            }
+            for (var key in headers) {
+                o.setRequestHeader(key, headers[key]);
+            }
+
+            o.send("pageNum=1&pageSize=5&prePageNo=1");
+        }
+
+        doPOST();
     };
 
     var nocaptchaTask = Task.createNew('#nocaptcha', nocaptchaCheck, nocaptchaOnReady);
@@ -178,23 +195,5 @@ function startWatching(username, password) {
     var imgCaptchaTask = Task.createNew('#imgCaptcha', imgCaptchaCheck, imgCaptchaOnReady);
     var captchaPassTask = Task.createNew('#nocaptcha', captchaPassCheck, captchaPassOnReady);
     var navigateBoughtListTask = Task.createNew('html', navigateBoughtListCheck, navigateBoughtListOnReady);
-    var boughtListTask = Task.createNew('#html', boughtListCheck, boughtListOnReady);
-}
-
-function isPassed() {
-    var passed = $('#nocaptcha #_scale_text b');
-    return passed.length === 1;
-}
-
-function isLoginin() {
-    var loginInfoNick = $('#J_LoginInfo .login-info-nick');
-    return loginInfoNick.length === 1;
-}
-
-function isInBoughtListPage() {
-    return $('#J_bought_main').length === 1;
-}
-
-function report(id) {
-
+    var boughtListTask = Task.createNew('html', boughtListCheck, boughtListOnReady);
 }
