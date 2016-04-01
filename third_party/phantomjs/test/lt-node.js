@@ -25,6 +25,7 @@ function step2(username, password, callback) {
             + '&pwdType=01&productType=01&redirectType=01&rememberMe=1'
         request({ url: hostname, jar: j}, function(error, res, body) {
             if (!error) {
+                pCookie(hostname);
                 var resultCode = parseLoginResultCode(body);
                 if (resultCode !== '0000') {
                     callback('step2 resultCode:' + resultCode, 'step2 failed...');
@@ -54,6 +55,7 @@ function step2(username, password, callback) {
 function step3(callback) {
     var hostname = 'http://www.10010.com/';
     request({url: hostname, jar: j}, function(error, res, body) {
+        pCookie(hostname);
         if (error) {
             callback('step3 error:' + error, 'step3 failed...');
         } else {
@@ -65,6 +67,7 @@ function step3(callback) {
 function step4(callback) {
     var hostname = 'http://iservice.10010.com/e3/query/paid_record.html?menuId=000100010003';
     request.post({ url: hostname, jar: j }, function(error, res, body) {
+        pCookie(hostname);
         if (error) {
             callback('step4 error:' + error, 'step4 failed...');
         } else {
@@ -88,6 +91,7 @@ function step5(callback) {
     var hostname = 'http://iservice.10010.com/e3/static/query/paymentRecord?_=' + new Date().getTime() +'&menuid=000100010003';
     j.setCookie(request.cookie('MIE=00020001'), 'http://iservice.10010.com');
     j.setCookie(request.cookie('MII=000100010003'), 'http://iservice.10010.com');
+    j.setCookie(request.cookie('MENUURL=/e3/navhtml3/WT3/WT_MENU_3_001/011/112_2002.html?_=' + new Date().getTime()), 'http://iservice.10010.com');
     pCookie(hostname);
     request.post({ url: hostname, jar: j, form: {
         beginDate: "20160101",
@@ -95,6 +99,7 @@ function step5(callback) {
         pageNo: "1",
         pageSize: "20"
     }}, function (error, res, body) {
+        pCookie(hostname);
         if (error) {
             callback('step5 error:' + error, 'step5 failed...');
         } else {
