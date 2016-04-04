@@ -76,6 +76,20 @@ function step4(callback) {
     });
 }
 
+function step4_1(callback) {
+    var hostname = 'http://iservice.10010.com/e3/static/check/checklogin/?_=' + new Date().getTime();
+    request.post({ url: hostname, jar: j }, function(error, res, body) {
+        pCookie(hostname);
+        if (error) {
+            callback('step4 error:' + error, 'step4 failed...');
+        } else {
+            console.log('checklogin:-->')
+            console.log(body);
+            callback(null, 'step4 success...');
+        }
+    });
+}
+
 function pCookie(url) {
     var cookies = j.getCookies(url);
     // var cookies = request.jar().getCookies(url);
@@ -116,6 +130,7 @@ function start(username, password) {
         },
         step3,
         step4,
+        step4_1,
         step5
     ], function callback(err, results) {
         if (err) {
