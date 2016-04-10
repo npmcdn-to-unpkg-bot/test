@@ -26,3 +26,6 @@
 
 # nvm node版本管理
 	https://github.com/creationix/nvm
+
+# 监控
+    zabbix, senaca
