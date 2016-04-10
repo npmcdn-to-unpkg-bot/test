@@ -18,6 +18,8 @@
 	$ ./node_modules/.bin/babel-node es6.js
 	$ ./node_modules/.bin/babel es6.js -o es5.js
 
+	# build with npm, see package.json
+		$ npm run build
 
 # node es6进度
 	https://nodejs.org/en/docs/es6/

@@ -76,18 +76,19 @@ var constantize = (obj) => {
 // 跨模块常量
 // 上面说过，const声明的常量只在当前代码块有效。如果想设置跨模块的常量，可以采用下面的写法。
 
-// constants.js 模块
-export const A = 1;
-export const B = 3;
-export const C = 4;
+// constants1/2.js 模块
+// export const A = 1;
+// export const B = 3;
+// export const C = 4;
 
+// import node not supported now.
 // test1.js 模块
-import * as constants from './constants';
+import * as constants from './constants1';
 console.log(constants.A); // 1
 console.log(constants.B); // 3
 
 // test2.js 模块
-import {A, B} from './constants';
+import {A, B} from './constants2';
 console.log(A); // 1
 console.log(B); // 3
 
@@ -97,22 +98,22 @@ console.log(B); // 3
 // 全局对象的属性
 // 全局对象是最顶层的对象，在浏览器环境指的是window对象，在Node.js指的是global对象。ES5之中，全局对象的属性与全局变量是等价的。
 
-window.a = 1;
-a // 1
+// window.a = 1;
+// a // 1
 
-a = 2;
-window.a // 2
+// a = 2;
+// window.a // 2
 // 上面代码中，全局对象的属性赋值与全局变量的赋值，是同一件事。（对于Node来说，这一条只对REPL环境适用，模块环境之中，全局变量必须显式声明成global对象的属性。）
 
 // 这种规定被视为JavaScript语言的一大问题，因为很容易不知不觉就创建了全局变量。ES6为了改变这一点，一方面规定，var命令和function命令声明的全局变量，依旧是全局对象的属性；另一方面规定，let命令、const命令、class命令声明的全局变量，不属于全局对象的属性。
 
-var a = 1;
+// var a = 1;
 // 如果在Node的REPL环境，可以写成global.a
 // 或者采用通用方法，写成this.a
-window.a // 1
+// window.a // 1
 
-let b = 1;
-window.b // undefined
+// let b = 1;
+// window.b // undefined
 // 上面代码中，全局变量a由var命令声明，所以它是全局对象的属性；全局变量b由let命令声明，所以它不是全局对象的属性，返回undefined
 
 
