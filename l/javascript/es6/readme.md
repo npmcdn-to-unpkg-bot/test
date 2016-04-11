@@ -21,6 +21,15 @@
 	# build with npm, see package.json
 		$ npm run build
 
+# babel-node in package.json
+	"scripts": {
+	    "babel-node": "babel-node"
+	},
+
+	# use abosolutely path or relative path to root.
+	$ npm run babel-node src/07-array/index.js
+
+
 # node es6进度
 	https://nodejs.org/en/docs/es6/
 
