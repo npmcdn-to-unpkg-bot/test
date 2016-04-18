@@ -40,4 +40,21 @@ var s = `
                 </tr>
 `
 
-/<tr>\s*<td><\/td><\/tr>/
+
+var tr = new RegExp('<tr>((\\s*<td>.*</td>\\s*){10})</tr>', 'ig');
+var td = new RegExp('<td>(.*)</td>', 'ig');
+var r = null;
+
+while (r = tr.exec(s)) {
+    console.log('-------------------------')
+    // console.log(r[1]);
+    var d = null;
+    while (d = td.exec(r[1])) {
+        console.log(d[1])
+    }
+}
+
+// while (r = td.exec(s)) {
+//     console.log(r[1]);
+// }
+
