@@ -1,7 +1,6 @@
 var jsdom = require('jsdom');
 var cookieJar = jsdom.createCookieJar();
 
-
 jsdom.env({
     url: "https://ha.ac.10086.cn/login",
     cookieJar: cookieJar,
@@ -13,7 +12,7 @@ jsdom.env({
         jsdom.env({
             url: "https://ha.ac.10086.cn/login",
             cookieJar: cookieJar,
-            features: {
+            features: { // 使用这些features
                 FetchExternalResources: ["script"],
                 ProcessExternalResources: ["script"],
                 SkipExternalResources: false
@@ -24,6 +23,7 @@ jsdom.env({
                     return;
                 }
                 var $ = window.$;
+                // 可以直接运行里面的脚本了 
                 // console.log($.jCryption.getKeys);
                 $.jCryption.getKeys('/rsaKey?broUUid=' + window.Math.uuid() + '&random=' + Math.random() + '&jsoncallback=?', function(keys) {
                     console.log(keys);

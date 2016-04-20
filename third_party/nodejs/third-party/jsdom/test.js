@@ -1,5 +1,5 @@
 
-function test() {
+function t() {
     console.log('this is simple test');
 }
 
