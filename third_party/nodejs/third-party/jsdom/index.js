@@ -6,7 +6,8 @@ var t = fs.readFileSync("./test.js", "utf-8");
 // console.log(uuid)
 
 jsdom.env({
-    html: '<p><a class="the-link" href="https://github.com">Hello!</a></p>',
+    // html: '<p><a class="the-link" href="https://github.com">Hello!</a></p>',
+    html: '',
     src: [uuid, t],
     features: { // 使用这些features
         // FetchExternalResources: ["script"],

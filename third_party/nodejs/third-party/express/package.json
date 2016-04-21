@@ -1,5 +1,5 @@
 {
-  "name": "request-test",
+  "name": "express-test",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,8 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.13.4",
-    "request": "^2.70.0",
-    "request-debug": "^0.2.0"
+    "express": "^4.13.4"
   }
 }
