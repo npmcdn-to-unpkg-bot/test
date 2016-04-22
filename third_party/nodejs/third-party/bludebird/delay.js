@@ -1,10 +1,13 @@
 var Promise = require('bluebird');
 
+
 console.log('start to test ....');
+console.log('timer-1 started ....');
 Promise.delay(2000).then(function() {
 	console.log('  timer-1 2 second passed...');
 });
 
+console.log('timer-2 started ....');
 Promise.delay(1000).then(function() {
 	console.log('  timer-2 1 second passed (1)..');
 }).delay(1000).then(function() {
@@ -29,4 +32,6 @@ var delay_func = function(timer_name) {
 	}
 };
 
+
+console.log('timer-3 started ....');
 delay_func('timer-3');
