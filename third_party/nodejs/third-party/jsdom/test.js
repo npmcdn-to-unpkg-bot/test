@@ -1,6 +1,10 @@
 
 function t() {
-    console.log('this is simple test');
+    return 'this is simple test';
 }
 
-window.tt = 'hello from tt';
+window.str = 'hello str';
+
+window.random = function() {
+    return Math.random();
+}
