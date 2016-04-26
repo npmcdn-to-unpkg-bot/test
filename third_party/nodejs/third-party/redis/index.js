@@ -21,5 +21,12 @@ client.hkeys("user:100", function (err, replies) {
     replies.forEach(function (reply, i) {
         console.log("    " + i + ": " + reply);
     });
-    client.quit();
 });
+
+
+
+
+//     client.quit();
+setTimeout(() => {
+    client.quit();
+}, 1000)

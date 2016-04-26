@@ -40,7 +40,7 @@
     $ sudo docker-compose up
 
 # command
-### var [set, get, incr]
+### var [set, get, incr, del]
     > set name "bob"
     OK
     > get name
@@ -49,6 +49,8 @@
     OK
     > incr aa
     (integer) 11
+    > del name
+    (integer) 1
 
 
 ### life [expire, ttl]
