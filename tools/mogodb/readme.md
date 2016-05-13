@@ -21,3 +21,12 @@
     // mongodb default data directry.
     $ mkdir -p /data/db
 
+
+# OSX install
+    $ brew udpate
+    $ brew install mongodb
+
+# Run mongodb
+    # 指定自己的数据的存储目录.
+    $ mkdir -p /tmp/data/mongodb
+    $ mongodb -dbpath /tmp/data/mongodb
