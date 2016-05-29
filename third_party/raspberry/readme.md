@@ -2,6 +2,11 @@ default username and password:
 	username: pi
 	passowrd: raspberry
 
+# my username & password
+    pi/xxxxxxx
+# MAC
+    E8-27-EB-36-9C-6E
+
 # shutdow and reboot
 	$ sudo poweroff
 
