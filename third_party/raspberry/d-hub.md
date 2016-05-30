@@ -53,7 +53,7 @@
     # web控制
     http://192.168.1.100:9091/download
 
-# ftp
-    $ sudo apt-get install vsftpd
-    $ sudo vi /etc/vsftpd.conf
+# 上传文件
+   使用任意ftp工具，但是选择 sftp
+   跟使用ssh一样。
 
