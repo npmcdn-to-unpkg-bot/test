@@ -16,12 +16,8 @@ client.on("error", function (err) {
 client.set("string key", "string val", redis.print);
 client.hset("user:100", "name", "Bob", redis.print);
 client.hset(["user:100", "email", "bob@bob.com"], redis.print);
-client.hkeys("user:100", function (err, replies) {
-    console.log(replies.length + " replies:");
-    replies.forEach(function (reply, i) {
-        console.log("    " + i + ": " + reply);
-    });
-});
+client.expire("user:100", 50);
+client.hkeys("user:100", function (err, replies) {});
 
 
 //     client.quit();

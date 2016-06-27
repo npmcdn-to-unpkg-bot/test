@@ -52,6 +52,10 @@
     > del name
     (integer) 1
 
+### 查看所有keys
+    > keys *
+### 删除所有keys
+    > flushdb
 
 ### life [expire, ttl]
     > set name "bob"
