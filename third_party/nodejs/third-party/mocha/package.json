@@ -11,7 +11,7 @@
     "mocha": "^2.5.3"
   },
   "scripts": {
-    "test": "mocha"
+    "test": "mocha -t 6000"
   },
   "author": "",
   "license": "ISC"
