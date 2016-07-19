@@ -1,8 +1,0 @@
-
-Ubuntu:
-sudo apt-get install python-setuptools
-
-# install sip
-    $ sudo easy_install pip
-# install python packages
-    $ sudo pip install wget
