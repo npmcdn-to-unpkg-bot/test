@@ -88,7 +88,6 @@ function updateDetails(p, mxxdetails) {
                 }
 
                 for (let entry of mxxdetails) {
-                    // 没有次月份数据
                     record.m.push({
                         m: entry[0],
                         i: entry[1].i,
@@ -124,20 +123,27 @@ for (let i = 0; i < detailsNum; i++) {
 }
 mxxdetails.set('201607', mxxcalldetails);
 
-let startPhone = 13800000000;
-let phoneNo = 13800000000;
-let repeatTimes = 100;
-function saveData(){
+function saveData(phoneNo, maxRepeat, repeat){
     let startTime = new Date().getTime();
     updateUserInfo(phoneNo, '张三', '北京市海淀区西三一号院', '370283199901011230', new Date(), 'sfafafafafafdffafdfdafa').then(() => {
         updateDetails(phoneNo, mxxdetails).then(() => {
             console.log(`done and took ${new Date().getTime() - startTime} ms`);
-            if (phoneNo < startPhone + repeatTimes) {
-                phoneNo++;
-                setTimeout(saveData, 0);
+            if (repeat < maxRepeat) {
+                repeat++;
+                setTimeout(() => {
+                  saveData(phoneNo+1, maxRepeat, repeat);
+                }, 0);
             }
         })
     });
 }
 
-saveData();
+function start(num, maxRepeat) { // num是并发数目
+  for (let i = 0; i < num; i++) {
+    let phoneNo = (130 + i) * 100000000;
+    saveData(phoneNo, maxRepeat, 0);
+  }
+}
+
+start(20, 20);
+// 并发上去之后，明显每个存储变慢了很多
