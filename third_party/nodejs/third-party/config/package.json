@@ -1,0 +1,14 @@
+{
+  "name": "t",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "for env in '' 'development' 'test' 'stage'; do if [ \"$env\" == '' ]; then echo 'no set NODE_ENV' && node index.js ;else echo 'set NODE_ENV='$env && NODE_ENV=$env node index.js; fi; done"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "config": "^1.21.0"
+  }
+}
