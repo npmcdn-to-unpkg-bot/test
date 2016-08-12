@@ -1,0 +1,41 @@
+
+
+
+var string = `\r\naaaa\r\nbbbbb`
+
+var s = `
+function e(string) {
+    return    
+}
+
+e('${string}')
+`
+eval(s)
+
+
+
+
+
+
+var s = '\r\naaaa\r\nbbbbb'.replace(/\r\n/g,"\n")
+
+var s = `<script> 
+function a() {
+    var tt = '\r\naaaa\r\nbbbbb'
+    eval('tt.replace(/\r\n/g,"\n")'')
+}
+ </script>
+`
+var jsdom = require('jsdom');
+jsdom.env({
+    html: '<p>test</p><script> function aa() { return "function in html body"; } </script>',
+    done: function(err, window) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+
+        console.log('aa(): ' + window.aa());
+
+        window.close(); // 释放资源
+    }});

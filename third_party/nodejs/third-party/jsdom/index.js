@@ -7,7 +7,7 @@ var t = fs.readFileSync("./test.js", "utf-8");
 
 jsdom.env({
     // html: '<p><a class="the-link" href="https://github.com">Hello!</a></p>',
-    html: '<p>test</p><script> function aa() { return "function in html body"; aa(); } </script>',
+    html: '<p>test</p><script> function aa() { return "function in html body"; } </script>',
     src: [uuid, t],
     features: { // 使用这些features, 注入的代码是自动可以运行的，除非你网页里需要加载的资源，才需要这些功能打开
         // FetchExternalResources: ["script"],
