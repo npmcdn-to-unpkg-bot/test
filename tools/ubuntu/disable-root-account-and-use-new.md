@@ -9,5 +9,11 @@
 	在root ALL=(ALL)ALL行下添加XXX ALL=(ALL)ALL，XXX为你的用户名
 	:wq!
 
-# disable root account login
 
+# ssh disable密码登录和root登录
+    $ vi /etc/ssh/sshd_config
+    PermitRootLogin no
+    PasswordAuthentication no
+
+    重启
+    $ /etc/init.d/ssh restart
