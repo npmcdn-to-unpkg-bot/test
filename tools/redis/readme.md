@@ -19,6 +19,9 @@
     $ cd utils
     $ sudo ./install-server.sh
 
+    Or
+    $ sudo apt-get install redis-server
+
 # play
     $ redis-cli
     redis> ping

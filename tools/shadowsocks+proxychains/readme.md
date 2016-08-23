@@ -1,16 +1,18 @@
 
-# new version of Proxychains
+
+
+
+# Proxychains
+
+Debian/Ubuntu:
+    $ apt-get install proxychains // Not working, erorros occur
+    # new version of Proxychains
 	$ git clone https://github.com/rofl0r/proxychains-ng.git
 	$ cd proxychains-ng
 	$ ./configure --prefix=/usr --sysconfdir=/etc
 	$ make
 	$ sudo make install
 
-
-# Proxychains
-
-Debian/Ubuntu:
-    $ apt-get install proxychains
 Mac OS X:
     $ brew install proxychains-ng
 
@@ -25,9 +27,10 @@ socks5  127.0.0.1 1080   # use socks5, it will proxy more than http
 
 
 
+# Ubuntu
 通过proxychains运行命令：
-    $ proxychains curl https://www.twitter.com/
-    $ proxychains git push origin master
+    $ proxychains4 curl https://www.twitter.com/
+    $ proxychains4 git push origin master
 Or
-    $ proxychains bash
+    $ proxychains4 bash
     $ curl git push origin master

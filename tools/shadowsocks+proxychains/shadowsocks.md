@@ -17,9 +17,25 @@
     $/usr/local/opt/shadowsocks-libev/bin/ss-local -c /usr/local/etc/shadowsocks-libev.json
 
 
+# linux client
+    $ apt-get install python-pip  
+    $ pip install shadowsocks  
+
+    启动并永久运行 Shadowsocks 客户端功能：
+
+nohup sslocal -c /root/ss/sslocal.json -d start &
+
+    停止命令:
+
+    sslocal -c /root/ss/sslocal.json -d stop
+
 
 # qt客户端 install
 	https://github.com/shadowsocks/shadowsocks-qt5/wiki/%E5%AE%89%E8%A3%85%E6%8C%87%E5%8D%97
+
+sudo add-apt-repository ppa:hzwhuang/ss-qt5
+sudo apt-get update
+sudo apt-get install shadowsocks-qt5
 
 	reboot
 
